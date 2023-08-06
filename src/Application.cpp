@@ -12,15 +12,18 @@
 #include <fstream>
 #include <sstream>
 
+
 #include "../ClassesOpengl/VAO.h"
 #include "../ClassesOpengl/VBO.h"
 #include "../ClassesOpengl/EBO.h"
 #include "../Shaders/ShaderClass.h"
+#include "../Mesh/Mesh.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb-master/stb_image.h"
+#include "Noise/PerlinNoise.h"
 using namespace glm;
 
 
@@ -115,75 +118,79 @@ int main(void)
 	ShaderClass myShader("Shaders/Base.vert", "Shaders/Base.frag");
 
 
-	GLfloat vertices[] = {
-	    -0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f,
+	std::vector <GLfloat> vertices = {
+	    -0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f, 0.0f,  0.0f, -1.0f,
+		 0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f, 0.0f,  0.0f, -1.0f,
+		 0.5f,  0.5f, -0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f, 0.0f,  0.0f, -1.0f,
+		 0.5f,  0.5f, -0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f, 0.0f,  0.0f, -1.0f,
+		-0.5f,  0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f, 0.0f,  0.0f, -1.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f, 0.0f,  0.0f, -1.0f,
 
-		-0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f, 0.0f,  0.0f,  1.0f,
+		 0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f, 0.0f,  0.0f,  1.0f,
+		 0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f, 0.0f,  0.0f,  1.0f,
+		 0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f, 0.0f,  0.0f,  1.0f,
+		-0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f, 0.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f, 0.0f,  0.0f,  1.0f,
 
-		-0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
 
-		 0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f, 1.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f, 1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f, 1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f, 1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f, 1.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f, 1.0f,  0.0f,  0.0f,
 
-		-0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f, 0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f, 0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f, 0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f, 0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f, 0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f, 0.0f, -1.0f,  0.0f,
 
-		-0.5f,  0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f, 0.0f,1.0f,0.0f, 1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f, 0.0f,0.0f,1.0f, 1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f, 0.0f,1.0f,0.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f, 0.0f,0.0f,1.0f, 0.0f, 1.0f
+		-0.5f,  0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f, 0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f, 0.0f,1.0f,0.0f, 1.0f, 1.0f, 0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f, 0.0f,0.0f,1.0f, 1.0f, 0.0f, 0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f, 0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, 0.0f,1.0f,0.0f, 0.0f, 0.0f, 0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f, 0.0f,0.0f,1.0f, 0.0f, 1.0f, 0.0f,  1.0f,  0.0f,
 	};
-	// index data
-	//GLuint indices[] = {
-	//	// front and back
-	//	0, 3, 2,
-	//	2, 1, 0,
-	//	4, 5, 6,
-	//	6, 7 ,4,
-	//	// left and right
-	//	11, 8, 9,
-	//	9, 10, 11,
-	//	12, 13, 14,
-	//	14, 15, 12,
-	//	// bottom and top
-	//	16, 17, 18,
-	//	18, 19, 16,
-	//	20, 21, 22,
-	//	22, 23, 20
-	//};
+	 //index data
+	GLuint indices[] = {
+		// front and back
+		0, 3, 2,
+		2, 1, 0,
+		4, 5, 6,
+		6, 7 ,4,
+		// left and right
+		11, 8, 9,
+		9, 10, 11,
+		12, 13, 14,
+		14, 15, 12,
+		// bottom and top
+		16, 17, 18,
+		18, 19, 16,
+		20, 21, 22,
+		22, 23, 20
+	};
 	
+
+
+
+
 	//vao class handler
 	VAO vao;
 	//vbo class handler
 	VBO vbo;
 	//ebo class handler
 	// 
-	//EBO ebo;
+	EBO ebo;
 	
 
 	//all is binded here
@@ -193,7 +200,7 @@ int main(void)
 
 	//vbo settings
 	vbo.Bind();
-	vbo.BufferData( sizeof(vertices)/ sizeof(GLfloat), vertices);
+	vbo.BufferData(vertices.size(),vertices.data());
 
 	//ebo settings;
 	//ebo.Bind();
@@ -201,21 +208,32 @@ int main(void)
 
 
 	//Pos
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 11, (void*)0);
 	glEnableVertexAttribArray(0);
 
 
 	//colour
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)( sizeof(float) * 3));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 11, (void*)(sizeof(float) * 3));
 	glEnableVertexAttribArray(1);
 
 	//Textures
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 6));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 11, (void*)(sizeof(float) * 6));
 	glEnableVertexAttribArray(2);
 
+	//normal
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(float)* 11 , (void*)(sizeof(float)*8));
+	glEnableVertexAttribArray(3);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//VBO instanceVBO;
+	//instanceVBO.Bind();
+	//instanceVBO.BufferData(amount * sizeof(glm::mat4), &modelMatrices[0]);
+	//////weird, not working well
+	//glVertexAttribPointer(4, 16, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
+	//glEnableVertexAttribArray(4);
+	//glVertexAttribDivisor(4, 1); // tell OpenGL this is an instanced vertex attribute.
+
 	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	// load and create a texture 
 	// -------------------------
@@ -236,7 +254,6 @@ int main(void)
 	int width, height, nrChannels;
 	//this needs to be png in order to configurate the alpha channel
 	unsigned char* data = stbi_load("C:/Users/carlo/Documents/ImagesProgramming/container.jpg", &width, &height, &nrChannels, 0);
-
 
 
 	if (data)
@@ -263,7 +280,7 @@ int main(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	data = stbi_load("C:/Users/carlo/Documents/ImagesProgramming/awesomeface.png", &width, &height, &nrChannels, 0);
+	data = stbi_load("C:/Users/carlo/Documents/ImagesProgramming/circle.png", &width, &height, &nrChannels, 0);
 	if (data)
 	{
 		// note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
@@ -289,8 +306,33 @@ int main(void)
 	float cubePosY = 0;
 	float cubePosZ = -3.0f;
 
-	//Camera
+	//light
 
+	glm::vec3 lightCol (1);
+	glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+
+	//Color
+	glm::vec3 Color(1);
+
+
+	//intances
+
+
+	int instanceID = 0;
+	int amount = 10;
+
+	//Noise
+	PerlinNoise myPNoise;
+	double noiseX;
+
+	//random val
+	glm::vec3* randomCols;
+	randomCols = new glm::vec3[amount*amount];;
+	for (size_t i = 0; i < amount * amount; i++)
+	{
+		randomCols[i] = glm::vec3((float)rand() / RAND_MAX, (float)rand() / RAND_MAX, (float)rand() / RAND_MAX);
+	}
+	//new object
 
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
@@ -311,42 +353,87 @@ int main(void)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-		const float radius = 10.0f;
-		float camX = sin(glfwGetTime()) * radius;
-		float camZ = cos(glfwGetTime()) * radius;
-	
-
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, (float)glfwGetTime()* speedRotation * speedMultiplier* glm::radians(50.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::translate(model, glm::vec3(cubePosX, cubePosY, cubePosZ));
-
+		glm::mat4 modelMoved = glm::mat4(1.0f);
+		modelMoved = glm::rotate(modelMoved, (float)glfwGetTime()* speedRotation * speedMultiplier* glm::radians(50.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::translate(modelMoved, glm::vec3(cubePosX, cubePosY, cubePosZ));
 		glm::mat4 view = glm::mat4(1.0f);
 		// note that we're translating the scene in the reverse direction of where we want to move
 		//view = glm::translate(view, glm::vec3(cubePosX, cubePosY, cubePosZ));
-
 		view = camera.GetViewMatrix();
-
 		glm::mat4 projection = glm::mat4(1.0f);;
 		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH/ (float)SCR_HEIGHT, 0.1f, 100.0f);
-
-
-		myShader.setMat4("model", model);
 		myShader.setMat4("view", view);
 		myShader.setMat4("projection", projection);
 
 
-
+		myShader.use();
 		// bind textures on corresponding texture units
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture1);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture2);
 
+
 		myShader.setInt("texture1", 0); // or with shader class
 		myShader.setInt("texture2", 1); // or with shader class
+		myShader.setVec3("Color", Color);
+		myShader.setVec3("lightPos", lightPos);
+		myShader.setVec3("viewPos", camera.Position);
+		
 
-		myShader.use();
-		vao.Bind();
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		//light 
+
+		glm::vec3 lightColor;
+		lightColor.x = sin(2.0f);
+		lightColor.y = sin( 0.7f);
+		lightColor.z = sin(1.3f);
+
+		glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
+		glm::vec3 ambientColor = diffuseColor * glm::vec3(0.1f);
+
+		myShader.setVec3("light.ambient", ambientColor);
+		myShader.setVec3("light.diffuse", diffuseColor);
+		myShader.setVec3("light.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+
+		glm::mat4* modelMatrices;
+		modelMatrices = new glm::mat4[amount*amount];
+
+		for (size_t k = 0; k < 10; k++)
+		{
+				for (size_t i = 0; i < amount; i++)
+				{
+					for (size_t j = 0; j < amount; j++)
+					{
+						glm::mat4 model = glm::mat4(1.0f);
+
+						noiseX ={ myPNoise.noise(i + cubePosX,
+							k + cubePosY * 10 * sin((float)glfwGetTime())*speedMultiplier,
+							j + cubePosZ) };
+						
+						model = glm::translate(model, glm::vec3(i+cubePosX, k+ noiseX, j+cubePosZ));
+						// 4. now add to list of matrices
+						//model = glm::rotate(model, (float)glfwGetTime() * speedRotation * speedMultiplier * glm::sin(glm::radians(50.0f)), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::translate(model, glm::vec3(cubePosX, cubePosY, cubePosZ));;
+
+						modelMatrices[instanceID] = model;
+						myShader.setMat4("model[" + std::to_string(instanceID) + "]", model);
+						//mat
+						myShader.setVec3("material[" + std::to_string(instanceID) + "]" + ".diffuse", glm::vec3(randomCols[i]));
+						myShader.setVec3("material[" + std::to_string(instanceID) + "]" + ".specular", glm::vec3(1.0f, 1.0f, 1.0f));
+						myShader.setFloat("material[" + std::to_string(instanceID) + "]" + ".shininess", 256.0f);
+						instanceID++;
+					}
+				}
+				instanceID = 0;
+				vao.Bind();
+				glDrawArraysInstanced(GL_TRIANGLES, 0, 36, amount * amount);
+			
+		}
+		//glDrawElementsInstanced(GL_TRIANGLES,36,GL_UNSIGNED_INT,0,amount);
+		//glDrawElements(GL_TRIANGLES, amount, GL_UNSIGNED_INT, indices);
+		//glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		glBindVertexArray(0);
+
+
 
 
 
@@ -427,6 +514,34 @@ int main(void)
 			ImGui::PopStyleVar();
 			ImGui::TreePop();
 		}
+		//if (ImGui::TreeNode("Cube Color"))
+		//{
+		//	static float col1[3] = { 1.0f, 1.0f, 1.0f };
+		//	//with alpha channel
+		//	//static float col2[4] = { 0.4f, 0.7f, 0.0f, 0.5f };
+		//	ImGui::ColorEdit3("color 1", col1);
+		//	//with alpha channel
+		//	//ImGui::ColorEdit4("color 2", col2);
+		//	Color.x = col1[0];
+		//	Color.y = col1[1];
+		//	Color.z = col1[2];
+		//	ImGui::PopID();
+		//	ImGui::PopStyleVar();
+		//	ImGui::TreePop();
+		//}
+		if (ImGui::TreeNode("cube amount"))
+		{
+		
+			const float spacing = 4;
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing, spacing));
+
+			ImGui::VSliderInt("##int", ImVec2(18, 160), &amount, 1, 10);
+			ImGui::SameLine();
+
+			ImGui::PopStyleVar();
+			ImGui::TreePop();
+		}
+		//ImGui::ShowDemoWindow();
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

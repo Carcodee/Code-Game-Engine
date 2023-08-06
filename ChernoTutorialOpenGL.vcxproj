@@ -148,6 +148,8 @@
     <ClCompile Include="Includes\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="Includes\imgui\imgui_tables.cpp" />
     <ClCompile Include="Includes\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="Includes\Noise\PerlinNoise.cpp" />
+    <ClCompile Include="Mesh\Mesh.cpp" />
     <ClCompile Include="Shaders\ShaderClass.cpp" />
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="ClassesOpengl\VAO.cpp" />
@@ -167,6 +169,8 @@
     <ClInclude Include="Includes\imgui\imstb_rectpack.h" />
     <ClInclude Include="Includes\imgui\imstb_textedit.h" />
     <ClInclude Include="Includes\imgui\imstb_truetype.h" />
+    <ClInclude Include="Includes\Noise\PerlinNoise.h" />
+    <ClInclude Include="Mesh\Mesh.h" />
     <ClInclude Include="Shaders\ShaderClass.h" />
   </ItemGroup>
   <ItemGroup>
