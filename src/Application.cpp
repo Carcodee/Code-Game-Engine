@@ -24,6 +24,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb-master/stb_image.h"
 #include "Noise/PerlinNoise.h"
+#include "OBJLoader/OBJ_Loader.h"
 using namespace glm;
 
 
@@ -49,6 +50,9 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
+unsigned int LoadCubemap(std::vector <std::string> faces);
+unsigned int LoadTexture(char const* path);
+
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
@@ -59,8 +63,18 @@ bool firstMouse = true;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
+#ifdef _DEBUG
+#define PRINTL(x) std::cout<< x << "\n"
+#define PRINT(x) std::cout<<x
+#else
+#define PRINTL(x)
+#define PRINT(x)
+#endif
+
 int main(void)
 {
+
+
 	GLFWwindow* window;
 
 
@@ -116,7 +130,109 @@ int main(void)
 
 
 	ShaderClass myShader("Shaders/Base.vert", "Shaders/Base.frag");
+	ShaderClass lightShader("Shaders/Light.vert","Shaders/Light.frag");
+	ShaderClass cubemapShader("Shaders/Cubemap.vert", "Shaders/Cubemap.frag");
 
+
+	//Model loader
+	//objl::Loader myLoader;
+	//std::vector <GLfloat> vertices;
+	//std::vector <GLuint> indices;
+
+	//if (myLoader.LoadFile("Models/AirBoat.obj"))
+	//{
+	//	objl::Mesh myMesh = myLoader.LoadedMeshes[0];
+
+	//		for (size_t i = 0; i < myMesh.Vertices.size(); i++)
+	//		{
+	//			objl::Vertex v = myMesh.Vertices[i];
+	//			v.Position;
+	//			//color
+	//			v.TextureCoordinate;
+	//			v.Normal;
+	//			//pos
+	//			vertices.push_back(v.Position.X);
+	//			vertices.push_back(v.Position.Y);
+	//			vertices.push_back(v.Position.Z);
+	//			//col
+	//			vertices.push_back(1.0f);
+	//			vertices.push_back(1.0f);
+	//			vertices.push_back(1.0f);
+	//			//text
+	//			vertices.push_back(v.TextureCoordinate.X);
+	//			vertices.push_back(v.TextureCoordinate.Y);
+	//			//norm
+	//			vertices.push_back(v.Normal.X);
+	//			vertices.push_back(v.Normal.Y);
+	//			vertices.push_back(v.Normal.Z);
+
+	//			//std::cout << v.Position.X<<" ";
+	//			//std::cout << v.Position.Y<<" ";
+	//			//std::cout << v.Position.Z<<" ";
+	//			//std::cout << (1.0f) << " ";
+	//			//std::cout << (1.0f) << " ";
+	//			//std::cout << (1.0f) << " ";
+	//			//std::cout << v.TextureCoordinate.X << " ";
+	//			//std::cout << v.TextureCoordinate.Y << " ";
+	//			//std::cout << v.Normal.X << " ";
+	//			//std::cout << v.Normal.Y << " ";
+	//			//std::cout << v.Normal.Z << "\n";
+
+	//		}
+	//	
+
+
+	//	indices = myMesh.Indices;
+
+	//}
+
+
+
+	std::vector <GLfloat> cubeLightVertices = {
+		-0.5f, -0.5f, -0.5f,
+		 0.5f, -0.5f, -0.5f,
+		 0.5f,  0.5f, -0.5f,
+		 0.5f,  0.5f, -0.5f,
+		-0.5f,  0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,
+
+		-0.5f, -0.5f,  0.5f,
+		 0.5f, -0.5f,  0.5f,
+		 0.5f,  0.5f,  0.5f,
+		 0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f,  0.5f,
+		-0.5f, -0.5f,  0.5f,
+
+		-0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,
+		-0.5f, -0.5f,  0.5f,
+		-0.5f,  0.5f,  0.5f,
+
+		 0.5f,  0.5f,  0.5f,
+		 0.5f,  0.5f, -0.5f,
+		 0.5f, -0.5f, -0.5f,
+		 0.5f, -0.5f, -0.5f,
+		 0.5f, -0.5f,  0.5f,
+		 0.5f,  0.5f,  0.5f,
+
+		-0.5f, -0.5f, -0.5f,
+		 0.5f, -0.5f, -0.5f,
+		 0.5f, -0.5f,  0.5f,
+		 0.5f, -0.5f,  0.5f,
+		-0.5f, -0.5f,  0.5f,
+		-0.5f, -0.5f, -0.5f,
+
+		-0.5f,  0.5f, -0.5f,
+		 0.5f,  0.5f, -0.5f,
+		 0.5f,  0.5f,  0.5f,
+		 0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f, -0.5f,
+	
+	
+	};
 
 	std::vector <GLfloat> vertices = {
 	    -0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f, 0.0f,  0.0f, -1.0f,
@@ -162,7 +278,7 @@ int main(void)
 		-0.5f,  0.5f, -0.5f, 0.0f,0.0f,1.0f, 0.0f, 1.0f, 0.0f,  1.0f,  0.0f,
 	};
 	 //index data
-	GLuint indices[] = {
+	std::vector <GLuint> indices = {
 		// front and back
 		0, 3, 2,
 		2, 1, 0,
@@ -203,8 +319,8 @@ int main(void)
 	vbo.BufferData(vertices.size(),vertices.data());
 
 	//ebo settings;
-	//ebo.Bind();
-	//ebo.BufferData(sizeof(indices), indices);
+	ebo.Bind();
+	ebo.BufferData(indices.size(), indices.data());
 
 
 	//Pos
@@ -224,79 +340,93 @@ int main(void)
 	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(float)* 11 , (void*)(sizeof(float)*8));
 	glEnableVertexAttribArray(3);
 
-	//VBO instanceVBO;
-	//instanceVBO.Bind();
-	//instanceVBO.BufferData(amount * sizeof(glm::mat4), &modelMatrices[0]);
-	//////weird, not working well
-	//glVertexAttribPointer(4, 16, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
-	//glEnableVertexAttribArray(4);
-	//glVertexAttribDivisor(4, 1); // tell OpenGL this is an instanced vertex attribute.
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	// load and create a texture 
 	// -------------------------
-	unsigned int texture1, texture2;
-	glGenTextures(1, &texture1);
-	glBindTexture(GL_TEXTURE_2D, texture1);
+	unsigned int texture1, specularMap;
+	texture1= LoadTexture("C:/Users/carlo/Documents/ImagesProgramming/container2.png");
+	specularMap = LoadTexture("C:/Users/carlo/Documents/ImagesProgramming/lighting_maps_specular_color.png");
+
+	
+
+	//Cubemap
+
+	std::vector <GLfloat> skyboxVertices = {
+		// positions          
+		-1.0f,  1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		-1.0f,  1.0f, -1.0f,
+		 1.0f,  1.0f, -1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		 1.0f, -1.0f,  1.0f
+	};
+
+	VAO skyboxVAO;
+	skyboxVAO.Bind();
+
+	VBO skyboxVBO;
+	skyboxVBO.Bind();
+
+	skyboxVBO.BufferData(skyboxVertices.size(), skyboxVertices.data());
+	
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
 
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// load and generate the texture
-
-
-	int width, height, nrChannels;
-	//this needs to be png in order to configurate the alpha channel
-	unsigned char* data = stbi_load("C:/Users/carlo/Documents/ImagesProgramming/container.jpg", &width, &height, &nrChannels, 0);
-
-
-	if (data)
+	std::vector<std::string> textFaces
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture1" << std::endl;
-	}
-	stbi_image_free(data);
+			"C:/Users/carlo/Documents/ImagesProgramming/skybox/right.jpg",
+			"C:/Users/carlo/Documents/ImagesProgramming/skybox/left.jpg",
+			"C:/Users/carlo/Documents/ImagesProgramming/skybox/top.jpg",
+			"C:/Users/carlo/Documents/ImagesProgramming/skybox/bottom.jpg",
+			"C:/Users/carlo/Documents/ImagesProgramming/skybox/front.jpg",
+			"C:/Users/carlo/Documents/ImagesProgramming/skybox/back.jpg"
+	};
 
+	unsigned int textureCubeMap=LoadCubemap(textFaces);
 
-	//Text2----------------------
-
-	glGenTextures(1, &texture2);
-	glBindTexture(GL_TEXTURE_2D, texture2);
-
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	data = stbi_load("C:/Users/carlo/Documents/ImagesProgramming/circle.png", &width, &height, &nrChannels, 0);
-	if (data)
-	{
-		// note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-	}
-	else
-	{
-		std::cout << "Failed to load texture2" << std::endl;
-	}
-	stbi_image_free(data);
-
-	//set the uniform data
-
-
+	cubemapShader.use();
+	cubemapShader.setInt("skybox", 0);
+	skyboxVAO.UnBind();
 
 	//UI system---------------
 
@@ -309,7 +439,30 @@ int main(void)
 	//light
 
 	glm::vec3 lightCol (1);
-	glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+	float lightX = 0;
+	float lightY = 0;
+	float lightZ = -3.0f;
+
+	glm::vec3 pointLightPositions[] = {
+	 glm::vec3(0.7f,  0.2f,  2.0f),
+	 glm::vec3(2.3f, -3.3f, -4.0f),
+	 glm::vec3(-4.0f,  2.0f, -12.0f),
+	 glm::vec3(0.0f,  0.0f, -3.0f)
+	};
+
+	// second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
+	VAO lightVAO;
+	lightVAO.Bind();
+
+	VBO lightVBO;
+	lightVBO.Bind();
+	lightVBO.BufferData(cubeLightVertices.size(),cubeLightVertices.data());
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	bool dirLightOn=true, pointLightOn=true, spotLightOn=true;
+
 
 	//Color
 	glm::vec3 Color(1);
@@ -319,7 +472,7 @@ int main(void)
 
 
 	int instanceID = 0;
-	int amount = 10;
+	int amount = 2;
 
 	//Noise
 	PerlinNoise myPNoise;
@@ -349,10 +502,11 @@ int main(void)
 
 
 		/* Render here */
-		glClearColor(0.2f, 0.3f, 0.3f,1.0f);
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
+		myShader.use();
+		//isntancesPos
 		glm::mat4 modelMoved = glm::mat4(1.0f);
 		modelMoved = glm::rotate(modelMoved, (float)glfwGetTime()* speedRotation * speedMultiplier* glm::radians(50.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::translate(modelMoved, glm::vec3(cubePosX, cubePosY, cubePosZ));
 		glm::mat4 view = glm::mat4(1.0f);
@@ -364,40 +518,104 @@ int main(void)
 		myShader.setMat4("view", view);
 		myShader.setMat4("projection", projection);
 
+#pragma region light
+
+
+
+		//lightPos
+		glm::vec3 lightPos(lightX, lightY, lightZ);
+
+		lightShader.use();
+		// view/projection transformations
+		glm::mat4 lightProjection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 lightView = camera.GetViewMatrix();
+		lightShader.setMat4("projection", projection);
+		lightShader.setMat4("view", view);
+		// world transformation
+		glm::mat4 lightModel = glm::mat4(1.0f);
+	    lightModel=glm::translate(lightModel, lightPos);
+		lightShader.setMat4("model", lightModel);
+
+		// 
+		glm::vec3 lightColor;
+		lightColor.x = sin(2.0f);
+		lightColor.y = sin(0.7f);
+		lightColor.z = sin(1.3f);
+
+		glm::vec3 diffuseColor = lightColor * 1.0f;
+		glm::vec3 ambientColor = glm::vec3(0.2f);
+		// be sure to activate shader when setting uniforms/drawing objects
+		lightShader.setVec3("light.ambient", ambientColor);
+		lightShader.setVec3("light.diffuse", glm::vec3(1.0));
+		lightShader.setInt("light.specular",  1);
+		lightShader.setVec3("light.position", lightPos);
+		lightShader.setVec3("objectColor", glm::vec3(1.0));
+		// render the cube
+		lightVAO.Bind();
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+#pragma endregion
+
+
+
 
 		myShader.use();
+
 		// bind textures on corresponding texture units
+
+		myShader.setInt("material.diffuse", 0);
+		myShader.setInt("material.specular", 1);
+		myShader.setFloat("material.shininess", 256.0f);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture1);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texture2);
-
-
-		myShader.setInt("texture1", 0); // or with shader class
-		myShader.setInt("texture2", 1); // or with shader class
+		glBindTexture(GL_TEXTURE_2D, specularMap);
 		myShader.setVec3("Color", Color);
-		myShader.setVec3("lightPos", lightPos);
 		myShader.setVec3("viewPos", camera.Position);
 		
-
 		//light 
+		myShader.setVec3("dirLight.direction", -lightPos);
+		myShader.setVec3("dirLight.ambient", ambientColor);
+		myShader.setVec3("dirLight.diffuse", diffuseColor);
+		myShader.setVec3("dirLight.specular", glm::vec3(.5f));
 
-		glm::vec3 lightColor;
-		lightColor.x = sin(2.0f);
-		lightColor.y = sin( 0.7f);
-		lightColor.z = sin(1.3f);
+		myShader.setVec3("pointLights[0].position", pointLightPositions[0]);
+		myShader.setVec3("pointLights[0].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+		myShader.setVec3("pointLights[0].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+		myShader.setVec3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+		myShader.setFloat("pointLights[0].constant", 1.0f);
+		myShader.setFloat("pointLights[0].linear", 0.09f);
+		myShader.setFloat("pointLights[0].quadratic", 0.032f);
 
-		glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
-		glm::vec3 ambientColor = diffuseColor * glm::vec3(0.1f);
+		myShader.setVec3("pointLights[1].position", pointLightPositions[1]);
+		myShader.setVec3("pointLights[1].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+		myShader.setVec3("pointLights[1].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+		myShader.setVec3("pointLights[1].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+		myShader.setFloat("pointLights[1].constant", 1.0f);
+		myShader.setFloat("pointLights[1].linear", 0.09f);
+		myShader.setFloat("pointLights[1].quadratic", 0.032f);
 
-		myShader.setVec3("light.ambient", ambientColor);
-		myShader.setVec3("light.diffuse", diffuseColor);
-		myShader.setVec3("light.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+		myShader.setVec3("pointLights[2].position", pointLightPositions[2]);
+		myShader.setVec3("pointLights[2].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+		myShader.setVec3("pointLights[2].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+		myShader.setVec3("pointLights[2].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+		myShader.setFloat("pointLights[2].constant", 1.0f);
+		myShader.setFloat("pointLights[2].linear", 0.09f);
+		myShader.setFloat("pointLights[2].quadratic", 0.032f);
 
+		myShader.setVec3("pointLights[3].position", pointLightPositions[3]);
+		myShader.setVec3("pointLights[3].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+		myShader.setVec3("pointLights[3].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+		myShader.setVec3("pointLights[3].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+		myShader.setFloat("pointLights[3].constant", 1.0f);
+		myShader.setFloat("pointLights[3].linear", 0.09f);
+		myShader.setFloat("pointLights[3].quadratic", 0.032f);
+
+
+		//instances
 		glm::mat4* modelMatrices;
 		modelMatrices = new glm::mat4[amount*amount];
 
-		for (size_t k = 0; k < 10; k++)
+		for (size_t k = 0; k < 1; k++)
 		{
 				for (size_t i = 0; i < amount; i++)
 				{
@@ -415,24 +633,41 @@ int main(void)
 
 						modelMatrices[instanceID] = model;
 						myShader.setMat4("model[" + std::to_string(instanceID) + "]", model);
-						//mat
-						myShader.setVec3("material[" + std::to_string(instanceID) + "]" + ".diffuse", glm::vec3(randomCols[i]));
-						myShader.setVec3("material[" + std::to_string(instanceID) + "]" + ".specular", glm::vec3(1.0f, 1.0f, 1.0f));
-						myShader.setFloat("material[" + std::to_string(instanceID) + "]" + ".shininess", 256.0f);
+
 						instanceID++;
 					}
 				}
 				instanceID = 0;
 				vao.Bind();
 				glDrawArraysInstanced(GL_TRIANGLES, 0, 36, amount * amount);
-			
+
+				glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				//glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0, amount * amount);
 		}
 		//glDrawElementsInstanced(GL_TRIANGLES,36,GL_UNSIGNED_INT,0,amount);
-		//glDrawElements(GL_TRIANGLES, amount, GL_UNSIGNED_INT, indices);
-		//glDrawArrays(GL_TRIANGLES, 0, 36);
+		//glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, indices.data());
 
 		glBindVertexArray(0);
 
+#pragma region Cubemap
+
+		glDepthFunc(GL_LEQUAL);
+		cubemapShader.use();
+		view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
+
+		cubemapShader.setMat4("view", view);
+		cubemapShader.setMat4("projection", projection);
+		skyboxVAO.Bind();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, textureCubeMap);
+
+		glBindTexture(GL_TEXTURE_CUBE_MAP, textureCubeMap);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+		glDepthFunc(GL_LESS);
+
+#pragma endregion
 
 
 
@@ -514,21 +749,8 @@ int main(void)
 			ImGui::PopStyleVar();
 			ImGui::TreePop();
 		}
-		//if (ImGui::TreeNode("Cube Color"))
-		//{
-		//	static float col1[3] = { 1.0f, 1.0f, 1.0f };
-		//	//with alpha channel
-		//	//static float col2[4] = { 0.4f, 0.7f, 0.0f, 0.5f };
-		//	ImGui::ColorEdit3("color 1", col1);
-		//	//with alpha channel
-		//	//ImGui::ColorEdit4("color 2", col2);
-		//	Color.x = col1[0];
-		//	Color.y = col1[1];
-		//	Color.z = col1[2];
-		//	ImGui::PopID();
-		//	ImGui::PopStyleVar();
-		//	ImGui::TreePop();
-		//}
+
+
 		if (ImGui::TreeNode("cube amount"))
 		{
 		
@@ -541,7 +763,92 @@ int main(void)
 			ImGui::PopStyleVar();
 			ImGui::TreePop();
 		}
-		//ImGui::ShowDemoWindow();
+
+		if (ImGui::TreeNode("light Movement"))
+		{
+			const float spacing = 4;
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing, spacing));
+
+			static float _valueX = 0;
+			ImGui::VSliderFloat("##int", ImVec2(18, 160), &_valueX, -10, 10);
+			ImGui::SameLine();
+			lightX = _valueX;
+
+			static float _valueY = 0;
+			ImGui::VSliderFloat("##int1", ImVec2(18, 160), &_valueY, -10, 10);
+			ImGui::SameLine();
+			lightY = _valueY;
+			static float _valueZ = -3.0f;
+			ImGui::VSliderFloat("##int2", ImVec2(18, 160), &_valueZ, -10, 10);
+			ImGui::SameLine();
+			lightZ = _valueZ;
+
+
+			ImGui::PushID("set1");
+
+
+
+			ImGui::PopID();
+			ImGui::PopStyleVar();
+			ImGui::TreePop();
+		}
+		if (ImGui::TreeNode("Light Settings"))
+		{
+			// Combo Boxes are also called "Dropdown" in other systems
+			// Expose flags as checkbox for the demo
+			static ImGuiComboFlags flags,flags2,flags3 = 0;
+			
+
+			ImGui::CheckboxFlags("Directional light", &flags, ImGuiComboFlags_PopupAlignLeft);
+			ImGui::CheckboxFlags("Spot light", &flags2, ImGuiComboFlags_PopupAlignLeft);
+			ImGui::CheckboxFlags("Point light", &flags3, ImGuiComboFlags_PopupAlignLeft);
+
+
+			// Using the generic BeginCombo() API, you have full control over how to display the combo contents.
+			// (your selection data could be an index, a pointer to the object, an id for the object, a flag intrusively
+			// stored in the object itself, etc.)
+			const char* items[] = { "AAAA", "BBBB", "CCCC", "DDDD", "EEEE", "FFFF", "GGGG", "HHHH", "IIII", "JJJJ", "KKKK", "LLLLLLL", "MMMM", "OOOOOOO" };
+			static int item_current_idx = 0; // Here we store our selection data as an index.
+			const char* combo_preview_value = items[item_current_idx];  // Pass in the preview value visible before opening the combo (it could be anything)
+			if (ImGui::BeginCombo("combo 1", combo_preview_value, flags))
+			{
+				for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+				{
+					const bool is_selected = (item_current_idx == n);
+					if (ImGui::Selectable(items[n], is_selected))
+						item_current_idx = n;
+
+					// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();
+				}
+				ImGui::EndCombo();
+			}
+
+			// Simplified one-liner Combo() API, using values packed in a single constant string
+			// This is a convenience for when the selection set is small and known at compile-time.
+			static int item_current_2 = 0;
+			ImGui::Combo("combo 2 (one-liner)", &item_current_2, "aaaa\0bbbb\0cccc\0dddd\0eeee\0\0");
+
+			// Simplified one-liner Combo() using an array of const char*
+			// This is not very useful (may obsolete): prefer using BeginCombo()/EndCombo() for full control.
+			static int item_current_3 = -1; // If the selection isn't within 0..count, Combo won't display a preview
+			ImGui::Combo("combo 3 (array)", &item_current_3, items, IM_ARRAYSIZE(items));
+
+			// Simplified one-liner Combo() using an accessor function
+			struct Funcs { static bool ItemGetter(void* data, int n, const char** out_str) { *out_str = ((const char**)data)[n]; return true; } };
+			static int item_current_4 = 0;
+			ImGui::Combo("combo 4 (function)", &item_current_4, &Funcs::ItemGetter, items, IM_ARRAYSIZE(items));
+
+			dirLightOn = flags;
+			spotLightOn= flags2;
+			pointLightOn = flags3;
+
+
+
+			ImGui::TreePop();
+		}
+		ImGui::ShowDemoWindow();
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -577,12 +884,16 @@ void processInput(GLFWwindow* window)
 		camera.ProcessKeyboard(LEFT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera.ProcessKeyboard(RIGHT, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+		camera.ProcessKeyboard(UP, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+		camera.ProcessKeyboard(DOWN, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) { 
-		camera.MovementSpeed = 15.0f;
+		camera.MovementSpeed = 35.0f;
 	}
 	else
 	{
-		camera.MovementSpeed = 2.5f;
+		camera.MovementSpeed = 5.0f;
 	}
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
 	{
@@ -638,6 +949,71 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	camera.ProcessMouseScroll(static_cast<float>(yoffset));
+}
+
+unsigned int LoadTexture(char const * path) {
+
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+
+	int width, height, nrComponents;
+	unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
+	if (data)
+	{
+		GLenum format;
+		if (nrComponents == 1)
+			format = GL_RED;
+		else if (nrComponents == 3)
+			format = GL_RGB;
+		else if (nrComponents == 4)
+			format = GL_RGBA;
+
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		stbi_image_free(data);
+	}
+	else
+	{
+		std::cout << "Texture failed to load at path: " << path << std::endl;
+		stbi_image_free(data);
+	}
+
+	return textureID;
+}
+
+unsigned int LoadCubemap(std::vector <std::string> faces) {
+	unsigned int textureCubeMap;
+	glGenTextures(1, &textureCubeMap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureCubeMap);
+	int width, height, nrChannels;
+	for (unsigned int i = 0; i < faces.size(); i++)
+	{
+		//std::string file = "C:/Users/carlo/Documents/ImagesProgramming/skybox/" + textFaces[i];
+		unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Cubemap tex failed to load at path: " << faces[i] << std::endl;
+			stbi_image_free(data);
+		}
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	return textureCubeMap;
 }
 
 

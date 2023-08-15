@@ -18,7 +18,6 @@ public:
 	 Mesh(std::vector <GLfloat> &vertices, float screenW, float screenH);
 	 void SetTexture(GLuint& textures, const char* filepath, bool isRGBA);
 	 void Render(ShaderClass& shader, GLenum mode, GLint first, GLsizei count);
-	 void Render(ShaderClass& shader, GLenum mode, GLint first, GLsizei count, GLsizei instancecount);
 
 	 void SetAtrib(GLuint index,GLint size,GLenum type,GLboolean normalized,GLsizei stride,const void* pointer);
 

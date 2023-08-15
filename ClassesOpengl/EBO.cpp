@@ -12,12 +12,12 @@ void EBO::Bind()
 
 void EBO::BufferData(GLsizeiptr size, const void* data)
 {
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(float), data, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(GLuint), data, GL_STATIC_DRAW);
 }
 
 void EBO::UnBind()
 {
-	glBindVertexArray(0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 EBO::~EBO()

@@ -27,6 +27,6 @@ void main()
   instanceID=glID;
   gl_Position=projection * view * model[gl_InstanceID] *vec4(position,1.0);
   ourColor= colour;
-  TrueTextCoord= vec2(TextCoord.x, TextCoord.y);
+  TrueTextCoord= TextCoord;
 
 }

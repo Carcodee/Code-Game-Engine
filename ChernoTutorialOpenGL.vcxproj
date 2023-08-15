@@ -170,6 +170,7 @@
     <ClInclude Include="Includes\imgui\imstb_textedit.h" />
     <ClInclude Include="Includes\imgui\imstb_truetype.h" />
     <ClInclude Include="Includes\Noise\PerlinNoise.h" />
+    <ClInclude Include="Includes\OBJLoader\OBJ_Loader.h" />
     <ClInclude Include="Mesh\Mesh.h" />
     <ClInclude Include="Shaders\ShaderClass.h" />
   </ItemGroup>
@@ -182,9 +183,13 @@
     <None Include="Includes\Imgui\.gitignore" />
     <None Include="Shaders\Base.frag" />
     <None Include="Shaders\Base.vert" />
+    <None Include="Shaders\Cubemap.frag" />
+    <None Include="Shaders\Cubemap.vert" />
+    <None Include="Shaders\Light.frag" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Includes\imgui-docking\LICENSE.txt" />
+    <Text Include="Shaders\Light.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

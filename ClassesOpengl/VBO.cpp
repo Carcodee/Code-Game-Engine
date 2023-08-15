@@ -17,7 +17,7 @@ void VBO::BufferData(GLsizeiptr size, const void* data)
 
 void VBO::UnBind()
 {
-	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 VBO::~VBO()

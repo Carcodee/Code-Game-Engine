@@ -110,6 +110,9 @@
     <ClInclude Include="Includes\Noise\PerlinNoise.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Includes\OBJLoader\OBJ_Loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Includes\Imgui\.editorconfig" />
@@ -120,8 +123,12 @@
     <None Include="Includes\imgui-docking\.editorconfig" />
     <None Include="Includes\imgui-docking\.gitattributes" />
     <None Include="Includes\imgui-docking\.gitignore" />
+    <None Include="Shaders\Light.frag" />
+    <None Include="Shaders\Cubemap.vert" />
+    <None Include="Shaders\Cubemap.frag" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Includes\imgui-docking\LICENSE.txt" />
+    <Text Include="Shaders\Light.vert" />
   </ItemGroup>
 </Project>
