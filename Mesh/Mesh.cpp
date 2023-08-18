@@ -1,15 +1,15 @@
 #include "Mesh.h"
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, Material mat)
 {
     this->vertices = vertices;
     this->indices = indices;
     this->textures = textures;
-
+    this->mat = mat;
     setupMesh();
 }
 
-void Mesh::Draw(ShaderClass& shader)
+void Mesh::Draw(ShaderClass& shader, int mIndex)
 {
     // bind appropriate textures
     unsigned int diffuseNr = 1;
@@ -36,7 +36,23 @@ void Mesh::Draw(ShaderClass& shader)
         // and finally bind the texture
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
+    shader.use();
+    shader.setInt("meshCount", mIndex);
 
+    shader.setVec3("materials[" + std::to_string(mIndex) + "].diffuse", mat.Diffuse);
+    shader.setVec3("materials[" + std::to_string(mIndex) + "].specular", mat.Specular);
+    shader.setVec3("materials[" + std::to_string(mIndex) + "].ambient", mat.Ambient);
+    shader.setFloat("materials[" + std::to_string(mIndex) + "].shininess", mat.Shininess);
+
+    if (textures.size()==0)
+    {
+        shader.setInt("texturesOn", 0);
+    }
+    else
+    {
+        shader.setInt("texturesOn", 1);
+
+    }
     // draw mesh
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
@@ -88,6 +104,16 @@ void Mesh::setupMesh()
     glEnableVertexAttribArray(6);
     glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_Weights));
     glBindVertexArray(0);
+
+    if (textures.size() == 0)
+    {
+        std::cout << "THERE IS NOT TEXTURES FINDED" << "\n";
+    }
+    else
+    {
+        std::cout << "TEXTURES LOADED CORRECTLY" << "\n";
+
+    }
 }
 
 

@@ -8,12 +8,7 @@
 #include "../Mesh/Mesh.h"
 
 
-struct Material {
-    glm::vec3 Diffuse;
-    glm::vec3 Specular;
-    glm::vec3 Ambient;
-    float Shininess;
-};
+
 class Model
 {
 
@@ -27,6 +22,7 @@ private:
     // model data
     std::vector<Texture> textures_loaded;
     std::vector<Mesh> meshes;
+    std::vector<Material> materials;
     std::string directory;
     bool gammaCorrection;
 

@@ -137,7 +137,7 @@ int main(void)
 	ShaderClass modelShader("Shaders/ModelLoader.vert", "Shaders/ModelLoader.frag");
 
 	stbi_set_flip_vertically_on_load(true);
-	Model ourModel("Models/mask.obj");
+	Model ourModel("Models/BackpackModel/backpack.obj");
 	stbi_set_flip_vertically_on_load(false);
 
 	//Model loader
@@ -566,7 +566,7 @@ int main(void)
 		modelShader.setVec3("viewPos", camera.Position);
 		modelShader.setVec3("dirLight.direction", -lightPos);
 		modelShader.setVec3("dirLight.ambient", ambientColor);
-		modelShader.setVec3("dirLight.diffuse", diffuseColor);
+		modelShader.setVec3("dirLight.diffuse", glm::vec3(1.0f));
 		modelShader.setVec3("dirLight.specular", glm::vec3(.5f));
 		// view/projection transformations
 		glm::mat4 projectionM = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);

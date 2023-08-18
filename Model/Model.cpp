@@ -2,15 +2,20 @@
 
 void Model::Draw(ShaderClass& shader)
 {
-	for (unsigned int i = 0; i < meshes.size(); i++)
-		meshes[i].Draw(shader);
+    shader.setInt("matSize", meshes.size());
+
+    for (unsigned int i = 0; i < meshes.size(); i++) {
+
+        meshes[i].Draw(shader,i);
+    }
+
 }
 
 
 void Model::loadModel(std::string path)
 {
     Assimp::Importer import;
-    const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+    const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace );
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
@@ -34,7 +39,10 @@ void Model::processNode(aiNode* node, const aiScene* scene)
     for (unsigned int i = 0; i < node->mNumChildren; i++)
     {
         processNode(node->mChildren[i], scene);
+
     }
+
+    
 }
 
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
@@ -104,11 +112,15 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         // 4. height maps
         std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
         textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
-        std::cout << textures.size()<<"\n";
         //insertmaterials in fragment shader  with a method in the mesh
 
+        Material materials=loadMaterial(material);
+        
+        //std::cout << materials.Diffuse.x<< " ," << materials.Diffuse.y << " ," << materials.Diffuse.z << "\n";
+        std::cout << materials.Shininess << "\n";
 
-    return Mesh(vertices, indices, textures);
+        
+    return Mesh(vertices, indices, textures, materials);
 }
 
 std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
@@ -179,7 +191,7 @@ unsigned int Model::TextureFromFile(const char* path, const std::string& directo
         std::cout << "Texture failed to load at path: " << path << std::endl;
         stbi_image_free(data);
     }
-
+    std::cout<< textureID << "\n";
     return textureID;
 
 
@@ -187,22 +199,24 @@ unsigned int Model::TextureFromFile(const char* path, const std::string& directo
 
 Material Model::loadMaterial(aiMaterial* mat)
 {
+
+    glm::vec3 randDiff((float)rand() / RAND_MAX, (float)rand() / RAND_MAX, (float)rand() / RAND_MAX);
     Material material;
     aiColor3D color(0.f, 0.f, 0.f);
     float shininess;
 
     mat->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-    material.Diffuse = glm::vec3(color.r, color.b, color.g);
+    material.Diffuse = glm::vec3(randDiff.r, randDiff.b, randDiff.g);
 
     mat->Get(AI_MATKEY_COLOR_AMBIENT, color);
     material.Ambient = glm::vec3(color.r, color.b, color.g);
 
     mat->Get(AI_MATKEY_COLOR_SPECULAR, color);
-    material.Specular = glm::vec3(color.r, color.b, color.g);
+    material.Specular = glm::vec3(randDiff.r, randDiff.b, randDiff.g);
 
     mat->Get(AI_MATKEY_SHININESS, shininess);
     material.Shininess = shininess;
-    std::cout << material.Diffuse.x << "\n";
+
     return material;
 }
 

@@ -11,6 +11,13 @@
 #include <vector>
 
 
+
+struct Material {
+    glm::vec3 Diffuse;
+    glm::vec3 Specular;
+    glm::vec3 Ambient;
+    float Shininess;
+};
 #define MAX_BONE_INFLUENCE 4
 struct Vertex {
     glm::vec3 Position;
@@ -34,13 +41,14 @@ struct Texture {
 class Mesh
 {
 public:
+
     // mesh data
     std::vector<Vertex>       vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture>      textures;
-
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
-    void Draw(ShaderClass& shader);
+    Material mat;
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, Material mat);
+    void Draw(ShaderClass& shader, int mIndex);
 private:
     //  render data
     unsigned int VAO, VBO, EBO;
