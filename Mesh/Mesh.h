@@ -3,26 +3,49 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "../Shaders/ShaderClass.h"
-#include "../ClassesOpengl/VAO.h"
-#include "../ClassesOpengl/VBO.h"
 #include "stb-master/stb_image.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
+#include <vector>
 
+
+#define MAX_BONE_INFLUENCE 4
+struct Vertex {
+    glm::vec3 Position;
+    glm::vec3 Normal;
+    glm::vec2 TexCoords;
+    // tangent
+    glm::vec3 Tangent;
+    // bitangent
+    glm::vec3 Bitangent;
+    //bone indexes which will influence this vertex
+    int m_BoneIDs[MAX_BONE_INFLUENCE];
+    //weights from each bone
+    float m_Weights[MAX_BONE_INFLUENCE];
+};
+
+struct Texture {
+    unsigned int id;
+    std::string type;
+    std::string path;
+};
 class Mesh
 {
 public:
-	 VAO myVAO;
-	 VBO myVBO;
-	 Mesh(std::vector <GLfloat> &vertices, float screenW, float screenH);
-	 void SetTexture(GLuint& textures, const char* filepath, bool isRGBA);
-	 void Render(ShaderClass& shader, GLenum mode, GLint first, GLsizei count);
+    // mesh data
+    std::vector<Vertex>       vertices;
+    std::vector<unsigned int> indices;
+    std::vector<Texture>      textures;
 
-	 void SetAtrib(GLuint index,GLint size,GLenum type,GLboolean normalized,GLsizei stride,const void* pointer);
-
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+    void Draw(ShaderClass& shader);
 private:
-	float screenH;
-	float screenW;
+    //  render data
+    unsigned int VAO, VBO, EBO;
+
+    void setupMesh();
+
 };
 

@@ -60,6 +60,9 @@
     <ClCompile Include="Includes\Noise\PerlinNoise.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Model\Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClassesOpengl\VAO.h">
@@ -113,6 +116,9 @@
     <ClInclude Include="Includes\OBJLoader\OBJ_Loader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Model\Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Includes\Imgui\.editorconfig" />
@@ -126,6 +132,8 @@
     <None Include="Shaders\Light.frag" />
     <None Include="Shaders\Cubemap.vert" />
     <None Include="Shaders\Cubemap.frag" />
+    <None Include="Shaders\ModelLoader.frag" />
+    <None Include="Shaders\ModelLoader.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Includes\imgui-docking\LICENSE.txt" />

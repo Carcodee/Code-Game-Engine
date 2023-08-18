@@ -3,7 +3,6 @@ layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 colour;
 layout (location = 2) in vec2 TextCoord;
 layout (location = 3) in vec3 aNormal;
-//layout (location = 4) in mat4 instanceMatrix;
 
 out vec3 ourColor;
 out vec2 TrueTextCoord;
