@@ -83,7 +83,6 @@ void main()
     for(int i = 0; i < NR_POINT_LIGHTS; i++)
         result += CalculatePointLight(pointLights[i], norm, FragPos, viewDir);    
 
-
 	FragColor =vec4(result, 1.0);
 
 

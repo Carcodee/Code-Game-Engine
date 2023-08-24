@@ -65,13 +65,13 @@ bool firstMouse = true;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
-//#ifdef _DEBUG
-//#define PRINTL(x) std::cout<< x << "\n"
-//#define PRINT(x) std::cout<<x
-//#else
-//#define PRINTL(x)
-//#define PRINT(x)
-//#endif
+#ifdef _DEBUG
+#define PRINTL(x) std::cout<< x << "\n"
+#define PRINT(x) std::cout<<x
+#else
+#define PRINTL(x)
+#define PRINT(x)
+#endif
 
 int main(void)
 {
@@ -135,9 +135,10 @@ int main(void)
 	ShaderClass lightShader("Shaders/Light.vert","Shaders/Light.frag");
 	ShaderClass cubemapShader("Shaders/Cubemap.vert", "Shaders/Cubemap.frag");
 	ShaderClass modelShader("Shaders/ModelLoader.vert", "Shaders/ModelLoader.frag");
+	ShaderClass fbShader("Shaders/framebuffer.vert", "Shaders/Framebuffer.frag");
 
 	stbi_set_flip_vertically_on_load(true);
-	Model ourModel("Models/BackpackModel/backpack.obj");
+	//Model ourModel("Models/BackpackModel/backpack.obj");
 	stbi_set_flip_vertically_on_load(false);
 
 	//Model loader
@@ -458,8 +459,62 @@ int main(void)
 	lightVBO.Bind();
 	lightVBO.BufferData(cubeLightVertices.size(),cubeLightVertices.data());
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+
+	lightVAO.UnBind();
+
+
+
+	std::vector <float> quadVertices = {
+		// positions   // texCoords
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		-1.0f, -1.0f,  0.0f, 0.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+		 1.0f,  1.0f,  1.0f, 1.0f
+	};
+
+	VAO fbVAO;
+	fbVAO.Bind();
+
+	VBO fbVBO;
+	fbVBO.Bind();
+	fbVBO.BufferData(quadVertices.size(), quadVertices.data());
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+	
+	fbShader.setInt("screenTexture", 0);
+
+
+	unsigned int fbo;
+	glGenFramebuffers(1, &fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+	unsigned int textureColorbuffer;
+	glGenTextures(1, &textureColorbuffer);
+	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+
+	//render buffer obj
+	unsigned int rbo;
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
+	// now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 
 	bool dirLightOn=true, pointLightOn=true, spotLightOn=true;
 
@@ -502,25 +557,32 @@ int main(void)
 
 
 		/* Render here */
+		// render
+		// ------
+		// bind to framebuffer and draw scene as we normally would to color texture 
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
+
+		// make sure we clear the framebuffer's content
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
 
-
-
+#pragma region configurations
 		myShader.use();
 		//isntancesPos
 		glm::mat4 modelMoved = glm::mat4(1.0f);
-		modelMoved = glm::rotate(modelMoved, (float)glfwGetTime()* speedRotation * speedMultiplier* glm::radians(50.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::translate(modelMoved, glm::vec3(cubePosX, cubePosY, cubePosZ));
+		modelMoved = glm::rotate(modelMoved, (float)glfwGetTime() * speedRotation * speedMultiplier * glm::radians(50.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::translate(modelMoved, glm::vec3(cubePosX, cubePosY, cubePosZ));
 		glm::mat4 view = glm::mat4(1.0f);
 		// note that we're translating the scene in the reverse direction of where we want to move
 		//view = glm::translate(view, glm::vec3(cubePosX, cubePosY, cubePosZ));
 		view = camera.GetViewMatrix();
 		glm::mat4 projection = glm::mat4(1.0f);;
-		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH/ (float)SCR_HEIGHT, 0.1f, 100.0f);
+		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 		myShader.setMat4("view", view);
 		myShader.setMat4("projection", projection);
+#pragma endregion
 
 #pragma region light
 
@@ -557,31 +619,33 @@ int main(void)
 		// render the cube
 		lightVAO.Bind();
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+
 #pragma endregion
 
 #pragma region ModelRegion
 
-		// don't forget to enable shader before setting uniforms
-		modelShader.use();
-		modelShader.setVec3("viewPos", camera.Position);
-		modelShader.setVec3("dirLight.direction", -lightPos);
-		modelShader.setVec3("dirLight.ambient", ambientColor);
-		modelShader.setVec3("dirLight.diffuse", glm::vec3(1.0f));
-		modelShader.setVec3("dirLight.specular", glm::vec3(.5f));
-		// view/projection transformations
-		glm::mat4 projectionM = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-		glm::mat4 viewM = camera.GetViewMatrix();
-		modelShader.setMat4("projection", projectionM);
-		modelShader.setMat4("view", viewM);
+		//// don't forget to enable shader before setting uniforms
+		//modelShader.use();
+		//modelShader.setVec3("viewPos", camera.Position);
+		//modelShader.setVec3("dirLight.direction", -lightPos);
+		//modelShader.setVec3("dirLight.ambient", ambientColor);
+		//modelShader.setVec3("dirLight.diffuse", glm::vec3(1.0f));
+		//modelShader.setVec3("dirLight.specular", glm::vec3(.5f));
+		//// view/projection transformations
+		//glm::mat4 projectionM = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		//glm::mat4 viewM = camera.GetViewMatrix();
+		//modelShader.setMat4("projection", projectionM);
+		//modelShader.setMat4("view", viewM);
 
-		// render the loaded model
-		glm::mat4 modelM = glm::mat4(1.0f);
-		modelM = glm::translate(modelM, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-		modelM = glm::scale(modelM, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
-		modelShader.setMat4("model", modelM);
-		ourModel.Draw(modelShader);
+		//// render the loaded model
+		//glm::mat4 modelM = glm::mat4(1.0f);
+		//modelM = glm::translate(modelM, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+		//modelM = glm::scale(modelM, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+		//modelShader.setMat4("model", modelM);
+		//ourModel.Draw(modelShader);
 #pragma endregion
 
+#pragma region CubesRegion
 		myShader.use();
 
 		// bind textures on corresponding texture units
@@ -595,47 +659,48 @@ int main(void)
 		glBindTexture(GL_TEXTURE_2D, specularMap);
 		myShader.setVec3("Color", Color);
 		myShader.setVec3("viewPos", camera.Position);
-		
+
 		HandleLights(dirLightOn, pointLightOn, myShader, lightPos, ambientColor, diffuseColor);
 
 		//instances
 		glm::mat4* modelMatrices;
-		modelMatrices = new glm::mat4[amount*amount];
+		modelMatrices = new glm::mat4[amount * amount];
 
 		for (size_t k = 0; k < 1; k++)
 		{
-				for (size_t i = 0; i < amount; i++)
+			for (size_t i = 0; i < amount; i++)
+			{
+				for (size_t j = 0; j < amount; j++)
 				{
-					for (size_t j = 0; j < amount; j++)
-					{
-						glm::mat4 model = glm::mat4(1.0f);
+					glm::mat4 model = glm::mat4(1.0f);
 
-						noiseX ={ myPNoise.noise(i + cubePosX,
-							k + cubePosY * 10 * sin((float)glfwGetTime())*speedMultiplier,
-							j + cubePosZ) };
-						
-						model = glm::translate(model, glm::vec3(i+cubePosX, k+ noiseX, j+cubePosZ));
-						// 4. now add to list of matrices
-						//model = glm::rotate(model, (float)glfwGetTime() * speedRotation * speedMultiplier * glm::sin(glm::radians(50.0f)), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::translate(model, glm::vec3(cubePosX, cubePosY, cubePosZ));;
+					noiseX = { myPNoise.noise(i + cubePosX,
+						k + cubePosY * 10 * sin((float)glfwGetTime()) * speedMultiplier,
+						j + cubePosZ) };
 
-						modelMatrices[instanceID] = model;
-						myShader.setMat4("model[" + std::to_string(instanceID) + "]", model);
+					model = glm::translate(model, glm::vec3(i + cubePosX, k + noiseX, j + cubePosZ));
+					// 4. now add to list of matrices
+					//model = glm::rotate(model, (float)glfwGetTime() * speedRotation * speedMultiplier * glm::sin(glm::radians(50.0f)), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::translate(model, glm::vec3(cubePosX, cubePosY, cubePosZ));;
 
-						instanceID++;
-					}
+					modelMatrices[instanceID] = model;
+					myShader.setMat4("model[" + std::to_string(instanceID) + "]", model);
+
+					instanceID++;
 				}
-				instanceID = 0;
-				vao.Bind();
-				glDrawArraysInstanced(GL_TRIANGLES, 0, 36, amount * amount);
+			}
+			instanceID = 0;
+			vao.Bind();
+			glDrawArraysInstanced(GL_TRIANGLES, 0, 36, amount * amount);
 
-				glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				//glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0, amount * amount);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			//glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0, amount * amount);
 		}
 		//glDrawElementsInstanced(GL_TRIANGLES,36,GL_UNSIGNED_INT,0,amount);
 		//glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, indices.data());
 
 		glBindVertexArray(0);
+#pragma endregion
 
 #pragma region Cubemap
 
@@ -657,11 +722,29 @@ int main(void)
 #pragma endregion
 
 
+#pragma region frambebuffers
+
+		// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
+		// clear all relevant buffers
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		fbShader.use();
+		fbVAO.Bind();
+		glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
+#pragma endregion
 
 
 		glEnd();
+
+#pragma region imgui
+
 		//IMGUI
 		if (ImGui::TreeNode("Cube Speed"))
 		{
@@ -689,7 +772,7 @@ int main(void)
 				ImGui::PopStyleColor(4);
 				ImGui::PopID();
 			}
-	
+
 			ImGui::PopID();
 
 			ImGui::SameLine();
@@ -729,9 +812,9 @@ int main(void)
 
 
 			ImGui::PushID("set1");
-		
 
-	
+
+
 			ImGui::PopID();
 			ImGui::PopStyleVar();
 			ImGui::TreePop();
@@ -740,7 +823,7 @@ int main(void)
 
 		if (ImGui::TreeNode("cube amount"))
 		{
-		
+
 			const float spacing = 4;
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing, spacing));
 
@@ -783,8 +866,8 @@ int main(void)
 		{
 			// Combo Boxes are also called "Dropdown" in other systems
 			// Expose flags as checkbox for the demo
-			static ImGuiComboFlags flags,flags2,flags3 = 0;
-			
+			static ImGuiComboFlags flags, flags2, flags3 = 0;
+
 
 			ImGui::CheckboxFlags("Directional light", &flags, ImGuiComboFlags_PopupAlignLeft);
 			ImGui::CheckboxFlags("Spot light", &flags2, ImGuiComboFlags_PopupAlignLeft);
@@ -828,7 +911,7 @@ int main(void)
 			ImGui::Combo("combo 4 (function)", &item_current_4, &Funcs::ItemGetter, items, IM_ARRAYSIZE(items));
 
 			dirLightOn = flags;
-			spotLightOn= flags2;
+			spotLightOn = flags2;
 			pointLightOn = flags3;
 
 
@@ -840,8 +923,7 @@ int main(void)
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-
-
+#pragma endregion
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
@@ -853,6 +935,17 @@ int main(void)
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui::DestroyContext();
 	glfwTerminate();
+
+	//de - allocate all resources once they've outlived their purpose
+	vao.~VAO();
+	skyboxVAO.~VAO();
+	lightVAO.~VAO();
+	fbVAO.~VAO();
+
+	vbo.~VBO();
+	skyboxVBO.~VBO();
+	lightVBO.~VBO();
+	fbVBO.~VBO();
 	return 0;
 }
 

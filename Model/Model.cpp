@@ -117,7 +117,6 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         Material materials=loadMaterial(material);
         
         //std::cout << materials.Diffuse.x<< " ," << materials.Diffuse.y << " ," << materials.Diffuse.z << "\n";
-        std::cout << materials.Shininess << "\n";
 
         
     return Mesh(vertices, indices, textures, materials);
