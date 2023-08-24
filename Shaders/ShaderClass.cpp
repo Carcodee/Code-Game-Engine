@@ -36,7 +36,7 @@ ShaderClass::ShaderClass(const char* vertexPath, const char* fragmentPath)
 	}
 	catch (std::ifstream::failure e)
 	{
-		std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+		std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ IN THIS FILE::" << vertexPath << "\n" << std::endl;
 	}
 	const char* vertexShaderCode = vertexShaderSource.c_str();
 	const char* fragmentShaderCode = fragmentShaderSource.c_str();
@@ -57,7 +57,7 @@ ShaderClass::ShaderClass(const char* vertexPath, const char* fragmentPath)
 	if (!success)
 	{
 		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED IN THIS FILE::"<< vertexPath << "\n" << infoLog << std::endl;
 	}
 
 
@@ -72,7 +72,7 @@ ShaderClass::ShaderClass(const char* vertexPath, const char* fragmentPath)
 	if (!success)
 	{
 		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-		std::cout << "ERROR::FRAGMENT::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+		std::cout << "ERROR::FRAGMENT::VERTEX::COMPILATION_FAILED IN THIS FILE:: "<< vertexPath << "\n" << infoLog << std::endl;
 	}
 
 	//ShaderProgram
@@ -93,7 +93,7 @@ ShaderClass::ShaderClass(const char* vertexPath, const char* fragmentPath)
 	glGetProgramiv(ID, GL_LINK_STATUS, &success);
 	if (!success) {
 		glGetProgramInfoLog(ID, 512, NULL, infoLog);
-		std::cout << "ERROR IN THE LINKING OF THE SHADER PROGRAM\n" << infoLog << std::endl;
+		std::cout << "ERROR IN THE LINKING OF THE SHADER PROGRAMIN THIS FILE::" << vertexPath << "\n" << infoLog << std::endl;
 	}
 
 	//

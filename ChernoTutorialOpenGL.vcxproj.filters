@@ -136,6 +136,10 @@
     <None Include="Shaders\ModelLoader.vert" />
     <None Include="Shaders\Framebuffer.frag" />
     <None Include="Shaders\Framebuffer.vert" />
+    <None Include="Shaders\Blur.vert" />
+    <None Include="Shaders\Blur.frag" />
+    <None Include="Shaders\FinalBloom.vert" />
+    <None Include="Shaders\FinalBloom.frag" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Includes\imgui-docking\LICENSE.txt" />

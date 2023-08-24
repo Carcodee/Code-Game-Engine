@@ -197,8 +197,12 @@
     <None Include="Includes\Imgui\.gitignore" />
     <None Include="Shaders\Base.frag" />
     <None Include="Shaders\Base.vert" />
+    <None Include="Shaders\Blur.frag" />
+    <None Include="Shaders\Blur.vert" />
     <None Include="Shaders\Cubemap.frag" />
     <None Include="Shaders\Cubemap.vert" />
+    <None Include="Shaders\FinalBloom.frag" />
+    <None Include="Shaders\FinalBloom.vert" />
     <None Include="Shaders\Framebuffer.frag" />
     <None Include="Shaders\Framebuffer.vert" />
     <None Include="Shaders\Light.frag" />

@@ -24,7 +24,7 @@ void main()
 
     float kernel[9] = float[](
          0,  0,  0,
-         0,  9,  0,
+         0,  1,  0,
          0,  0,  0
     );
     
