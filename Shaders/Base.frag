@@ -1,5 +1,8 @@
 #version 330 core
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 BrightColor;
+
+
 //ourColor is not implemented in order to control the color value from editor (i could also with this but is easier with an uniform)
 in vec3 ourColor;
 in vec2 TrueTextCoord;
@@ -84,6 +87,13 @@ void main()
         result += CalculatePointLight(pointLights[i], norm, FragPos, viewDir);    
 
 	FragColor =vec4(result, 1.0);
+    float brightness = dot(FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+    if(brightness > .3)
+        BrightColor = vec4(FragColor.rgb, 1.0);
+	else
+		BrightColor = vec4(0.0, 0.0, 0.0, 1.0);
+
+
 
 
 }

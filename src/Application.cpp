@@ -46,9 +46,10 @@ int sum(int* num1, int* num2) {
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
-bool bloom = true;
-bool bloomKeyPressed = false;
+
+bool bloomKeyPressed = true;
 float exposure = 1.0f;
+bool dirLightOn = true, pointLightOn = true, spotLightOn = true, HDR = true,bloom = true;
 
 // camera
 
@@ -141,14 +142,15 @@ int main(void)
 	ShaderClass lightShader("Shaders/Light.vert","Shaders/Light.frag");
 	ShaderClass cubemapShader("Shaders/Cubemap.vert", "Shaders/Cubemap.frag");
 	ShaderClass modelShader("Shaders/ModelLoader.vert", "Shaders/ModelLoader.frag");
-	//ShaderClass fbShader("Shaders/framebuffer.vert", "Shaders/Framebuffer.frag");
+	ShaderClass fbShader("Shaders/framebuffer.vert", "Shaders/Framebuffer.frag");
 
 	ShaderClass fbBlurShader("Shaders/Blur.vert", "Shaders/Blur.frag");
 	ShaderClass finalBloomShader("Shaders/FinalBloom.vert", "Shaders/FinalBloom.frag");
 
 
 	stbi_set_flip_vertically_on_load(true);
-	//Model ourModel("Models/BackpackModel/backpack.obj");
+	
+	Model ourModel("Models/BackpackModel/backpack.obj");
 	stbi_set_flip_vertically_on_load(false);
 
 	//Model loader
@@ -364,8 +366,8 @@ int main(void)
 	// load and create a texture 
 	// -------------------------
 	unsigned int texture1, specularMap;
-	texture1= LoadTexture("C:/Users/carlo/Documents/ImagesProgramming/container2.png");
-	specularMap = LoadTexture("C:/Users/carlo/Documents/ImagesProgramming/lighting_maps_specular_color.png");
+	texture1= LoadTexture("C:/Users/carlo/OneDrive/Documents/GitHub/OpenglCarlos/ImagesProgramming/container2.png");
+	specularMap = LoadTexture("C:/Users/carlo/OneDrive/Documents/GitHub/OpenglCarlos/ImagesProgramming/lighting_maps_specular_color.png");
 
 	
 
@@ -431,12 +433,12 @@ int main(void)
 
 	std::vector<std::string> textFaces
 	{
-			"C:/Users/carlo/Documents/ImagesProgramming/skybox/right.jpg",
-			"C:/Users/carlo/Documents/ImagesProgramming/skybox/left.jpg",
-			"C:/Users/carlo/Documents/ImagesProgramming/skybox/top.jpg",
-			"C:/Users/carlo/Documents/ImagesProgramming/skybox/bottom.jpg",
-			"C:/Users/carlo/Documents/ImagesProgramming/skybox/front.jpg",
-			"C:/Users/carlo/Documents/ImagesProgramming/skybox/back.jpg"
+			"C:/Users/carlo/OneDrive/Documents/GitHub/OpenglCarlos/ImagesProgramming/skybox/right.jpg",
+			"C:/Users/carlo/OneDrive/Documents/GitHub/OpenglCarlos/ImagesProgramming/skybox/left.jpg",
+			"C:/Users/carlo/OneDrive/Documents/GitHub/OpenglCarlos/ImagesProgramming/skybox/top.jpg",
+			"C:/Users/carlo/OneDrive/Documents/GitHub/OpenglCarlos/ImagesProgramming/skybox/bottom.jpg",
+			"C:/Users/carlo/OneDrive/Documents/GitHub/OpenglCarlos/ImagesProgramming/skybox/front.jpg",
+			"C:/Users/carlo/OneDrive/Documents/GitHub/OpenglCarlos/ImagesProgramming/skybox/back.jpg"
 	};
 
 	unsigned int textureCubeMap=LoadCubemap(textFaces);
@@ -484,103 +486,106 @@ int main(void)
 
 
 #pragma region basic Fbo
+
+		unsigned int fbo;
+		glGenFramebuffers(1, &fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+		unsigned int textureColorbuffer;
+		glGenTextures(1, &textureColorbuffer);
+		glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+
+		//render buffer obj
+		unsigned int rbo;
+		glGenRenderbuffers(1, &rbo);
+		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
+		// now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		fbShader.setInt("screenTexture", 0);
 	
-	//renderQuad();
-	//fbShader.setInt("screenTexture", 0);
-
-
-	//unsigned int fbo;
-	//glGenFramebuffers(1, &fbo);
-	//glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-	//unsigned int textureColorbuffer;
-	//glGenTextures(1, &textureColorbuffer);
-	//glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
-
-	////render buffer obj
-	//unsigned int rbo;
-	//glGenRenderbuffers(1, &rbo);
-	//glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-	//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
-	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
-	//// now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
-	//if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	//	std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+	
 #pragma endregion
 
 #pragma region Bloom
 
 
-	unsigned int hdrFBO;
-	glGenFramebuffers(1, &hdrFBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
-	// create 2 floating point color buffers (1 for normal rendering, other for brightness threshold values)
-	unsigned int colorBuffers[2];
-	glGenTextures(2, colorBuffers);
-	for (unsigned int i = 0; i < 2; i++)
-	{
-		glBindTexture(GL_TEXTURE_2D, colorBuffers[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);  // we clamp to the edge as the blur filter would otherwise sample repeated texture values!
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		// attach texture to framebuffer
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colorBuffers[i], 0);
-	}
-	
-	// create and attach depth buffer (renderbuffer)
-	unsigned int rboDepth;
-	glGenRenderbuffers(1, &rboDepth);
-	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
-	// tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
-	unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-	glDrawBuffers(2, attachments);
-	// finally check if framebuffer is complete
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "Framebuffer not complete!" << std::endl;
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	// ping-pong-framebuffer for blurring
-	unsigned int pingpongFBO[2];
-	unsigned int pingpongColorbuffers[2];
-	glGenFramebuffers(2, pingpongFBO);
-	glGenTextures(2, pingpongColorbuffers);
-	for (unsigned int i = 0; i < 2; i++)
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
-		glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // we clamp to the edge as the blur filter would otherwise sample repeated texture values!
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongColorbuffers[i], 0);
-		// also check if framebuffers are complete (no need for depth buffer)
+		unsigned int hdrFBO;
+		glGenFramebuffers(1, &hdrFBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+		// create 2 floating point color buffers (1 for normal rendering, other for brightness threshold values)
+		unsigned int colorBuffers[2];
+		glGenTextures(2, colorBuffers);
+		for (unsigned int i = 0; i < 2; i++)
+		{
+			glBindTexture(GL_TEXTURE_2D, colorBuffers[i]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);  // we clamp to the edge as the blur filter would otherwise sample repeated texture values!
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			// attach texture to framebuffer
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colorBuffers[i], 0);
+		}
+		// create and attach depth buffer (renderbuffer)
+		unsigned int rboDepth;
+		glGenRenderbuffers(1, &rboDepth);
+		glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+		// tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
+		unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+		glDrawBuffers(2, attachments);
+		// finally check if framebuffer is complete
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			std::cout << "Framebuffer not complete!" << std::endl;
-	}
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	fbBlurShader.use();
-	fbBlurShader.setInt("image", 0);
-	finalBloomShader.use();
-	finalBloomShader.setInt("scene", 0);
-	finalBloomShader.setInt("bloomBlur", 1);
 
-#pragma endregion
+		// ping-pong-framebuffer for blurring
+		unsigned int pingpongFBO[2];
+		unsigned int pingpongColorbuffers[2];
+		glGenFramebuffers(2, pingpongFBO);
+		glGenTextures(2, pingpongColorbuffers);
+		for (unsigned int i = 0; i < 2; i++)
+		{
+			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
+			glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[i]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // we clamp to the edge as the blur filter would otherwise sample repeated texture values!
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongColorbuffers[i], 0);
+			// also check if framebuffers are complete (no need for depth buffer)
+			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+				std::cout << "Framebuffer not complete!" << std::endl;
 
+		}
+
+		fbBlurShader.use();
+		fbBlurShader.setInt("image", 0);
+		finalBloomShader.use();
+		finalBloomShader.setInt("scene", 0);
+		finalBloomShader.setInt("bloomBlur", 1);
 	
 
 
-	bool dirLightOn=true, pointLightOn=true, spotLightOn=true;
+
+
+
+
+#pragma endregion
+	
+
 
 
 	//Color
@@ -623,15 +628,17 @@ int main(void)
 		// render
 		// ------
 		glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
-
+		(bloom) ? glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO) : glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		//glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		// make sure we clear the framebuffer's content
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 
 #pragma region configurations
+
 		myShader.use();
 		//isntancesPos
 		glm::mat4 modelMoved = glm::mat4(1.0f);
@@ -644,6 +651,7 @@ int main(void)
 		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 		myShader.setMat4("view", view);
 		myShader.setMat4("projection", projection);
+
 #pragma endregion
 
 #pragma region light
@@ -671,7 +679,7 @@ int main(void)
 		lightColor.z = sin(1.3f);
 
 		glm::vec3 diffuseColor = lightColor * 1.0f;
-		glm::vec3 ambientColor = glm::vec3(0.2f);
+		glm::vec3 ambientColor = glm::vec3(0.1f);
 		// be sure to activate shader when setting uniforms/drawing objects
 		lightShader.setVec3("objectColor", glm::vec3(1.0));
 		// render the cube
@@ -682,28 +690,30 @@ int main(void)
 
 #pragma region ModelRegion
 
-		//// don't forget to enable shader before setting uniforms
-		//modelShader.use();
-		//modelShader.setVec3("viewPos", camera.Position);
-		//modelShader.setVec3("dirLight.direction", -lightPos);
-		//modelShader.setVec3("dirLight.ambient", ambientColor);
-		//modelShader.setVec3("dirLight.diffuse", glm::vec3(1.0f));
-		//modelShader.setVec3("dirLight.specular", glm::vec3(.5f));
-		//// view/projection transformations
-		//glm::mat4 projectionM = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-		//glm::mat4 viewM = camera.GetViewMatrix();
-		//modelShader.setMat4("projection", projectionM);
-		//modelShader.setMat4("view", viewM);
+		// don't forget to enable shader before setting uniforms
+		modelShader.use();
+		modelShader.setVec3("viewPos", camera.Position);
+		modelShader.setVec3("dirLight.direction", -lightPos);
+		modelShader.setVec3("dirLight.ambient", ambientColor);
+		modelShader.setVec3("dirLight.diffuse", glm::vec3(1.0f));
+		modelShader.setVec3("dirLight.specular", glm::vec3(.5f));
+		// view/projection transformations
+		glm::mat4 projectionM = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 viewM = camera.GetViewMatrix();
+		modelShader.setMat4("projection", projectionM);
+		modelShader.setMat4("view", viewM);
 
-		//// render the loaded model
-		//glm::mat4 modelM = glm::mat4(1.0f);
-		//modelM = glm::translate(modelM, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-		//modelM = glm::scale(modelM, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
-		//modelShader.setMat4("model", modelM);
-		//ourModel.Draw(modelShader);
+		// render the loaded model
+		glm::mat4 modelM = glm::mat4(1.0f);
+		modelM = glm::translate(modelM, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+		modelM = glm::scale(modelM, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+		modelShader.setMat4("model", modelM);
+		ourModel.Draw(modelShader);
+
 #pragma endregion
 
 #pragma region CubesRegion
+
 		myShader.use();
 
 		// bind textures on corresponding texture units
@@ -782,18 +792,24 @@ int main(void)
 
 #pragma region frambebuffersTest
 
-		//// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		if (!bloom)
+		{	
+			// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		//glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
-		//// clear all relevant buffers
-		//glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
-		//glClear(GL_COLOR_BUFFER_BIT);
+		glDisable(GL_DEPTH_TEST | GL_DEPTH_BUFFER_BIT); // disable depth test so screen-space quad isn't discarded due to depth test.
+		// clear all relevant buffers
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
+		glClear(GL_COLOR_BUFFER_BIT);
 
-		//fbShader.use();
-		//fbVAO.Bind();
-		//glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
-		//glDrawArrays(GL_TRIANGLES, 0, 6);
+		fbShader.use();
+		fbShader.setBool("HDR", HDR);
+
+		glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
+		renderQuad();
+
+		}
+
 
 
 #pragma endregion
@@ -801,48 +817,53 @@ int main(void)
 
 #pragma region Bloom render
 
-
-				// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-
-		bool horizontal = true, first_iteration = true;
-		unsigned int amountIter = 10;
-		fbBlurShader.use();
-		for (unsigned int i = 0; i < amountIter; i++)
+		if (bloom)
 		{
-			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
-			fbBlurShader.setInt("horizontal", horizontal);
-			glBindTexture(GL_TEXTURE_2D, first_iteration ? colorBuffers[1] : pingpongColorbuffers[!horizontal]);  // bind texture of other framebuffer (or scene if first iteration)
+			// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
+
+			bool horizontal = true, first_iteration = true;
+			unsigned int amountIter = 10;
+			fbBlurShader.use();
+			for (unsigned int i = 0; i < amountIter; i++)
+			{
+				glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
+				glBindTexture(GL_TEXTURE_2D, first_iteration ? colorBuffers[1] : pingpongColorbuffers[!horizontal]);  // bind texture of other framebuffer (or scene if first iteration)
+				fbBlurShader.setInt("horizontal", horizontal);
+
+				renderQuad();
+
+				horizontal = !horizontal;
+				if (first_iteration)
+					first_iteration = false;
+			}
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			glDisable(GL_DEPTH_TEST);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			finalBloomShader.use();
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, colorBuffers[0]);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[!horizontal]);
+			finalBloomShader.setInt("bloom", bloom);
+			finalBloomShader.setFloat("exposure", exposure);
+			finalBloomShader.setBool("hdr", HDR);
 			renderQuad();
 
-			horizontal = !horizontal;
-			if (first_iteration)
-				first_iteration = false;
+			std::cout << "bloom: " << (bloom ? "on" : "off") << "| exposure: " << exposure << std::endl;
+			//clear all relevant buffers
 		}
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		finalBloomShader.use();
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, colorBuffers[0]);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[!horizontal]);
-		finalBloomShader.setInt("bloom", bloom);
-		finalBloomShader.setFloat("exposure", exposure);
-		renderQuad();
-
-		//std::cout << "bloom: " << (bloom ? "on" : "off") << "| exposure: " << exposure << std::endl;
-		// clear all relevant buffers
-		glClear(GL_COLOR_BUFFER_BIT);
 
 
 #pragma endregion
 
 
 		glEnd();
+
 
 #pragma region imgui
 
@@ -967,12 +988,16 @@ int main(void)
 		{
 			// Combo Boxes are also called "Dropdown" in other systems
 			// Expose flags as checkbox for the demo
-			static ImGuiComboFlags flags, flags2, flags3 = 0;
+			static ImGuiComboFlags flags, flags2, flags3, flags4, flags5 = 0;
 
 
 			ImGui::CheckboxFlags("Directional light", &flags, ImGuiComboFlags_PopupAlignLeft);
 			ImGui::CheckboxFlags("Spot light", &flags2, ImGuiComboFlags_PopupAlignLeft);
 			ImGui::CheckboxFlags("Point light", &flags3, ImGuiComboFlags_PopupAlignLeft);
+			ImGui::CheckboxFlags("HRD", &flags4, ImGuiComboFlags_PopupAlignLeft);
+			ImGui::CheckboxFlags("BLOOM", &flags5, ImGuiComboFlags_PopupAlignLeft);
+
+
 
 
 			// Using the generic BeginCombo() API, you have full control over how to display the combo contents.
@@ -1014,7 +1039,8 @@ int main(void)
 			dirLightOn = flags;
 			spotLightOn = flags2;
 			pointLightOn = flags3;
-
+			HDR = flags4;
+			bloom = flags5;
 
 
 			ImGui::TreePop();
@@ -1291,28 +1317,32 @@ unsigned int quadVAO = 0;
 unsigned int quadVBO;
 void renderQuad()
 {
-	if (quadVAO == 0)
-	{
-		std::vector<float> quadVertices = {
-			// positions        // texture Coords
-			-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-			 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-			 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+	
+		float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+			// positions   // texCoords
+			-1.0f,  1.0f,  0.0f, 1.0f,
+			-1.0f, -1.0f,  0.0f, 0.0f,
+			 1.0f, -1.0f,  1.0f, 0.0f,
+
+			-1.0f,  1.0f,  0.0f, 1.0f,
+			 1.0f, -1.0f,  1.0f, 0.0f,
+			 1.0f,  1.0f,  1.0f, 1.0f
 		};
-		// setup plane VAO
+
+		unsigned int quadVAO, quadVBO;
 		glGenVertexArrays(1, &quadVAO);
 		glGenBuffers(1, &quadVBO);
 		glBindVertexArray(quadVAO);
 		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-		glBufferData(GL_ARRAY_BUFFER, quadVertices.size(), quadVertices.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	}
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+	
+		
 	glBindVertexArray(quadVAO);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindVertexArray(0);
 }
 
