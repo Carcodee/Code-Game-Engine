@@ -63,6 +63,9 @@
     <ClCompile Include="Model\Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ClassesOpengl\GBufferClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClassesOpengl\VAO.h">
@@ -119,6 +122,9 @@
     <ClInclude Include="Model\Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ClassesOpengl\GBufferClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Includes\Imgui\.editorconfig" />
@@ -140,6 +146,12 @@
     <None Include="Shaders\Blur.frag" />
     <None Include="Shaders\FinalBloom.vert" />
     <None Include="Shaders\FinalBloom.frag" />
+    <None Include="Shaders\GBuffer.vert" />
+    <None Include="Shaders\GBuffer.frag" />
+    <None Include="Shaders\LightPass.vert" />
+    <None Include="Shaders\LightPass.frag" />
+    <None Include="Shaders\ShadowMap.frag" />
+    <None Include="Shaders\ShadowMap.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Includes\imgui-docking\LICENSE.txt" />

@@ -1,5 +1,4 @@
 #include <GL/glew.h>
-
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
@@ -11,7 +10,9 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
-
+#include <thread>
+#include <future>
+#include <memory>
 
 #include "../ClassesOpengl/VAO.h"
 #include "../ClassesOpengl/VBO.h"
@@ -30,7 +31,7 @@
 using namespace glm;
 
 
-
+#define GLEW_MX
 
 //pointers examples
 
@@ -44,25 +45,33 @@ int sum(int* num1, int* num2) {
 	return *num1 + *num2;
 }
 
+GLFWwindow* window;
+
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 bool bloomKeyPressed = true;
 float exposure = 1.0f;
-bool dirLightOn = true, pointLightOn = true, spotLightOn = true, HDR = true,bloom = true;
-
+bool dirLightOn = true, pointLightOn = true, spotLightOn = true, HDR = true,bloom = true, useGbuffer = false, shadows = true;
+bool loadModel= false;
 // camera
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
-unsigned int LoadCubemap(std::vector <std::string> faces);
-unsigned int LoadTexture(char const* path);
-void HandleLights(bool& dirLight, bool& pointLights, ShaderClass& myShader, glm::vec3& lightPos, glm::vec3& ambientColor, glm::vec3& diffuseColor);
+
+std::thread loadingThread;
+void loadModelAsync(std::string& path, Model& model);
+std::shared_ptr<Model> modelSharedPtr;
+Model ourModel;
+
+void renderCube();
 
 void renderQuad();
-
+void HandleLights(bool& dirLight, bool& pointLights, ShaderClass& myShader, glm::vec3& lightPos, glm::vec3& ambientColor, glm::vec3& diffuseColor);
+unsigned int LoadCubemap(std::vector <std::string> faces);
+unsigned int LoadTexture(char const* path);
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
@@ -79,22 +88,11 @@ float lastFrame = 0.0f;
 #define PRINTL(x)
 #define PRINT(x)
 #endif
-
 int main(void)
 {
-
-
-	GLFWwindow* window;
-
-
-
-
-
-
 	/* Initialize the library */
 	if (!glfwInit())
 		return -1;
-
 
 
 	/* Create a windowed mode window and its OpenGL context */
@@ -106,7 +104,6 @@ int main(void)
 	}
 	//Create context
 	glfwMakeContextCurrent(window);
-
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
@@ -141,71 +138,18 @@ int main(void)
 	ShaderClass myShader("Shaders/Base.vert", "Shaders/Base.frag");
 	ShaderClass lightShader("Shaders/Light.vert","Shaders/Light.frag");
 	ShaderClass cubemapShader("Shaders/Cubemap.vert", "Shaders/Cubemap.frag");
-	ShaderClass modelShader("Shaders/ModelLoader.vert", "Shaders/ModelLoader.frag");
 	ShaderClass fbShader("Shaders/framebuffer.vert", "Shaders/Framebuffer.frag");
+	ShaderClass modelShader("Shaders/ModelLoader.vert", "Shaders/ModelLoader.frag");
 
 	ShaderClass fbBlurShader("Shaders/Blur.vert", "Shaders/Blur.frag");
 	ShaderClass finalBloomShader("Shaders/FinalBloom.vert", "Shaders/FinalBloom.frag");
-
-
+	ShaderClass geometricBufferShader("Shaders/GBuffer.vert", "Shaders/GBuffer.frag");
+	ShaderClass gBufferLightPassShader("Shaders/LightPass.vert", "Shaders/LightPass.frag");
+	ShaderClass shadowShaderDepth("Shaders/ShadowMap.vert", "Shaders/ShadowMap.frag");
 	stbi_set_flip_vertically_on_load(true);
-	
-	Model ourModel("Models/BackpackModel/backpack.obj");
+	std::string str = "Models/BackpackModel/backpack.obj";
+
 	stbi_set_flip_vertically_on_load(false);
-
-	//Model loader
-	//objl::Loader myLoader;
-	//std::vector <GLfloat> vertices;
-	//std::vector <GLuint> indices;
-
-	//if (myLoader.LoadFile("Models/AirBoat.obj"))
-	//{
-	//	objl::Mesh myMesh = myLoader.LoadedMeshes[0];
-
-	//		for (size_t i = 0; i < myMesh.Vertices.size(); i++)
-	//		{
-	//			objl::Vertex v = myMesh.Vertices[i];
-	//			v.Position;
-	//			//color
-	//			v.TextureCoordinate;
-	//			v.Normal;
-	//			//pos
-	//			vertices.push_back(v.Position.X);
-	//			vertices.push_back(v.Position.Y);
-	//			vertices.push_back(v.Position.Z);
-	//			//col
-	//			vertices.push_back(1.0f);
-	//			vertices.push_back(1.0f);
-	//			vertices.push_back(1.0f);
-	//			//text
-	//			vertices.push_back(v.TextureCoordinate.X);
-	//			vertices.push_back(v.TextureCoordinate.Y);
-	//			//norm
-	//			vertices.push_back(v.Normal.X);
-	//			vertices.push_back(v.Normal.Y);
-	//			vertices.push_back(v.Normal.Z);
-
-	//			//std::cout << v.Position.X<<" ";
-	//			//std::cout << v.Position.Y<<" ";
-	//			//std::cout << v.Position.Z<<" ";
-	//			//std::cout << (1.0f) << " ";
-	//			//std::cout << (1.0f) << " ";
-	//			//std::cout << (1.0f) << " ";
-	//			//std::cout << v.TextureCoordinate.X << " ";
-	//			//std::cout << v.TextureCoordinate.Y << " ";
-	//			//std::cout << v.Normal.X << " ";
-	//			//std::cout << v.Normal.Y << " ";
-	//			//std::cout << v.Normal.Z << "\n";
-
-	//		}
-	//	
-
-
-	//	indices = myMesh.Indices;
-
-	//}
-
-
 
 	std::vector <GLfloat> cubeLightVertices = {
 			-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
@@ -454,6 +398,8 @@ int main(void)
 	float cubePosX = 0;
 	float cubePosY = 0;
 	float cubePosZ = -3.0f;
+	float noiseMult = 0;
+
 
 	//light
 
@@ -483,6 +429,98 @@ int main(void)
 	lightVAO.UnBind();
 
 
+
+#pragma region GBuffer
+
+
+	//unsigned int gBuffer;
+	//glGenFramebuffers(1, &gBuffer);
+	//glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+	//unsigned int gPosition, gNormal, gAlbedoSpec;
+	//// position color buffer
+	//glGenTextures(1, &gPosition);
+	//glBindTexture(GL_TEXTURE_2D, gPosition);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
+	//// normal color buffer
+	//glGenTextures(1, &gNormal);
+	//glBindTexture(GL_TEXTURE_2D, gNormal);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
+	//// color + specular color buffer
+	//glGenTextures(1, &gAlbedoSpec);
+	//glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
+	//// tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
+	//unsigned int gAttachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+	//glDrawBuffers(3, gAttachments);
+	//// create and attach depth buffer (renderbuffer)
+	//unsigned int gRboDepth;
+	//glGenRenderbuffers(1, &gRboDepth);
+	//glBindRenderbuffer(GL_RENDERBUFFER, gRboDepth);
+	//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
+	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, gRboDepth);
+	//// finally check if framebuffer is complete
+	//if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	//	std::cout << "Framebuffer not complete!" << std::endl;
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//const unsigned int NR_LIGHTS = 32;
+	//std::vector<glm::vec3> lightPositions;
+	//std::vector<glm::vec3> lightColors;
+	//srand(13);
+	//for (unsigned int i = 0; i < NR_LIGHTS; i++)
+	//{
+	//	// calculate slightly random offsets
+	//	float xPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 3.0);
+	//	float yPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 4.0);
+	//	float zPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 3.0);
+	//	lightPositions.push_back(glm::vec3(xPos, yPos, zPos));
+	//	// also calculate random color
+	//	float rColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
+	//	float gColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
+	//	float bColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
+	//	lightColors.push_back(glm::vec3(rColor, gColor, bColor));
+	//}
+	//gBufferLightPassShader.use();
+	//gBufferLightPassShader.setInt("gPosition", 0);
+	//gBufferLightPassShader.setInt("gNormal", 1);
+	//gBufferLightPassShader.setInt("gAlbedoSpec", 2);
+
+#pragma endregion
+
+#pragma region ShadowFramebuffer
+
+	unsigned int depthMapFBO;
+	glGenFramebuffers(1, &depthMapFBO);
+
+	const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+
+	unsigned int depthMap;
+	glGenTextures(1, &depthMap);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+#pragma endregion
 
 
 #pragma region basic Fbo
@@ -609,7 +647,9 @@ int main(void)
 	{
 		randomCols[i] = glm::vec3((float)rand() / RAND_MAX, (float)rand() / RAND_MAX, (float)rand() / RAND_MAX);
 	}
-	//new object
+	//Shadows
+
+
 
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
@@ -628,18 +668,13 @@ int main(void)
 		// render
 		// ------
 		glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
-		(bloom) ? glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO) : glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-		//glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 		// make sure we clear the framebuffer's content
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-
 #pragma region configurations
 
-		myShader.use();
 		//isntancesPos
 		glm::mat4 modelMoved = glm::mat4(1.0f);
 		modelMoved = glm::rotate(modelMoved, (float)glfwGetTime() * speedRotation * speedMultiplier * glm::radians(50.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::translate(modelMoved, glm::vec3(cubePosX, cubePosY, cubePosZ));
@@ -649,28 +684,19 @@ int main(void)
 		view = camera.GetViewMatrix();
 		glm::mat4 projection = glm::mat4(1.0f);;
 		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-		myShader.setMat4("view", view);
-		myShader.setMat4("projection", projection);
 
-#pragma endregion
-
-#pragma region light
-
-
-
-		//lightPos
+		glm::mat4 projectionM = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 viewM = camera.GetViewMatrix();
 		glm::vec3 lightPos(lightX, lightY, lightZ);
 
-		lightShader.use();
-		// view/projection transformations
-		glm::mat4 lightProjection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-		glm::mat4 lightView = camera.GetViewMatrix();
-		lightShader.setMat4("projection", projection);
-		lightShader.setMat4("view", view);
-		// world transformation
-		glm::mat4 lightModel = glm::mat4(1.0f);
-	    lightModel=glm::translate(lightModel, lightPos);
-		lightShader.setMat4("model", lightModel);
+		float near_plane = 1.0f, far_plane = 7.5f;
+		glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+
+		glm::mat4 lightView = glm::lookAt(lightPos,
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f));
+		 
+		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
 		// 
 		glm::vec3 lightColor;
@@ -680,35 +706,90 @@ int main(void)
 
 		glm::vec3 diffuseColor = lightColor * 1.0f;
 		glm::vec3 ambientColor = glm::vec3(0.1f);
+		glm::mat4* modelMatrices;
+
+#pragma endregion
+
+
+#pragma region ShadowsRegion
+		if (shadows)
+		{
+			shadowShaderDepth.use();
+			shadowShaderDepth.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+			glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+			glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+			glClear(GL_DEPTH_BUFFER_BIT);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texture1);
+
+			shadowShaderDepth.use();
+
+			// bind textures on corresponding texture units
+			//instances
+			modelMatrices = new glm::mat4[amount * amount];
+
+			for (size_t k = 0; k < 10; k++)
+			{
+				for (size_t i = 0; i < amount; i++)
+				{
+					for (size_t j = 0; j < amount; j++)
+					{
+						glm::mat4 model = glm::mat4(1.0f);
+
+						noiseX = { myPNoise.noise(i + cubePosX,
+							k + cubePosY ,
+							j + cubePosZ) * (10 * sin((float)glfwGetTime()) * noiseMult) };
+
+						model = glm::translate(model, glm::vec3(i + cubePosX, (k + cubePosY) + noiseX, j + cubePosZ));
+						// 4. now add to list of matrices
+						model = glm::rotate(model, (float)glfwGetTime() * speedRotation * speedMultiplier * glm::sin(glm::radians(50.0f)), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::translate(model, glm::vec3(cubePosX, cubePosY, cubePosZ));;
+						shadowShaderDepth.use();
+						modelMatrices[instanceID] = model;
+						shadowShaderDepth.setMat4("model[" + std::to_string(instanceID) + "]", model);
+						instanceID++;
+					}
+				}
+				instanceID = 0;
+				vao.Bind();
+				glDrawArraysInstanced(GL_TRIANGLES, 0, 36, amount * amount);
+			}
+			glBindVertexArray(0);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
+
+
+#pragma endregion
+
+		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+
+		(bloom) ? glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO) : glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		//glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+		// make sure we clear the framebuffer's content
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+#pragma region light
+
+
+
+		//lightPos
+
+		lightShader.use();
+		// view/projection transformations
+
+		lightShader.setMat4("projection", projectionM);
+		lightShader.setMat4("view", viewM);
+		// world transformation
+		glm::mat4 lightModel = glm::mat4(1.0f);
+	    lightModel=glm::translate(lightModel, lightPos);
+		lightShader.setMat4("model", lightModel);
+
+
 		// be sure to activate shader when setting uniforms/drawing objects
 		lightShader.setVec3("objectColor", glm::vec3(1.0));
 		// render the cube
 		lightVAO.Bind();
 		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-#pragma endregion
-
-#pragma region ModelRegion
-
-		// don't forget to enable shader before setting uniforms
-		modelShader.use();
-		modelShader.setVec3("viewPos", camera.Position);
-		modelShader.setVec3("dirLight.direction", -lightPos);
-		modelShader.setVec3("dirLight.ambient", ambientColor);
-		modelShader.setVec3("dirLight.diffuse", glm::vec3(1.0f));
-		modelShader.setVec3("dirLight.specular", glm::vec3(.5f));
-		// view/projection transformations
-		glm::mat4 projectionM = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-		glm::mat4 viewM = camera.GetViewMatrix();
-		modelShader.setMat4("projection", projectionM);
-		modelShader.setMat4("view", viewM);
-
-		// render the loaded model
-		glm::mat4 modelM = glm::mat4(1.0f);
-		modelM = glm::translate(modelM, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-		modelM = glm::scale(modelM, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
-		modelShader.setMat4("model", modelM);
-		ourModel.Draw(modelShader);
 
 #pragma endregion
 
@@ -721,20 +802,27 @@ int main(void)
 		myShader.setInt("material.diffuse", 0);
 		myShader.setInt("material.specular", 1);
 		myShader.setFloat("material.shininess", 256.0f);
+		myShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture1);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, specularMap);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE2, depthMap);
 		myShader.setVec3("Color", Color);
 		myShader.setVec3("viewPos", camera.Position);
+		myShader.setMat4("view", viewM);
+		myShader.setMat4("projection", projectionM);
 
 		HandleLights(dirLightOn, pointLightOn, myShader, lightPos, ambientColor, diffuseColor);
+		(shadows) ? myShader.setBool("shadowsOn", shadows) : myShader.setBool("shadowsOn", shadows);
+		
 
+	
 		//instances
-		glm::mat4* modelMatrices;
 		modelMatrices = new glm::mat4[amount * amount];
 
-		for (size_t k = 0; k < 1; k++)
+		for (size_t k = 0; k < 10; k++)
 		{
 			for (size_t i = 0; i < amount; i++)
 			{
@@ -743,16 +831,15 @@ int main(void)
 					glm::mat4 model = glm::mat4(1.0f);
 
 					noiseX = { myPNoise.noise(i + cubePosX,
-						k + cubePosY * 10 * sin((float)glfwGetTime()) * speedMultiplier,
-						j + cubePosZ) };
+						k + cubePosY ,
+						j + cubePosZ) * (10 * sin((float)glfwGetTime()) * noiseMult) };
 
-					model = glm::translate(model, glm::vec3(i + cubePosX, k + noiseX, j + cubePosZ));
+					model = glm::translate(model, glm::vec3(i + cubePosX, (k + cubePosY) + noiseX, j + cubePosZ));
 					// 4. now add to list of matrices
-					//model = glm::rotate(model, (float)glfwGetTime() * speedRotation * speedMultiplier * glm::sin(glm::radians(50.0f)), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::translate(model, glm::vec3(cubePosX, cubePosY, cubePosZ));;
-
+					model = glm::rotate(model, (float)glfwGetTime() * speedRotation * speedMultiplier * glm::sin(glm::radians(50.0f)), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::translate(model, glm::vec3(cubePosX, cubePosY, cubePosZ));;
+					myShader.use();
 					modelMatrices[instanceID] = model;
 					myShader.setMat4("model[" + std::to_string(instanceID) + "]", model);
-
 					instanceID++;
 				}
 			}
@@ -760,14 +847,14 @@ int main(void)
 			vao.Bind();
 			glDrawArraysInstanced(GL_TRIANGLES, 0, 36, amount * amount);
 
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			//glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0, amount * amount);
 		}
 		//glDrawElementsInstanced(GL_TRIANGLES,36,GL_UNSIGNED_INT,0,amount);
 		//glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, indices.data());
-
 		glBindVertexArray(0);
+
 #pragma endregion
 
 #pragma region Cubemap
@@ -789,6 +876,33 @@ int main(void)
 
 #pragma endregion
 
+#pragma region ModelRegion
+
+		
+		if (ourModel.isLoaded)
+		{
+			// don't forget to enable shader before setting uniforms
+			modelShader.use();
+			modelShader.setVec3("viewPos", camera.Position);
+			modelShader.setVec3("dirLight.direction", -lightPos);
+			modelShader.setVec3("dirLight.ambient", ambientColor);
+			modelShader.setVec3("dirLight.diffuse", glm::vec3(1.0f));
+			modelShader.setVec3("dirLight.specular", glm::vec3(.5f));
+			// view/projection transformations
+
+			modelShader.setMat4("projection", projectionM);
+			modelShader.setMat4("view", viewM);
+
+			// render the loaded model
+			glm::mat4 modelM = glm::mat4(1.0f);
+			modelM = glm::translate(modelM, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+			modelM = glm::scale(modelM, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+			modelShader.setMat4("model", modelM);
+			ourModel.Draw(modelShader);
+		}
+
+
+#pragma endregion
 
 #pragma region frambebuffersTest
 
@@ -813,7 +927,6 @@ int main(void)
 
 
 #pragma endregion
-
 
 #pragma region Bloom render
 
@@ -853,11 +966,46 @@ int main(void)
 			finalBloomShader.setBool("hdr", HDR);
 			renderQuad();
 
-			std::cout << "bloom: " << (bloom ? "on" : "off") << "| exposure: " << exposure << std::endl;
+			//std::cout << "bloom: " << (bloom ? "on" : "off") << "| exposure: " << exposure << std::endl;
 			//clear all relevant buffers
 		}
 
 
+
+#pragma endregion
+
+#pragma region Gbuffer
+
+
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_2D, gPosition);
+		//glActiveTexture(GL_TEXTURE1);
+		//glBindTexture(GL_TEXTURE_2D, gNormal);
+		//glActiveTexture(GL_TEXTURE2);
+		//glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+		//// also send light relevant uniforms
+		//gBufferLightPassShader.use();
+		//for (unsigned int i = 0; i < lightPositions.size(); i++)
+		//{
+		//	gBufferLightPassShader.setVec3("lights[" + std::to_string(i) + "].Position", lightPositions[i]);
+		//	gBufferLightPassShader.setVec3("lights[" + std::to_string(i) + "].Color", lightColors[i]);
+		//	// update attenuation parameters and calculate radius
+		//	const float linear = 0.7f;
+		//	const float quadratic = 1.8f;
+		//	gBufferLightPassShader.setFloat("lights[" + std::to_string(i) + "].Linear", linear);
+		//	gBufferLightPassShader.setFloat("lights[" + std::to_string(i) + "].Quadratic", quadratic);
+		//}
+		//gBufferLightPassShader.setVec3("viewPos", camera.Position);
+		//renderQuad();
+		//glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
+		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+		//// blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.
+		//// the internal formats are implementation defined. This works on all of my systems, but if it doesn't on yours you'll likely have to write to the 		
+		//// depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
+		//glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 #pragma endregion
 
@@ -893,6 +1041,7 @@ int main(void)
 					ImGui::SetTooltip("%.3f", values[i]);
 				ImGui::PopStyleColor(4);
 				ImGui::PopID();
+				ImGui::Spacing();
 			}
 
 			ImGui::PopID();
@@ -911,6 +1060,8 @@ int main(void)
 			ImGui::PopID();
 			ImGui::PopStyleVar();
 			ImGui::TreePop();
+			ImGui::Spacing();
+
 		}
 
 		if (ImGui::TreeNode("Cube Movement"))
@@ -931,6 +1082,10 @@ int main(void)
 			ImGui::VSliderFloat("##int2", ImVec2(18, 160), &_valueZ, -10, 10);
 			ImGui::SameLine();
 			cubePosZ = _valueZ;
+			static float myNoiseMult = 0;
+			ImGui::VSliderFloat("##int3", ImVec2(18, 160), &myNoiseMult, -10, 10);
+			ImGui::SameLine();
+			noiseMult= myNoiseMult;
 
 
 			ImGui::PushID("set1");
@@ -940,6 +1095,8 @@ int main(void)
 			ImGui::PopID();
 			ImGui::PopStyleVar();
 			ImGui::TreePop();
+			ImGui::Spacing();
+
 		}
 
 
@@ -954,6 +1111,8 @@ int main(void)
 
 			ImGui::PopStyleVar();
 			ImGui::TreePop();
+			ImGui::Spacing();
+
 		}
 
 		if (ImGui::TreeNode("light Movement"))
@@ -983,12 +1142,14 @@ int main(void)
 			ImGui::PopID();
 			ImGui::PopStyleVar();
 			ImGui::TreePop();
+			ImGui::Spacing();
+
 		}
 		if (ImGui::TreeNode("Light Settings"))
 		{
 			// Combo Boxes are also called "Dropdown" in other systems
 			// Expose flags as checkbox for the demo
-			static ImGuiComboFlags flags, flags2, flags3, flags4, flags5 = 0;
+			static ImGuiComboFlags flags, flags2, flags3, flags4, flags5, flags6 = 1;
 
 
 			ImGui::CheckboxFlags("Directional light", &flags, ImGuiComboFlags_PopupAlignLeft);
@@ -996,6 +1157,8 @@ int main(void)
 			ImGui::CheckboxFlags("Point light", &flags3, ImGuiComboFlags_PopupAlignLeft);
 			ImGui::CheckboxFlags("HRD", &flags4, ImGuiComboFlags_PopupAlignLeft);
 			ImGui::CheckboxFlags("BLOOM", &flags5, ImGuiComboFlags_PopupAlignLeft);
+			ImGui::CheckboxFlags("Shadows", &flags6, ImGuiComboFlags_PopupAlignLeft);
+
 
 
 
@@ -1041,9 +1204,63 @@ int main(void)
 			pointLightOn = flags3;
 			HDR = flags4;
 			bloom = flags5;
+			shadows = flags6;
 
 
 			ImGui::TreePop();
+			ImGui::Spacing();
+
+		}
+			
+		
+
+
+		if (ImGui::TreeNode("Model Loader"))
+		{
+			struct TextFilters
+			{
+				// Modify character input by altering 'data->Eventchar' (ImGuiInputTextFlags_CallbackCharFilter callback)
+				static int FilterCasingSwap(ImGuiInputTextCallbackData* data)
+				{
+					if (data->EventChar >= 'a' && data->EventChar <= 'z') { data->EventChar -= 'a' - 'A'; } // Lowercase becomes uppercase
+					else if (data->EventChar >= 'A' && data->EventChar <= 'Z') { data->EventChar += 'a' - 'A'; } // Uppercase becomes lowercase
+					return 0;
+				}
+
+				// Return 0 (pass) if the character is 'i' or 'm' or 'g' or 'u' or 'i', otherwise return 1 (filter out)
+				static int FilterImGuiLetters(ImGuiInputTextCallbackData* data)
+				{
+					if (data->EventChar < 256 && strchr("imgui", (char)data->EventChar))
+						return 0;
+					return 1;
+				}
+			};
+
+			static char buf1[400] = ""; ImGui::InputText("Model path here:", buf1, 400);
+			// Save/Revert button
+			static ImGuiComboFlags flipUvs = 1;
+			ImGui::CheckboxFlags("Flip UVS", &flipUvs, ImGuiComboFlags_PopupAlignLeft);
+			if (ImGui::Button("Load")) {
+				//"Models/BackpackModel/backpack.obj"
+				std::string strPath = buf1;
+				if (flipUvs)
+				{
+					stbi_set_flip_vertically_on_load(true);
+					loadModelAsync(strPath, ourModel);
+					stbi_set_flip_vertically_on_load(false);
+				}
+				else
+				{
+					loadModelAsync(strPath, ourModel);
+				}
+
+			}
+			
+				
+			ImGui::SameLine();
+			ImGui::TreePop();
+			ImGui::Spacing();
+
 		}
 		ImGui::ShowDemoWindow();
 
@@ -1073,6 +1290,15 @@ int main(void)
 	lightVBO.~VBO();
 	return 0;
 }
+ void loadModelAsync(std::string& path, Model& model) {
+
+	 model.StartModel(path);
+	 model.isLoaded = true;
+}
+ 
+
+
+
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
@@ -1156,7 +1382,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
-unsigned int LoadTexture(char const * path) {
+
+unsigned int LoadTexture(char const* path) {
 
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
@@ -1312,6 +1539,79 @@ void HandleLights(bool& dirLight, bool& pointLights, ShaderClass& myShader, glm:
 	}
 
 }
+unsigned int cubeVAO = 0;
+unsigned int cubeVBO = 0;
+void renderCube()
+{
+	// initialize (if necessary)
+	if (cubeVAO == 0)
+	{
+		float vertices[] = {
+			// back face
+			-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+			 1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+			 1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right         
+			 1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+			-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+			-1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
+			// front face
+			-1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+			 1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // bottom-right
+			 1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+			 1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+			-1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // top-left
+			-1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+			// left face
+			-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+			-1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left
+			-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+			-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+			-1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+			-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+			// right face
+			 1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+			 1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+			 1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right         
+			 1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+			 1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+			 1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left     
+			 // bottom face
+			 -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+			  1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left
+			  1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+			  1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+			 -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+			 -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+			 // top face
+			 -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+			  1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+			  1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right     
+			  1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+			 -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+			 -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left        
+		};
+		glGenVertexArrays(1, &cubeVAO);
+		glGenBuffers(1, &cubeVBO);
+		// fill buffer
+		glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		// link vertex attributes
+		glBindVertexArray(cubeVAO);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
+	// render Cube
+	glBindVertexArray(cubeVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+}
+
 
 unsigned int quadVAO = 0;
 unsigned int quadVBO;

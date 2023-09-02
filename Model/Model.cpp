@@ -1,21 +1,33 @@
 #include "Model.h"
 
+
+Model::Model()
+{
+    isLoaded = false;
+    gammaCorrection = false;
+}
+
 void Model::Draw(ShaderClass& shader)
 {
     shader.setInt("matSize", meshes.size());
-
+    if (!isLoaded)
+    {
+        std::cout << "preparing model" << "\n";
+        return;
+    }
     for (unsigned int i = 0; i < meshes.size(); i++) {
 
-        meshes[i].Draw(shader,i);
+        meshes[i].Draw(shader, i);
     }
+
 
 }
 
-
 void Model::loadModel(std::string path)
 {
+
     Assimp::Importer import;
-    const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace );
+    const aiScene * scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
@@ -25,6 +37,8 @@ void Model::loadModel(std::string path)
     directory = path.substr(0, path.find_last_of('/'));
 
     processNode(scene->mRootNode, scene);
+
+
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene)
@@ -42,7 +56,7 @@ void Model::processNode(aiNode* node, const aiScene* scene)
 
     }
 
-    
+
 }
 
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
@@ -55,7 +69,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     {
         Vertex vertex;
         // process vertex positions, normals and texture coordinates
-  
+
         glm::vec3 vector;
         vector.x = mesh->mVertices[i].x;
         vector.y = mesh->mVertices[i].y;
@@ -77,7 +91,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
             vec.y = mesh->mTextureCoords[0][i].y;
             vertex.TexCoords = vec;
             // tangent
-            vector.x =mesh->mTangents[i].x;
+            vector.x = mesh->mTangents[i].x;
             vector.y = mesh->mTangents[i].y;
             vector.z = mesh->mTangents[i].z;
             vertex.Tangent = vector;
@@ -100,25 +114,24 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
             indices.push_back(face.mIndices[j]);
     }
 
-        aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-        textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-        // 2. specular maps
-        std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-        textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-        // 3. normal maps
-        std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
-        textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-        // 4. height maps
-        std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
-        textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
-        //insertmaterials in fragment shader  with a method in the mesh
+    aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+    std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+    textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+    //2. specular maps
+    std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+    textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+    //3. normal maps
+    std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+    textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+    //4. height maps
+    std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
+    textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+    //insertmaterials in fragment shader  with a method in the mesh
+    Material materials = loadMaterial(material);
 
-        Material materials=loadMaterial(material);
-        
-        //std::cout << materials.Diffuse.x<< " ," << materials.Diffuse.y << " ," << materials.Diffuse.z << "\n";
+    //std::cout << materials.Diffuse.x<< " ," << materials.Diffuse.y << " ," << materials.Diffuse.z << "\n";
 
-        
+
     return Mesh(vertices, indices, textures, materials);
 }
 
@@ -126,7 +139,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 {
     std::vector<Texture> textures;
 
-    
+
     for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
     {
         aiString str;
@@ -144,8 +157,8 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
         if (!skip)
         {   // if texture hasn't been loaded already, load it
             Texture texture;
-            texture.id = TextureFromFile(str.C_Str(), this->directory,false);
-            texture.type = typeName; 
+            texture.id = TextureFromFile(str.C_Str(), this->directory, false);
+            texture.type = typeName;
             texture.path = str.C_Str();
             textures.push_back(texture);
             textures_loaded.push_back(texture); // add to loaded textures
@@ -154,7 +167,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
     return textures;
 }
 
-unsigned int Model::TextureFromFile(const char* path, const std::string& directory,bool gamma)
+unsigned int Model::TextureFromFile(const char* path, const std::string& directory, bool gamma)
 {
     std::string filename = std::string(path);
     filename = directory + '/' + filename;
@@ -190,7 +203,7 @@ unsigned int Model::TextureFromFile(const char* path, const std::string& directo
         std::cout << "Texture failed to load at path: " << path << std::endl;
         stbi_image_free(data);
     }
-    std::cout<< textureID << "\n";
+    std::cout << textureID << "\n";
     return textureID;
 
 
@@ -217,6 +230,39 @@ Material Model::loadMaterial(aiMaterial* mat)
     material.Shininess = shininess;
 
     return material;
+}
+
+void Model::loadSceneAsync(std::string path, std::string& directory, bool& isLoaded, std::mutex& mutex)
+{
+    Assimp::Importer import;
+
+    auto sceneLoader = ([path, &directory, &isLoaded, &mutex, &import]()->const aiScene* {
+        std::lock_guard<std::mutex> lock(mutex);
+        const aiScene * scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+        {
+            std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
+            return nullptr;
+        }
+        directory = path.substr(0, path.find_last_of('/'));
+
+        });
+
+    std::future<const aiScene*> sceneFuture = std::async(sceneLoader);
+    auto futureStatus = sceneFuture.wait_for(std::chrono::milliseconds(1));
+    while (futureStatus != std::future_status::ready)
+    {
+        futureStatus = sceneFuture.wait_for(std::chrono::milliseconds(1));
+    }
+    if (sceneFuture.valid())
+    {
+        std::cout << "Done" << "\n";
+        isLoaded = true;
+        const aiScene* scene = import.GetOrphanedScene();
+        this->processNode(scene->mRootNode, scene);
+    }
+
+
 }
 
 
