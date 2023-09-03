@@ -4,15 +4,14 @@ Simple 3d game engine where I implement some off the basic concepts of opengl an
 The main features are:
 
 - Async model loading.
-- HDR
-- Bloom
-- Shadows
-- Imgui implementation
-- instantiating objects
-- G-Frame buffer to render the light (not used in order to test other light techniques)
+- HDR.
+- Bloom.
+- Shadows.
+- Imgui implementation.
+- instantiating objects.
+- G-Frame buffer to render the light (not used in order to test other light techniques).
 
 Issues:
+-Only supported for visual studio, there is not premake or cmake implemented.
 
--Only supported for visual study, there is not premake or cmake implemented
-
--Some lib files are not downloaded with the project (GLEW lib files)
+-Some lib files are not downloaded with the project (GLEW lib files).
