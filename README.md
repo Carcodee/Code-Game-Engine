@@ -12,6 +12,7 @@ The main features are:
 - G-Frame buffer to render the light (not used in order to test other light techniques).
 
 Issues:
+
 -Only supported for visual studio, there is not premake or cmake implemented.
 
 -Some lib files are not downloaded with the project (GLEW lib files).
