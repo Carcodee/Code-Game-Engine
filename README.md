@@ -13,4 +13,4 @@ The main features are:
 
 Issues:
 -Only supported for visual study, there is not premake or cmake implemented
--Some lib files are not downloaded with the project (glfw lib files)
+-Some lib files are not downloaded with the project (GLEW lib files)
