@@ -17,7 +17,7 @@ class Model
 public:
     Model();
     void StartModel(std::string const& path ,bool gamma = false) {
-        loadSceneAsync(path,directory,isLoaded,modelMutex);
+       myFuture = loadSceneAsync(path,directory,isLoaded,modelMutex);
         //loadModel(path);
     }
     void Draw(ShaderClass& shader);
@@ -30,13 +30,14 @@ private:
     std::vector<Material> materials;
     std::string directory;
     bool gammaCorrection;
-
+    std::future<const aiScene*> myFuture;
+    Assimp::Importer import;
     void loadModel(std::string path);
     void processNode(aiNode* node, const aiScene* scene);
     Mesh processMesh(aiMesh* mesh, const aiScene* scene);
     std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
     unsigned int TextureFromFile(const char* path, const std::string& directory,bool gamma);
     Material loadMaterial(aiMaterial* mat);
-    void loadSceneAsync(std::string path, std::string& directory, bool& isLoaded, std::mutex& mutex);
+    std::future<const aiScene*> loadSceneAsync(std::string path, std::string& directory, bool& isLoaded, std::mutex& mutex);
     
 };

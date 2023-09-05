@@ -1,5 +1,6 @@
 #include "Mesh.h"
 
+
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, Material mat)
 {
     this->vertices = vertices;
@@ -36,9 +37,13 @@ void Mesh::Draw(ShaderClass& shader, int mIndex)
         // and finally bind the texture
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
+    int normalMapping = (normalNr > 1) ? 1 : 0;
+    int specularMapping = (specularNr > 1) ? 1 : 0;
+
     shader.use();
     shader.setInt("meshCount", mIndex);
-
+    shader.setInt("normalMapping", normalMapping);
+    shader.setInt("specularMapping", specularMapping);
     shader.setVec3("materials[" + std::to_string(mIndex) + "].diffuse", mat.Diffuse);
     shader.setVec3("materials[" + std::to_string(mIndex) + "].specular", mat.Specular);
     shader.setVec3("materials[" + std::to_string(mIndex) + "].ambient", mat.Ambient);

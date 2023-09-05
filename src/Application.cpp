@@ -53,7 +53,7 @@ const unsigned int SCR_HEIGHT = 600;
 bool bloomKeyPressed = true;
 float exposure = 1.0f;
 bool dirLightOn = true, pointLightOn = true, spotLightOn = true, HDR = true,bloom = true, useGbuffer = false, shadows = true;
-bool loadModel= false;
+bool flipUVS= false;
 // camera
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -553,6 +553,32 @@ int main(void)
 	
 #pragma endregion
 
+
+		unsigned int finalFbo;
+		glGenFramebuffers(1, &finalFbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, finalFbo);
+
+		unsigned int finalFboText;
+		glGenTextures(1, &finalFboText);
+		glBindTexture(GL_TEXTURE_2D, finalFboText);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, finalFboText, 0);
+
+		//render buffer obj
+		unsigned int rboFinal;
+		glGenRenderbuffers(1, &rboFinal);
+		glBindRenderbuffer(GL_RENDERBUFFER, rboFinal);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboFinal); // now actually attach it
+		// now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		fbShader.setInt("screenTexture", 0);
+
 #pragma region Bloom
 
 
@@ -691,7 +717,7 @@ int main(void)
 
 		float near_plane = 1.0f, far_plane = 7.5f;
 		glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-
+		//
 		glm::mat4 lightView = glm::lookAt(lightPos,
 			glm::vec3(0.0f, 0.0f, 0.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f));
@@ -712,6 +738,7 @@ int main(void)
 
 
 #pragma region ShadowsRegion
+
 		if (shadows)
 		{
 			shadowShaderDepth.use();
@@ -760,8 +787,9 @@ int main(void)
 
 #pragma endregion
 
-		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 
+
+		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 		(bloom) ? glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO) : glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		//glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 		// make sure we clear the framebuffer's content
@@ -884,7 +912,7 @@ int main(void)
 			// don't forget to enable shader before setting uniforms
 			modelShader.use();
 			modelShader.setVec3("viewPos", camera.Position);
-			modelShader.setVec3("dirLight.direction", -lightPos);
+			modelShader.setVec3("lightPos", -lightPos);
 			modelShader.setVec3("dirLight.ambient", ambientColor);
 			modelShader.setVec3("dirLight.diffuse", glm::vec3(1.0f));
 			modelShader.setVec3("dirLight.specular", glm::vec3(.5f));
@@ -898,7 +926,17 @@ int main(void)
 			modelM = glm::translate(modelM, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
 			modelM = glm::scale(modelM, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
 			modelShader.setMat4("model", modelM);
+		}
+		if (flipUVS)
+		{
+			stbi_set_flip_vertically_on_load(true);
 			ourModel.Draw(modelShader);
+			stbi_set_flip_vertically_on_load(false);
+		}
+		else
+		{
+			ourModel.Draw(modelShader);
+
 		}
 
 
@@ -954,6 +992,8 @@ int main(void)
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+			//glBindFramebuffer(GL_FRAMEBUFFER, finalFbo);
+
 			glDisable(GL_DEPTH_TEST);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			finalBloomShader.use();
@@ -966,8 +1006,12 @@ int main(void)
 			finalBloomShader.setBool("hdr", HDR);
 			renderQuad();
 
+			//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 			//std::cout << "bloom: " << (bloom ? "on" : "off") << "| exposure: " << exposure << std::endl;
 			//clear all relevant buffers
+
+
 		}
 
 
@@ -1010,10 +1054,12 @@ int main(void)
 #pragma endregion
 
 
+
 		glEnd();
 
 
 #pragma region imgui
+
 
 		//IMGUI
 		if (ImGui::TreeNode("Cube Speed"))
@@ -1242,16 +1288,17 @@ int main(void)
 			ImGui::CheckboxFlags("Flip UVS", &flipUvs, ImGuiComboFlags_PopupAlignLeft);
 			if (ImGui::Button("Load")) {
 				//"Models/BackpackModel/backpack.obj"
-				std::string strPath = buf1;
+				//Models/pizzaCar/myPizzaMovil.obj
+				std::string strPath = "Models/pizzaCar/myPizzaMovil.obj";
 				if (flipUvs)
 				{
-					stbi_set_flip_vertically_on_load(true);
-					loadModelAsync(strPath, ourModel);
-					stbi_set_flip_vertically_on_load(false);
+					flipUVS = true;
+					ourModel.StartModel(strPath);
 				}
 				else
 				{
-					loadModelAsync(strPath, ourModel);
+					flipUVS = false;
+					ourModel.StartModel(strPath);
 				}
 
 			}
@@ -1262,8 +1309,23 @@ int main(void)
 			ImGui::Spacing();
 
 		}
+
+
+
 		ImGui::ShowDemoWindow();
 
+		ImGui::Begin("Scene");
+		ImGui::SetWindowSize(ImVec2(SCR_WIDTH, SCR_HEIGHT));
+		ImGui::SetWindowPos(ImVec2(0, 0));
+		
+		//maintain the window the same size of the glfw window
+
+		ImGui::GetWindowDrawList()->AddImage(
+			(void*)finalFboText,
+			ImVec2(SCR_WIDTH,SCR_HEIGHT),
+			ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::End();
+		
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -1293,7 +1355,7 @@ int main(void)
  void loadModelAsync(std::string& path, Model& model) {
 
 	 model.StartModel(path);
-	 model.isLoaded = true;
+	 //model.isLoaded= true;
 }
  
 

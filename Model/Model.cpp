@@ -1,5 +1,6 @@
 #include "Model.h"
 
+#define GET_VARIABLE_NAME(Variable) (#Variable)
 
 Model::Model()
 {
@@ -9,24 +10,32 @@ Model::Model()
 
 void Model::Draw(ShaderClass& shader)
 {
-    shader.setInt("matSize", meshes.size());
     if (!isLoaded)
     {
-        std::cout << "preparing model" << "\n";
+        if (myFuture.valid())
+        {
+            const aiScene* scene = myFuture.get();
+            processNode(scene->mRootNode, scene);
+            isLoaded = true;
+        }
+
         return;
     }
-    for (unsigned int i = 0; i < meshes.size(); i++) {
+    else
+    {
+        shader.setInt("matSize", meshes.size());
+        for (unsigned int i = 0; i < meshes.size(); i++) {
 
-        meshes[i].Draw(shader, i);
+            meshes[i].Draw(shader, i);
+        }
     }
-
 
 }
 
 void Model::loadModel(std::string path)
 {
 
-    Assimp::Importer import;
+    import;
     const aiScene * scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
@@ -35,6 +44,7 @@ void Model::loadModel(std::string path)
         return;
     }
     directory = path.substr(0, path.find_last_of('/'));
+
 
     processNode(scene->mRootNode, scene);
 
@@ -115,17 +125,23 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     }
 
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+    std::string errorTexture = "errorTexture::UNABLE TO READ THE TEXTURE= ";
+
     std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
     textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+    (diffuseMaps.size() == 0) ? std::cout << errorTexture+GET_VARIABLE_NAME(diffuseMaps) << "\n" : std::cout << "diffuse ok" << "\n";
     //2. specular maps
     std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
     textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+    (specularMaps.size() == 0) ? std::cout << errorTexture +GET_VARIABLE_NAME(specularMaps) << "\n" : std::cout << "specular ok" << "\n";
     //3. normal maps
     std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
     textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+    (normalMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(normalMaps) << "\n" : std::cout << "normalmap ok" << "\n";
     //4. height maps
     std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
     textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+    (heightMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(heightMaps) << "\n" : std::cout << "heightmap ok" << "\n";
     //insertmaterials in fragment shader  with a method in the mesh
     Material materials = loadMaterial(material);
 
@@ -203,7 +219,6 @@ unsigned int Model::TextureFromFile(const char* path, const std::string& directo
         std::cout << "Texture failed to load at path: " << path << std::endl;
         stbi_image_free(data);
     }
-    std::cout << textureID << "\n";
     return textureID;
 
 
@@ -232,11 +247,11 @@ Material Model::loadMaterial(aiMaterial* mat)
     return material;
 }
 
-void Model::loadSceneAsync(std::string path, std::string& directory, bool& isLoaded, std::mutex& mutex)
+std::future<const aiScene*> Model::loadSceneAsync(std::string path, std::string& directory, bool& isLoaded, std::mutex& mutex)
 {
-    Assimp::Importer import;
 
-    auto sceneLoader = ([path, &directory, &isLoaded, &mutex, &import]()->const aiScene* {
+
+    auto sceneLoader = ([path, &directory, &isLoaded, &mutex, this]()->const aiScene* {
         std::lock_guard<std::mutex> lock(mutex);
         const aiScene * scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
@@ -245,22 +260,19 @@ void Model::loadSceneAsync(std::string path, std::string& directory, bool& isLoa
             return nullptr;
         }
         directory = path.substr(0, path.find_last_of('/'));
-
+        return scene;
         });
 
-    std::future<const aiScene*> sceneFuture = std::async(sceneLoader);
-    auto futureStatus = sceneFuture.wait_for(std::chrono::milliseconds(1));
-    while (futureStatus != std::future_status::ready)
-    {
-        futureStatus = sceneFuture.wait_for(std::chrono::milliseconds(1));
-    }
-    if (sceneFuture.valid())
-    {
-        std::cout << "Done" << "\n";
-        isLoaded = true;
-        const aiScene* scene = import.GetOrphanedScene();
-        this->processNode(scene->mRootNode, scene);
-    }
+    std::future <const aiScene*> sceneFuture = std::async(std::launch::async,sceneLoader);
+
+    return sceneFuture;
+    //if (sceneFuture.valid())
+    //{
+    //    std::cout << "Done" << "\n";
+    //    isLoaded = true;
+    //    const aiScene* scene = import.GetOrphanedScene();
+    //    this->processNode(scene->mRootNode, scene);
+    //}
 
 
 }
