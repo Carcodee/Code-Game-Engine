@@ -139,7 +139,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
     (normalMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(normalMaps) << "\n" : std::cout << "normalmap ok" << "\n";
     //4. height maps
-    std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
+    std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_DISPLACEMENT, "texture_height");
     textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
     (heightMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(heightMaps) << "\n" : std::cout << "heightmap ok" << "\n";
     //insertmaterials in fragment shader  with a method in the mesh

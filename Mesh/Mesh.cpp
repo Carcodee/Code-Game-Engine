@@ -39,11 +39,14 @@ void Mesh::Draw(ShaderClass& shader, int mIndex)
     }
     int normalMapping = (normalNr > 1) ? 1 : 0;
     int specularMapping = (specularNr > 1) ? 1 : 0;
+    int heightmapping= (heightNr > 1) ? 1 : 0;
 
     shader.use();
     shader.setInt("meshCount", mIndex);
     shader.setInt("normalMapping", normalMapping);
     shader.setInt("specularMapping", specularMapping);
+    shader.setInt("heighmap", 1);
+
     shader.setVec3("materials[" + std::to_string(mIndex) + "].diffuse", mat.Diffuse);
     shader.setVec3("materials[" + std::to_string(mIndex) + "].specular", mat.Specular);
     shader.setVec3("materials[" + std::to_string(mIndex) + "].ambient", mat.Ambient);

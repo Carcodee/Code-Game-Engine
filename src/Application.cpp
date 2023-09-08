@@ -54,6 +54,7 @@ bool bloomKeyPressed = true;
 float exposure = 1.0f;
 bool dirLightOn = true, pointLightOn = true, spotLightOn = true, HDR = true,bloom = true, useGbuffer = false, shadows = true;
 bool flipUVS= false;
+float heightScaleFactor = 0.1f;
 // camera
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -313,7 +314,7 @@ int main(void)
 	texture1= LoadTexture("C:/Users/carlo/OneDrive/Documents/GitHub/OpenglCarlos/ImagesProgramming/container2.png");
 	specularMap = LoadTexture("C:/Users/carlo/OneDrive/Documents/GitHub/OpenglCarlos/ImagesProgramming/lighting_maps_specular_color.png");
 
-	
+
 
 	//Cubemap
 
@@ -370,7 +371,6 @@ int main(void)
 
 	skyboxVBO.BufferData(skyboxVertices.size(), skyboxVertices.data());
 	
-
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
@@ -917,9 +917,9 @@ int main(void)
 			modelShader.setVec3("dirLight.diffuse", glm::vec3(1.0f));
 			modelShader.setVec3("dirLight.specular", glm::vec3(.5f));
 			// view/projection transformations
-
 			modelShader.setMat4("projection", projectionM);
 			modelShader.setMat4("view", viewM);
+			modelShader.setFloat("height_scale", heightScaleFactor);
 
 			// render the loaded model
 			glm::mat4 modelM = glm::mat4(1.0f);
@@ -1191,6 +1191,23 @@ int main(void)
 			ImGui::Spacing();
 
 		}
+		if (ImGui::TreeNode("Height Mapping"))
+		{
+			const float spacing = 4;
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing, spacing));
+
+			static float myValue = 0.1f;
+			ImGui::VSliderFloat("##int", ImVec2(18, 160),&myValue, 0.0,1.0f);
+			ImGui::SameLine();
+			heightScaleFactor = myValue;
+
+			ImGui::PushID("set2");
+			ImGui::PopID();
+			ImGui::PopStyleVar();
+			ImGui::TreePop();
+			ImGui::Spacing();
+
+		}
 		if (ImGui::TreeNode("Light Settings"))
 		{
 			// Combo Boxes are also called "Dropdown" in other systems
@@ -1289,7 +1306,7 @@ int main(void)
 			if (ImGui::Button("Load")) {
 				//"Models/BackpackModel/backpack.obj"
 				//Models/pizzaCar/myPizzaMovil.obj
-				std::string strPath = "Models/pizzaCar/myPizzaMovil.obj";
+				std::string strPath = "Models/crazyrock/crazyplane.obj";
 				if (flipUvs)
 				{
 					flipUVS = true;
@@ -1316,14 +1333,15 @@ int main(void)
 
 		ImGui::Begin("Scene");
 		ImGui::SetWindowSize(ImVec2(SCR_WIDTH, SCR_HEIGHT));
-		ImGui::SetWindowPos(ImVec2(0, 0));
-		
+
+		//ImGui::SetNextWindowSize(ImVec2(SCR_WIDTH, SCR_HEIGHT));
 		//maintain the window the same size of the glfw window
 
 		ImGui::GetWindowDrawList()->AddImage(
 			(void*)finalFboText,
 			ImVec2(SCR_WIDTH,SCR_HEIGHT),
 			ImVec2(0, 1), ImVec2(1, 0));
+
 		ImGui::End();
 		
 		ImGui::Render();
