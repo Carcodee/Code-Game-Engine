@@ -154,6 +154,8 @@
     <ClCompile Include="Camera\CameraHandler.cpp" />
     <ClCompile Include="ClassesOpengl\EBO.cpp" />
     <ClCompile Include="ClassesOpengl\GBufferClass.cpp" />
+    <ClCompile Include="ClassesOpengl\Framebuffer.cpp" />
+    <ClCompile Include="ClassesOpengl\ImguiSettings\ImguiRender.cpp" />
     <ClCompile Include="Includes\imgui\imgui.cpp" />
     <ClCompile Include="Includes\imgui\imgui_demo.cpp" />
     <ClCompile Include="Includes\imgui\imgui_draw.cpp" />
@@ -164,6 +166,7 @@
     <ClCompile Include="Includes\Noise\PerlinNoise.cpp" />
     <ClCompile Include="Mesh\Mesh.cpp" />
     <ClCompile Include="Model\Model.cpp" />
+    <ClCompile Include="ClassesOpengl\Renderer\Renderer.cpp" />
     <ClCompile Include="Shaders\ShaderClass.cpp" />
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="ClassesOpengl\VAO.cpp" />
@@ -173,9 +176,12 @@
   <ItemGroup>
     <ClInclude Include="Camera\CameraHandler.h" />
     <ClInclude Include="ClassesOpengl\EBO.h" />
+    <ClInclude Include="ClassesOpengl\ImguiSettings\MyImguiSettings.h" />
     <ClInclude Include="ClassesOpengl\VAO.h" />
     <ClInclude Include="ClassesOpengl\VBO.h" />
     <ClInclude Include="ClassesOpengl\GBufferClass.h" />
+    <ClInclude Include="ClassesOpengl\Framebuffer.h" />
+    <ClInclude Include="ClassesOpengl\ImguiSettings\ImguiRender.h" />
     <ClInclude Include="Includes\headers\headers.h" />
     <ClInclude Include="Includes\imgui\imconfig.h" />
     <ClInclude Include="Includes\imgui\imgui.h" />
@@ -190,6 +196,7 @@
     <ClInclude Include="Includes\OBJLoader\OBJ_Loader.h" />
     <ClInclude Include="Mesh\Mesh.h" />
     <ClInclude Include="Model\Model.h" />
+    <ClInclude Include="ClassesOpengl\Renderer\Renderer.h" />
     <ClInclude Include="Shaders\ShaderClass.h" />
     <ClInclude Include="Functions\Utility.h" />
   </ItemGroup>

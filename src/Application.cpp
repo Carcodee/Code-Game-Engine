@@ -1,7 +1,10 @@
+#pragma once
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+#include"../ClassesOpengl/ImguiSettings/ImguiRender.h"
+#include "../ClassesOpengl/ImguiSettings/MyImguiSettings.h"
 #include "headers/headers.h"
 #include "../Functions/Utility.h"
 
@@ -72,19 +75,7 @@ int main(void)
 	// tell GLFW to capture our mouse
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	//IMGUI
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-
-	ImGui::StyleColorsDark();
-
-	ImGui_ImplGlfw_InitForOpenGL(window , true);
-	ImGui_ImplOpenGL3_Init("#version 330");
-
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // Enable Keyboard Controls
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;    // Enable Gamepad Controlbs
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // Enable Docking
+	ImguiRender myImgui(window);
 
 	if (glewInit() != GLEW_OK)
 		std::cout << "Error!" << std::endl;
@@ -107,10 +98,7 @@ int main(void)
 	ShaderClass geometricBufferShader("Shaders/GBuffer.vert", "Shaders/GBuffer.frag");
 	ShaderClass gBufferLightPassShader("Shaders/LightPass.vert", "Shaders/LightPass.frag");
 	ShaderClass shadowShaderDepth("Shaders/ShadowMap.vert", "Shaders/ShadowMap.frag");
-	stbi_set_flip_vertically_on_load(true);
-	std::string str = "Models/BackpackModel/backpack.obj";
 
-	stbi_set_flip_vertically_on_load(false);
 
 	std::vector <GLfloat> cubeLightVertices = {
 			-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
@@ -159,47 +147,48 @@ int main(void)
 	};
 
 	std::vector <GLfloat> vertices = {
-	    -0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f, 0.0f,  0.0f, -1.0f,
-		 0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f, 0.0f,  0.0f, -1.0f,
-		 0.5f,  0.5f, -0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f, 0.0f,  0.0f, -1.0f,
-		 0.5f,  0.5f, -0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f, 0.0f,  0.0f, -1.0f,
-		-0.5f,  0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f, 0.0f,  0.0f, -1.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f, 0.0f,  0.0f, -1.0f,
+		   // positions          // colour     // texture       //normal 
+	    -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,  0.0f, -1.0f,
+		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,  0.0f, -1.0f,
+		 0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,  0.0f, -1.0f,
+		 0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,  0.0f, -1.0f,
+		-0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,  0.0f, -1.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,  0.0f, -1.0f,
+ 
+		-0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,  0.0f,  1.0f,
+		 0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,  0.0f,  1.0f,
+		 0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,  0.0f,  1.0f,
+		 0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,  0.0f,  1.0f,
+		-0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,  0.0f,  1.0f,
 
-		-0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f, 0.0f,  0.0f,  1.0f,
-		 0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f, 0.0f,  0.0f,  1.0f,
-		 0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f, 0.0f,  0.0f,  1.0f,
-		 0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f, 0.0f,  0.0f,  1.0f,
-		-0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f, 0.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f, 0.0f,  0.0f,  1.0f,
+		-0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
 
-		-0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f, -1.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,  0.0f,  0.0f,
 
-		 0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f, 1.0f,  0.0f,  0.0f,
-		 0.5f,  0.5f, -0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f, 1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f, 1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f, 1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f, 1.0f,  0.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f, 1.0f,  0.0f,  0.0f,
-
-		-0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f, 0.0f, -1.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 1.0f, 1.0f, 0.0f, -1.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f, 0.0f, -1.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f, 0.0f, -1.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f, 1.0f,0.0f,0.0f, 0.0f, 0.0f, 0.0f, -1.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f, 0.0f, -1.0f,  0.0f,
-
-		-0.5f,  0.5f, -0.5f, 1.0f,0.0f,0.0f, 0.0f, 1.0f, 0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f, -0.5f, 0.0f,1.0f,0.0f, 1.0f, 1.0f, 0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f, 0.0f,0.0f,1.0f, 1.0f, 0.0f, 0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f, 1.0f,0.0f,0.0f, 1.0f, 0.0f, 0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f, 0.0f,1.0f,0.0f, 0.0f, 0.0f, 0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f, 0.0f,0.0f,1.0f, 0.0f, 1.0f, 0.0f,  1.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f,  0.0f,
+ 
+		-0.5f,  0.5f, -0.5f, 1.0f, 0.0f,0.0f, 0.0f, 1.0f, 0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f, 0.0f, 1.0f,0.0f, 1.0f, 1.0f, 0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f, 0.0f, 0.0f,1.0f, 1.0f, 0.0f, 0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f, 1.0f, 0.0f,0.0f, 1.0f, 0.0f, 0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, 0.0f, 1.0f,0.0f, 0.0f, 0.0f, 0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f, 0.0f, 0.0f,1.0f, 0.0f, 1.0f, 0.0f,  1.0f,  0.0f,
 	};
 	 //index data
 	std::vector <GLuint> indices = {
@@ -512,30 +501,8 @@ int main(void)
 	
 #pragma endregion
 
-
-		unsigned int finalFbo;
-		glGenFramebuffers(1, &finalFbo);
-		glBindFramebuffer(GL_FRAMEBUFFER, finalFbo);
-
-		unsigned int finalFboText;
-		glGenTextures(1, &finalFboText);
-		glBindTexture(GL_TEXTURE_2D, finalFboText);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, finalFboText, 0);
-
-		//render buffer obj
-		unsigned int rboFinal;
-		glGenRenderbuffers(1, &rboFinal);
-		glBindRenderbuffer(GL_RENDERBUFFER, rboFinal);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboFinal); // now actually attach it
-		// now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-			std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+		Framebuffer finalFbo;
+		finalFbo.generateTexture(window);
 		fbShader.setInt("screenTexture", 0);
 
 #pragma region Bloom
@@ -645,9 +612,8 @@ int main(void)
 		
 		processInput(window);
 
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+		myImgui.NewFrame();
+
 
 		/* Render here */
 		// render
@@ -802,6 +768,7 @@ int main(void)
 		myShader.setMat4("projection", projectionM);
 
 		util::HandleLights(dirLightOn, pointLightOn, myShader, lightPos, ambientColor, diffuseColor);
+
 		(shadows) ? myShader.setBool("shadowsOn", shadows) : myShader.setBool("shadowsOn", shadows);
 		
 
@@ -832,7 +799,7 @@ int main(void)
 			}
 			instanceID = 0;
 			vao.Bind();
-			glDrawArraysInstanced(GL_TRIANGLES, 0, 36, amount * amount);
+			glDrawArraysInstanced(GL_TRIANGLES, 0, vertices.size(), amount* amount);
 
 			//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -951,7 +918,7 @@ int main(void)
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-			glBindFramebuffer(GL_FRAMEBUFFER, finalFbo);
+			finalFbo.Bind();
 
 			glDisable(GL_DEPTH_TEST);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -965,7 +932,7 @@ int main(void)
 			finalBloomShader.setBool("hdr", HDR);
 			util::renderQuad();
 
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			finalFbo.UnBind();
 
 			//std::cout << "bloom: " << (bloom ? "on" : "off") << "| exposure: " << exposure << std::endl;
 			//clear all relevant buffers
@@ -1019,292 +986,19 @@ int main(void)
 
 #pragma region imgui
 
-
-		//IMGUI
-		if (ImGui::TreeNode("Cube Speed"))
-		{
-			const float spacing = 4;
-			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing, spacing));
-
-			static int int_value = 1;
-			ImGui::VSliderInt("##int", ImVec2(18, 160), &int_value, 1, 10);
-			ImGui::SameLine();
-			speedMultiplier = int_value;
-			static float values[1] = { 0.0f };
-			speedRotation = values[0];
-			ImGui::PushID("set1");
-			for (int i = 0; i < 1; i++)
-			{
-				if (i > 0) ImGui::SameLine();
-				ImGui::PushID(i);
-				ImGui::PushStyleColor(ImGuiCol_FrameBg, (ImVec4)ImColor::HSV(i / 7.0f, 0.5f, 0.5f));
-				ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, (ImVec4)ImColor::HSV(i / 7.0f, 0.6f, 0.5f));
-				ImGui::PushStyleColor(ImGuiCol_FrameBgActive, (ImVec4)ImColor::HSV(i / 7.0f, 0.7f, 0.5f));
-				ImGui::PushStyleColor(ImGuiCol_SliderGrab, (ImVec4)ImColor::HSV(i / 7.0f, 0.9f, 0.9f));
-				ImGui::VSliderFloat("##v", ImVec2(18, 160), &values[i], -1.0f, 1.0f, "");
-				if (ImGui::IsItemActive() || ImGui::IsItemHovered())
-					ImGui::SetTooltip("%.3f", values[i]);
-				ImGui::PopStyleColor(4);
-				ImGui::PopID();
-				ImGui::Spacing();
-			}
-
-			ImGui::PopID();
-
-			ImGui::SameLine();
-			ImGui::PushID("set3");
-			for (int i = 0; i < 1; i++)
-			{
-				if (i > 0) ImGui::SameLine();
-				ImGui::PushID(i);
-				ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, 40);
-				ImGui::VSliderFloat("##v", ImVec2(40, 160), &values[i], -1.0f, 1.0f, "%.2f\nsec");
-				ImGui::PopStyleVar();
-				ImGui::PopID();
-			}
-			ImGui::PopID();
-			ImGui::PopStyleVar();
-			ImGui::TreePop();
-			ImGui::Spacing();
-
-		}
-
-		if (ImGui::TreeNode("Cube Movement"))
-		{
-			const float spacing = 4;
-			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing, spacing));
-
-			static float _valueX = 0;
-			ImGui::VSliderFloat("##int", ImVec2(18, 160), &_valueX, -10, 10);
-			ImGui::SameLine();
-			cubePosX = _valueX;
-
-			static float _valueY = 0;
-			ImGui::VSliderFloat("##int1", ImVec2(18, 160), &_valueY, -10, 10);
-			ImGui::SameLine();
-			cubePosY = _valueY;
-			static float _valueZ = -3.0f;
-			ImGui::VSliderFloat("##int2", ImVec2(18, 160), &_valueZ, -10, 10);
-			ImGui::SameLine();
-			cubePosZ = _valueZ;
-			static float myNoiseMult = 0;
-			ImGui::VSliderFloat("##int3", ImVec2(18, 160), &myNoiseMult, -10, 10);
-			ImGui::SameLine();
-			noiseMult= myNoiseMult;
-
-
-			ImGui::PushID("set1");
-
-
-
-			ImGui::PopID();
-			ImGui::PopStyleVar();
-			ImGui::TreePop();
-			ImGui::Spacing();
-
-		}
-
-
-		if (ImGui::TreeNode("cube amount"))
-		{
-
-			const float spacing = 4;
-			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing, spacing));
-
-			ImGui::VSliderInt("##int", ImVec2(18, 160), &amount, 1, 10);
-			ImGui::SameLine();
-
-			ImGui::PopStyleVar();
-			ImGui::TreePop();
-			ImGui::Spacing();
-
-		}
-
-		if (ImGui::TreeNode("light Movement"))
-		{
-			const float spacing = 4;
-			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing, spacing));
-
-			static float _valueX = 0;
-			ImGui::VSliderFloat("##int", ImVec2(18, 160), &_valueX, -10, 10);
-			ImGui::SameLine();
-			lightX = _valueX;
-
-			static float _valueY = 0;
-			ImGui::VSliderFloat("##int1", ImVec2(18, 160), &_valueY, -10, 10);
-			ImGui::SameLine();
-			lightY = _valueY;
-			static float _valueZ = -3.0f;
-			ImGui::VSliderFloat("##int2", ImVec2(18, 160), &_valueZ, -10, 10);
-			ImGui::SameLine();
-			lightZ = _valueZ;
-
-
-			ImGui::PushID("set1");
-
-
-
-			ImGui::PopID();
-			ImGui::PopStyleVar();
-			ImGui::TreePop();
-			ImGui::Spacing();
-
-		}
-		if (ImGui::TreeNode("Height Mapping"))
-		{
-			const float spacing = 4;
-			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing, spacing));
-
-			static float myValue = 0.1f;
-			ImGui::VSliderFloat("##int", ImVec2(18, 160),&myValue, 0.0,1.0f);
-			ImGui::SameLine();
-			heightScaleFactor = myValue;
-
-			ImGui::PushID("set2");
-			ImGui::PopID();
-			ImGui::PopStyleVar();
-			ImGui::TreePop();
-			ImGui::Spacing();
-
-		}
-		if (ImGui::TreeNode("Light Settings"))
-		{
-			// Combo Boxes are also called "Dropdown" in other systems
-			// Expose flags as checkbox for the demo
-			static ImGuiComboFlags flags, flags2, flags3, flags4, flags5, flags6 = 1;
-
-
-			ImGui::CheckboxFlags("Directional light", &flags, ImGuiComboFlags_PopupAlignLeft);
-			ImGui::CheckboxFlags("Spot light", &flags2, ImGuiComboFlags_PopupAlignLeft);
-			ImGui::CheckboxFlags("Point light", &flags3, ImGuiComboFlags_PopupAlignLeft);
-			ImGui::CheckboxFlags("HRD", &flags4, ImGuiComboFlags_PopupAlignLeft);
-			ImGui::CheckboxFlags("BLOOM", &flags5, ImGuiComboFlags_PopupAlignLeft);
-			ImGui::CheckboxFlags("Shadows", &flags6, ImGuiComboFlags_PopupAlignLeft);
-
-
-
-
-
-			// Using the generic BeginCombo() API, you have full control over how to display the combo contents.
-			// (your selection data could be an index, a pointer to the object, an id for the object, a flag intrusively
-			// stored in the object itself, etc.)
-			const char* items[] = { "AAAA", "BBBB", "CCCC", "DDDD", "EEEE", "FFFF", "GGGG", "HHHH", "IIII", "JJJJ", "KKKK", "LLLLLLL", "MMMM", "OOOOOOO" };
-			static int item_current_idx = 0; // Here we store our selection data as an index.
-			const char* combo_preview_value = items[item_current_idx];  // Pass in the preview value visible before opening the combo (it could be anything)
-			if (ImGui::BeginCombo("combo 1", combo_preview_value, flags))
-			{
-				for (int n = 0; n < IM_ARRAYSIZE(items); n++)
-				{
-					const bool is_selected = (item_current_idx == n);
-					if (ImGui::Selectable(items[n], is_selected))
-						item_current_idx = n;
-
-					// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-					if (is_selected)
-						ImGui::SetItemDefaultFocus();
-				}
-				ImGui::EndCombo();
-			}
-
-			// Simplified one-liner Combo() API, using values packed in a single constant string
-			// This is a convenience for when the selection set is small and known at compile-time.
-			static int item_current_2 = 0;
-			ImGui::Combo("combo 2 (one-liner)", &item_current_2, "aaaa\0bbbb\0cccc\0dddd\0eeee\0\0");
-
-			// Simplified one-liner Combo() using an array of const char*
-			// This is not very useful (may obsolete): prefer using BeginCombo()/EndCombo() for full control.
-			static int item_current_3 = -1; // If the selection isn't within 0..count, Combo won't display a preview
-			ImGui::Combo("combo 3 (array)", &item_current_3, items, IM_ARRAYSIZE(items));
-
-			// Simplified one-liner Combo() using an accessor function
-			struct Funcs { static bool ItemGetter(void* data, int n, const char** out_str) { *out_str = ((const char**)data)[n]; return true; } };
-			static int item_current_4 = 0;
-			ImGui::Combo("combo 4 (function)", &item_current_4, &Funcs::ItemGetter, items, IM_ARRAYSIZE(items));
-
-			dirLightOn = flags;
-			spotLightOn = flags2;
-			pointLightOn = flags3;
-			HDR = flags4;
-			bloom = flags5;
-			shadows = flags6;
-
-
-			ImGui::TreePop();
-			ImGui::Spacing();
-
-		}
-			
 		
-
-
-		if (ImGui::TreeNode("Model Loader"))
-		{
-			struct TextFilters
-			{
-				// Modify character input by altering 'data->Eventchar' (ImGuiInputTextFlags_CallbackCharFilter callback)
-				static int FilterCasingSwap(ImGuiInputTextCallbackData* data)
-				{
-					if (data->EventChar >= 'a' && data->EventChar <= 'z') { data->EventChar -= 'a' - 'A'; } // Lowercase becomes uppercase
-					else if (data->EventChar >= 'A' && data->EventChar <= 'Z') { data->EventChar += 'a' - 'A'; } // Uppercase becomes lowercase
-					return 0;
-				}
-
-				// Return 0 (pass) if the character is 'i' or 'm' or 'g' or 'u' or 'i', otherwise return 1 (filter out)
-				static int FilterImGuiLetters(ImGuiInputTextCallbackData* data)
-				{
-					if (data->EventChar < 256 && strchr("imgui", (char)data->EventChar))
-						return 0;
-					return 1;
-				}
-			};
-
-			static char buf1[400] = ""; ImGui::InputText("Model path here:", buf1, 400);
-			// Save/Revert button
-			static ImGuiComboFlags flipUvs = 1;
-			ImGui::CheckboxFlags("Flip UVS", &flipUvs, ImGuiComboFlags_PopupAlignLeft);
-			if (ImGui::Button("Load")) {
-				//"Models/BackpackModel/backpack.obj"
-				//Models/pizzaCar/myPizzaMovil.obj
-				std::string strPath = "Models/crazyrock/crazyplane.obj";
-				if (flipUvs)
-				{
-					flipUVS = true;
-					ourModel.StartModel(strPath);
-				}
-				else
-				{
-					flipUVS = false;
-					ourModel.StartModel(strPath);
-				}
-
-			}
+		myImgui.CreateNode([&]() {MoveCubes(speedMultiplier, speedRotation); });
+		myImgui.CreateNode([&]() {cubes_Movement(cubePosX, cubePosY, cubePosZ, noiseMult); });
+		myImgui.CreateNode([&]() {cube_Amount(amount); });
+		myImgui.CreateNode([&]() {light_Movement(lightX, lightY, lightZ); });
+		myImgui.CreateNode([&]() {height_Mapping(heightScaleFactor); });
+		myImgui.CreateNode([&]() {light_Settings(dirLightOn, spotLightOn, pointLightOn, HDR, bloom, shadows); });
+		myImgui.CreateNode([&]() {model_Loader(ourModel, flipUVS); });
 			
-				
-			ImGui::SameLine();
-			ImGui::TreePop();
-			ImGui::Spacing();
-
-		}
-
-
-
 		ImGui::ShowDemoWindow();
-
-		ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoMove);
-		ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-		//ImGui::SetNextWindowSize(ImVec2(SCR_WIDTH, SCR_HEIGHT));
-		//maintain the window the same size of the glfw window
-		ImGui::GetWindowDrawList()->AddImage(
-			(void*)finalFboText,
-			ImVec2(ImGui::GetCursorScreenPos()),
-			viewportSize,
-			ImVec2(0, 1), 
-			ImVec2(1, 0));
-
-		ImGui::End();
 		
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		myImgui.CreateViewPort(finalFbo.m_Texture);
+		myImgui.Render();
 
 #pragma endregion
 
@@ -1314,9 +1008,8 @@ int main(void)
 		/* Poll for and process events */
 		glfwPollEvents();
 	}
-	ImGui_ImplGlfw_Shutdown();
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui::DestroyContext();
+
+	myImgui.~ImguiRender();
 	glfwTerminate();
 
 	//de - allocate all resources once they've outlived their purpose

@@ -23,5 +23,6 @@
 #include "../Model/Model.h"
 #include "../Mesh/Mesh.h"
 #include "../Camera/CameraHandler.h"
+#include "../ClassesOpengl/Framebuffer.h"
 #include "stb-master/stb_image.h"
 #define STB_IMAGE_IMPLEMENTATION
