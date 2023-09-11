@@ -231,7 +231,7 @@ auto light_Settings = [](bool& dirLightOn, bool& spotLightOn, bool& pointLightOn
 	}
 
 	};
-auto model_Loader = [](Model& ourModel, bool& flipUVS) {
+auto model_Loader = [](Model& ourModel, bool& flipUVS,bool& PBR) {
 
 	if (ImGui::TreeNode("Model Loader"))
 	{
@@ -257,16 +257,20 @@ auto model_Loader = [](Model& ourModel, bool& flipUVS) {
 		static char buf1[400] = ""; ImGui::InputText("Model path here:", buf1, 400);
 		// Save/Revert button
 		static ImGuiComboFlags flipUvs = 1;
+		static ImGuiComboFlags PBRon = 1;
+
 		ImGui::CheckboxFlags("Flip UVS", &flipUvs, ImGuiComboFlags_PopupAlignLeft);
+		ImGui::CheckboxFlags("PBR", &PBRon, ImGuiComboFlags_PopupAlignLeft);
+
 		if (ImGui::Button("Load")) {
 			//"Models/BackpackModel/backpack.obj"
 			//Models/pizzaCar/myPizzaMovil.obj
 			std::string strPath = "Models/box/box.obj";
+			PBR = PBRon;
 			flipUVS = flipUvs;
-			ourModel.StartModel(strPath);
-
-
+			ourModel.StartModel(strPath,PBR);
 		}
+
 		ImGui::SameLine();
 		ImGui::TreePop();
 		ImGui::Spacing();

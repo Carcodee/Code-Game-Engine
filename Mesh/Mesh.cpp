@@ -17,6 +17,10 @@ void Mesh::Draw(ShaderClass& shader, int mIndex)
     unsigned int specularNr = 1;
     unsigned int normalNr = 1;
     unsigned int heightNr = 1;
+    unsigned int roguhtnessNr=1;
+    unsigned int metallicNr=1;
+    unsigned int aoNr=1;
+
     for (unsigned int i = 0; i < textures.size(); i++)
     {
         glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
@@ -31,6 +35,12 @@ void Mesh::Draw(ShaderClass& shader, int mIndex)
             number = std::to_string(normalNr++); // transfer unsigned int to string
         else if (name == "texture_height")
             number = std::to_string(heightNr++); // transfer unsigned int to string
+        else if (name == "texture_metallic")
+            number = std::to_string(metallicNr++); // transfer unsigned int to string
+        else if (name == "texture_ao")
+            number = std::to_string(aoNr++); // transfer unsigned int to string
+        else if (name == "texture_roughness")
+            number = std::to_string(roguhtnessNr++); // transfer unsigned int to string
 
         // now set the sampler to the correct texture unit
         glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
@@ -40,12 +50,20 @@ void Mesh::Draw(ShaderClass& shader, int mIndex)
     int normalMapping = (normalNr > 1) ? 1 : 0;
     int specularMapping = (specularNr > 1) ? 1 : 0;
     int heightmapping= (heightNr > 1) ? 1 : 0;
+    int roughtnessmapping = (roguhtnessNr > 1) ? 1 : 0;
+    int metallicmapping = (metallicNr > 1) ? 1 : 0;
+    int aomapping = (aoNr > 1) ? 1 : 0;
+
 
     shader.use();
     shader.setInt("meshCount", mIndex);
     shader.setInt("normalMapping", normalMapping);
     shader.setInt("specularMapping", specularMapping);
-    shader.setInt("heighmap", 1);
+    shader.setInt("heighmap", heightmapping);
+    shader.setInt("roughnessMap", roughtnessmapping);
+    shader.setInt("metallicMap", metallicmapping);
+    shader.setInt("aoMap", aomapping);
+
 
     shader.setVec3("materials[" + std::to_string(mIndex) + "].diffuse", mat.Diffuse);
     shader.setVec3("materials[" + std::to_string(mIndex) + "].specular", mat.Specular);

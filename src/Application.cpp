@@ -25,7 +25,7 @@ float exposure = 1.0f;
 bool dirLightOn = true, pointLightOn = true, spotLightOn = true, HDR = true,bloom = true, useGbuffer = false, shadows = true;
 bool flipUVS= false;
 float heightScaleFactor = 0.1f;
-
+bool PBR = false;
 
 
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
@@ -790,7 +790,7 @@ int main(void)
 
 		util::HandleLights(dirLightOn, pointLightOn, myShader, lightPos, ambientColor, diffuseColor);
 
-		(shadows) ? myShader.setBool("shadowsOn", shadows) : myShader.setBool("shadowsOn", shadows);
+		(shadows) ? myShader.setBool("shadowsOn", shadows) : myShader.setBool("shadowsOn", !shadows);
 		
 
 	
@@ -869,7 +869,7 @@ int main(void)
 			modelShader.setMat4("projection", projectionM);
 			modelShader.setMat4("view", viewM);
 			modelShader.setFloat("height_scale", heightScaleFactor);
-
+			modelShader.setInt("PBRon", PBR);
 			// render the loaded model
 			glm::mat4 modelM = glm::mat4(1.0f);
 			modelM = glm::translate(modelM, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
@@ -1019,7 +1019,7 @@ int main(void)
 		myImgui.CreateNode([&]() {light_Movement(lightX, lightY, lightZ); });
 		myImgui.CreateNode([&]() {height_Mapping(heightScaleFactor); });
 		myImgui.CreateNode([&]() {light_Settings(dirLightOn, spotLightOn, pointLightOn, HDR, bloom, shadows); });
-		myImgui.CreateNode([&]() {model_Loader(ourModel, flipUVS); });
+		myImgui.CreateNode([&]() {model_Loader(ourModel, flipUVS,PBR); });
 		
 
 		ImGui::ShowDemoWindow();

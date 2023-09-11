@@ -127,26 +127,44 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
     std::string errorTexture = "errorTexture::UNABLE TO READ THE TEXTURE= ";
 
-    std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-    textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-    (diffuseMaps.size() == 0) ? std::cout << errorTexture+GET_VARIABLE_NAME(diffuseMaps) << "\n" : std::cout << "diffuse ok" << "\n";
-    //2. specular maps
-    std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-    textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-    (specularMaps.size() == 0) ? std::cout << errorTexture +GET_VARIABLE_NAME(specularMaps) << "\n" : std::cout << "specular ok" << "\n";
-    //3. normal maps
-    std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
-    textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-    (normalMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(normalMaps) << "\n" : std::cout << "normalmap ok" << "\n";
-    //4. height maps
-    std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_DISPLACEMENT, "texture_height");
-    textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
-    (heightMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(heightMaps) << "\n" : std::cout << "heightmap ok" << "\n";
+
+    if (!isPBR)
+    {
+        std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+        textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+        (diffuseMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(diffuseMaps) << "\n" : std::cout << "diffuse ok" << "\n";
+        //2. specular maps
+        std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+        textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+        (specularMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(specularMaps) << "\n" : std::cout << "specular ok" << "\n";
+        //3. normal maps
+        std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+        textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+        (normalMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(normalMaps) << "\n" : std::cout << "normalmap ok" << "\n";
+        //4. height maps
+        std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_DISPLACEMENT, "texture_height");
+        textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+        (heightMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(heightMaps) << "\n" : std::cout << "heightmap ok" << "\n";
+    }
+    else
+    {
+
+        //1. roughtness maps
+        LoadPBRTextures("texture_diffuse", textures);
+        //2. Normal maps
+        LoadPBRTextures("texture_normal", textures);
+        //3. roughtness maps
+        LoadPBRTextures("texture_roughness", textures);
+        //4. metallic maps
+        LoadPBRTextures("texture_metallic", textures);
+        //5. ao maps
+        LoadPBRTextures("texture_ao", textures);
+    }
+
     //insertmaterials in fragment shader  with a method in the mesh
     Material materials = loadMaterial(material);
 
     //std::cout << materials.Diffuse.x<< " ," << materials.Diffuse.y << " ," << materials.Diffuse.z << "\n";
-
 
     return Mesh(vertices, indices, textures, materials);
 }
@@ -154,7 +172,6 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
 {
     std::vector<Texture> textures;
-
 
     for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
     {
@@ -181,6 +198,25 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
         }
     }
     return textures;
+}
+
+void Model::LoadPBRTextures(std::string typeName,std::vector<Texture>& textures)
+{
+    Texture myPBRText;
+    std::string prefixSize="texture_";
+    std::string textName = typeName.substr(prefixSize.size());
+
+    std::string myPath = "PBRTextures/" + textName + ".png";
+    myPBRText.id = TextureFromFile(myPath.c_str(), this->directory, false);
+    if (myPBRText.id==0)
+    {
+        std::cout << "Failed to load texture " + typeName << "\n";
+    }
+    myPBRText.type = typeName;
+    myPBRText.path = path;
+    textures.push_back(myPBRText);
+    textures_loaded.push_back(myPBRText); // add to loaded textures
+    std::cout << "PBR texture loaded: " + typeName << "\n";
 }
 
 unsigned int Model::TextureFromFile(const char* path, const std::string& directory, bool gamma)

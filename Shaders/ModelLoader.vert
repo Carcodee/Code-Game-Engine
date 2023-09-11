@@ -15,6 +15,7 @@ out vec3 TangentFragPos;
 out vec3 TangentLightPos;
 
 flat out int calculateNormals;
+flat out int PBR;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -22,7 +23,7 @@ uniform mat4 projection;
 uniform vec3 viewPos;
 uniform vec3 lightPos;
 uniform int normalMapping;
-
+uniform int PBRon;
 
 void main()
 {
@@ -33,8 +34,8 @@ void main()
     gl_Position = projection * view * model * vec4(aPos, 1.0);
     
     calculateNormals = normalMapping;
-
-    if(calculateNormals == 1){
+    PBR = PBRon;
+    if(calculateNormals == 1&& PBRon != 1){
         vec3 T = normalize(vec3(model * vec4(aTangent,   0.0)));
         vec3 B = normalize(vec3(model * vec4(aBitangent, 0.0)));
         vec3 N = normalize(vec3(model * vec4(aNormal,    0.0)));
