@@ -35,7 +35,8 @@ void ImguiRender::CreateViewPort(unsigned int textureID)
 {
 
 	ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoMove);
-	ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+	ImVec2 viewportSize = ImGui::GetWindowSize();
+	glViewport(0, 0, viewportSize.x, viewportSize.y);
 	//ImGui::SetNextWindowSize(ImVec2(SCR_WIDTH, SCR_HEIGHT));
 	//maintain the window the same size of the glfw window
 	ImGui::GetWindowDrawList()->AddImage(

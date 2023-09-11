@@ -259,11 +259,18 @@ int main(void)
 
 	// load and create a texture 
 	// -------------------------
-	unsigned int texture1, specularMap;
-	texture1= util::LoadTexture("C:/Users/carlo/OneDrive/Documents/GitHub/OpenglCarlos/ImagesProgramming/container2.png");
-	specularMap = util::LoadTexture("C:/Users/carlo/OneDrive/Documents/GitHub/OpenglCarlos/ImagesProgramming/lighting_maps_specular_color.png");
-
-
+	unsigned int albedo = util::LoadTexture("Models/rust/albedo.png");
+	unsigned int normal = util::LoadTexture("Models/rust/normal.png");
+	unsigned int metallic = util::LoadTexture("Models/rust/metallic.png");
+	unsigned int roughness = util::LoadTexture("Models/rust/roughness.png");
+	unsigned int ao = util::LoadTexture("Models/rust/ao.png");
+	
+	myShader.use();
+	myShader.setInt("albedoMap", 0);
+	myShader.setInt("normalMap", 1);
+	myShader.setInt("metallicMap", 2);
+	myShader.setInt("roughnessMap", 3);
+	myShader.setInt("aoMap", 4);
 	//Cubemap
 
 	std::vector <GLfloat> skyboxVertices = {
@@ -602,7 +609,13 @@ int main(void)
 	//Shadows
 
 
-
+	//PBR
+	glm::vec3 lightPositions[] = {
+	glm::vec3(0.0f, 0.0f, 10.0f),
+	};
+	glm::vec3 lightColors[] = {
+		glm::vec3(150.0f, 150.0f, 150.0f),
+	};
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
@@ -672,7 +685,7 @@ int main(void)
 			glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 			glClear(GL_DEPTH_BUFFER_BIT);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, texture1);
+			glBindTexture(GL_TEXTURE_2D, albedo);
 
 			shadowShaderDepth.use();
 
@@ -713,6 +726,8 @@ int main(void)
 #pragma endregion
 
 
+		int* y;
+		
 
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 		(bloom) ? glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO) : glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -757,11 +772,17 @@ int main(void)
 		myShader.setFloat("material.shininess", 256.0f);
 		myShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture1);
+		glBindTexture(GL_TEXTURE_2D, albedo);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, specularMap);
+		glBindTexture(GL_TEXTURE_2D, normal);
 		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, metallic);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, roughness);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, ao);
 		glBindTexture(GL_TEXTURE2, depthMap);
+
 		myShader.setVec3("Color", Color);
 		myShader.setVec3("viewPos", camera.Position);
 		myShader.setMat4("view", viewM);
@@ -793,6 +814,8 @@ int main(void)
 					model = glm::rotate(model, (float)glfwGetTime() * speedRotation * speedMultiplier * glm::sin(glm::radians(50.0f)), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::translate(model, glm::vec3(cubePosX, cubePosY, cubePosZ));;
 					myShader.use();
 					modelMatrices[instanceID] = model;
+					myShader.setVec3("lightPositions[" + std::to_string(i) + "]", lightPos);
+					myShader.setVec3("lightColors[" + std::to_string(i) + "]", lightColors[0]);
 					myShader.setMat4("model[" + std::to_string(instanceID) + "]", model);
 					instanceID++;
 				}
@@ -879,12 +902,15 @@ int main(void)
 		// clear all relevant buffers
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
 		glClear(GL_COLOR_BUFFER_BIT);
+		finalFbo.Bind();
 
 		fbShader.use();
 		fbShader.setBool("HDR", HDR);
 
 		glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
 		util::renderQuad();
+		finalFbo.UnBind();
+
 
 		}
 
@@ -994,7 +1020,8 @@ int main(void)
 		myImgui.CreateNode([&]() {height_Mapping(heightScaleFactor); });
 		myImgui.CreateNode([&]() {light_Settings(dirLightOn, spotLightOn, pointLightOn, HDR, bloom, shadows); });
 		myImgui.CreateNode([&]() {model_Loader(ourModel, flipUVS); });
-			
+		
+
 		ImGui::ShowDemoWindow();
 		
 		myImgui.CreateViewPort(finalFbo.m_Texture);
@@ -1009,17 +1036,7 @@ int main(void)
 		glfwPollEvents();
 	}
 
-	myImgui.~ImguiRender();
 	glfwTerminate();
-
-	//de - allocate all resources once they've outlived their purpose
-	vao.~VAO();
-	skyboxVAO.~VAO();
-	lightVAO.~VAO();
-
-	vbo.~VBO();
-	skyboxVBO.~VBO();
-	lightVBO.~VBO();
 	return 0;
 }
 

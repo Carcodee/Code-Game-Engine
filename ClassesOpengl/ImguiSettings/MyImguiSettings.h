@@ -5,6 +5,7 @@
 #include "imgui/imgui_impl_opengl3.h"
 #include <iostream>
 #include "../Model/Model.h"
+
 auto MoveCubes = [](float& speed, float& rotationSpeed) {
 
 	if (ImGui::TreeNode("Cube Speed"))
@@ -230,7 +231,7 @@ auto light_Settings = [](bool& dirLightOn, bool& spotLightOn, bool& pointLightOn
 	}
 
 	};
-auto model_Loader = [](Model& outModel, bool& flipUVS) {
+auto model_Loader = [](Model& ourModel, bool& flipUVS) {
 
 	if (ImGui::TreeNode("Model Loader"))
 	{
@@ -260,17 +261,10 @@ auto model_Loader = [](Model& outModel, bool& flipUVS) {
 		if (ImGui::Button("Load")) {
 			//"Models/BackpackModel/backpack.obj"
 			//Models/pizzaCar/myPizzaMovil.obj
-			std::string strPath = "Models/crazyrock/crazyplane.obj";
-			if (flipUvs)
-			{
-				flipUVS = true;
-				ourModel.StartModel(strPath);
-			}
-			else
-			{
-				flipUVS = false;
-				ourModel.StartModel(strPath);
-			}
+			std::string strPath = "Models/box/box.obj";
+			flipUVS = flipUvs;
+			ourModel.StartModel(strPath);
+
 
 		}
 		ImGui::SameLine();
