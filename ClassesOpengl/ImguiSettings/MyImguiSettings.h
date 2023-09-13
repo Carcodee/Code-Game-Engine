@@ -265,7 +265,7 @@ auto model_Loader = [](Model& ourModel, bool& flipUVS,bool& PBR) {
 		if (ImGui::Button("Load")) {
 			//"Models/BackpackModel/backpack.obj"
 			//Models/pizzaCar/myPizzaMovil.obj
-			std::string strPath = "Models/box/box.obj";
+			std::string strPath = "Models/pig/pig.obj";
 			PBR = PBRon;
 			flipUVS = flipUvs;
 			ourModel.StartModel(strPath,PBR);

@@ -91,10 +91,32 @@ void main()
 
 vec3 CalculatePBR(){
 
+    
     vec3 albedo     = pow(texture(texture_diffuse1, TexCoords).rgb, vec3(2.2));
-    float metallic  = texture(texture_metallic1, TexCoords).r;
-    float roughness = texture(texture_roughness1, TexCoords).r;
-    float ao        = texture(texture_ao1, TexCoords).r;
+    float metallic;
+    float roughness;
+    float ao;  
+    if(metallicMap==1){
+    metallic= texture(texture_metallic1, TexCoords).r;
+    }else{
+    metallic=0.01f;
+    }
+
+    if(roughtnessMap==1){
+    roughness= texture(texture_roughness1, TexCoords).r;
+    }else
+    {
+    roughness=0.01f;
+    }
+
+    if(aoMap==1){
+    ao= texture(texture_ao1, TexCoords).r;
+    }else
+    {
+    ao=0.01f;
+    }
+
+
 
     vec3 N = getNormalFromMap();
     vec3 V = normalize(TangentViewPos - FragPos);

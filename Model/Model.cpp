@@ -206,7 +206,7 @@ void Model::LoadPBRTextures(std::string typeName,std::vector<Texture>& textures)
     std::string prefixSize="texture_";
     std::string textName = typeName.substr(prefixSize.size());
 
-    std::string myPath = "PBRTextures/" + textName + ".png";
+    std::string myPath = "PBRTextures/" + textName + ".jpg";
     myPBRText.id = TextureFromFile(myPath.c_str(), this->directory, false);
     if (myPBRText.id==0)
     {
