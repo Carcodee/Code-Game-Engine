@@ -26,7 +26,7 @@ bool dirLightOn = true, pointLightOn = true, spotLightOn = true, HDR = true,bloo
 bool flipUVS= false;
 float heightScaleFactor = 0.1f;
 bool PBR = false;
-
+int modelsLoadedCounter = 0;
 
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -34,7 +34,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
 
-Model ourModel;
+std::vector <Model> ourModels;
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
@@ -855,38 +855,41 @@ int main(void)
 
 #pragma region ModelRegion
 
-		
-		if (ourModel.isLoaded)
+		for (size_t i = 0; i < ourModels.size(); i++)
 		{
-			// don't forget to enable shader before setting uniforms
-			modelShader.use();
-			modelShader.setVec3("viewPos", camera.Position);
-			modelShader.setVec3("lightPos", -lightPos);
-			modelShader.setVec3("dirLight.ambient", ambientColor);
-			modelShader.setVec3("dirLight.diffuse", glm::vec3(1.0f));
-			modelShader.setVec3("dirLight.specular", glm::vec3(.5f));
-			// view/projection transformations
-			modelShader.setMat4("projection", projectionM);
-			modelShader.setMat4("view", viewM);
-			modelShader.setFloat("height_scale", heightScaleFactor);
-			modelShader.setInt("PBRon", PBR);
-			// render the loaded model
-			glm::mat4 modelM = glm::mat4(1.0f);
-			modelM = glm::translate(modelM, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-			modelM = glm::scale(modelM, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
-			modelShader.setMat4("model", modelM);
-		}
-		if (flipUVS)
-		{
-			stbi_set_flip_vertically_on_load(true);
-			ourModel.Draw(modelShader);
-			stbi_set_flip_vertically_on_load(false);
-		}
-		else
-		{
-			ourModel.Draw(modelShader);
+			if (ourModels[i].isLoaded)
+			{
+				// don't forget to enable shader before setting uniforms
+				modelShader.use();
+				modelShader.setVec3("viewPos", camera.Position);
+				modelShader.setVec3("lightPos", -lightPos);
+				modelShader.setVec3("dirLight.ambient", ambientColor);
+				modelShader.setVec3("dirLight.diffuse", glm::vec3(1.0f));
+				modelShader.setVec3("dirLight.specular", glm::vec3(.5f));
+				// view/projection transformations
+				modelShader.setMat4("projection", projectionM);
+				modelShader.setMat4("view", viewM);
+				modelShader.setFloat("height_scale", heightScaleFactor);
+				modelShader.setInt("PBRon", PBR);
+				// render the loaded model
+				glm::mat4 modelM = glm::mat4(1.0f);
+				modelM = glm::translate(modelM, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+				modelM = glm::scale(modelM, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+				modelShader.setMat4("model", modelM);
+			}
+			if (flipUVS)
+			{
+				stbi_set_flip_vertically_on_load(true);
+				ourModels[i].Draw(modelShader);
+				stbi_set_flip_vertically_on_load(false);
+			}
+			else
+			{
+				ourModels[i].Draw(modelShader);
 
+			}
 		}
+		
 
 
 #pragma endregion
@@ -1019,7 +1022,7 @@ int main(void)
 		myImgui.CreateNode([&]() {light_Movement(lightX, lightY, lightZ); });
 		myImgui.CreateNode([&]() {height_Mapping(heightScaleFactor); });
 		myImgui.CreateNode([&]() {light_Settings(dirLightOn, spotLightOn, pointLightOn, HDR, bloom, shadows); });
-		myImgui.CreateNode([&]() {model_Loader(ourModel, flipUVS,PBR); });
+		myImgui.CreateNode([&]() {model_Loader(ourModels, flipUVS,PBR,modelsLoadedCounter); });
 		
 
 		ImGui::ShowDemoWindow();

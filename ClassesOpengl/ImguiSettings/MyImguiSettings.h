@@ -231,7 +231,7 @@ auto light_Settings = [](bool& dirLightOn, bool& spotLightOn, bool& pointLightOn
 	}
 
 	};
-auto model_Loader = [](Model& ourModel, bool& flipUVS,bool& PBR) {
+auto model_Loader = [](std::vector<Model>& ourModels, bool& flipUVS,bool& PBR,int& modelCounter) {
 
 	if (ImGui::TreeNode("Model Loader"))
 	{
@@ -265,10 +265,13 @@ auto model_Loader = [](Model& ourModel, bool& flipUVS,bool& PBR) {
 		if (ImGui::Button("Load")) {
 			//"Models/BackpackModel/backpack.obj"
 			//Models/pizzaCar/myPizzaMovil.obj
-			std::string strPath = "Models/pig/pig.obj";
+			//Models/pig/pig.obj
+			std::string strPath = buf1;
 			PBR = PBRon;
 			flipUVS = flipUvs;
-			ourModel.StartModel(strPath,PBR);
+			ourModels.push_back(Model());
+			ourModels[modelCounter].StartModel(buf1,PBR);
+			modelCounter++;
 		}
 
 		ImGui::SameLine();

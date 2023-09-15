@@ -16,6 +16,8 @@ class Model
 
 public:
     Model();
+    Model(const Model& other);
+
     void StartModel(std::string const& path ,bool isPBR,bool gamma = false) {
        myFuture = loadSceneAsync(path,directory,isLoaded,modelMutex);
        this->isPBR=isPBR;

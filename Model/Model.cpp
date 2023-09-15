@@ -7,6 +7,17 @@ Model::Model()
     isLoaded = false;
     gammaCorrection = false;
 }
+Model::Model(const Model& other)
+{
+    this->meshes = other.meshes;
+	this->directory = other.directory;
+	this->textures_loaded = other.textures_loaded;
+	this->isLoaded = other.isLoaded;
+	this->gammaCorrection = other.gammaCorrection;
+	this->path = other.path;
+	this->isPBR = other.isPBR;
+}
+
 
 void Model::Draw(ShaderClass& shader)
 {
