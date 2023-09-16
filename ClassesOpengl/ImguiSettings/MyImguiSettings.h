@@ -93,7 +93,7 @@ auto cubes_Movement=[](float& cubePosX, float& cubePosY, float& cubePosZ,float& 
 		
 
 	};
-auto cube_Amount = [](int& amount) {
+auto cube_Amount = [](int& amount, float& roughness, float& metalness, float& ao, float& albedo) {
 	if (ImGui::TreeNode("cube amount"))
 	{
 
@@ -101,13 +101,28 @@ auto cube_Amount = [](int& amount) {
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing, spacing));
 
 		ImGui::VSliderInt("##int", ImVec2(18, 160), &amount, 1, 10);
-		ImGui::SameLine();
+
+		static float f1 = 1.0f;
+		ImGui::SliderFloat("Rougness", &f1, 0.0f, 5.0f, "");
+		roughness = f1;
+		static float f2 = 1.0f;
+		ImGui::SliderFloat("Metalness", &f2, 0.0f, 5.0f, "");
+		metalness = f2;
+		static float f3 = 1.0f;
+		ImGui::SliderFloat("Ao intensity", &f3, 0.0f, 5.0f, "");
+		ao = f3;
+		static float f4 = 1.0f;
+		ImGui::SliderFloat("albedo Intensity", &f4, 0.0f, 5.0f, "");
+		albedo = f4;
 
 		ImGui::PopStyleVar();
 		ImGui::TreePop();
 		ImGui::Spacing();
 
+
+
 	}
+
 	};
 auto light_Movement = [](float& lightX,float& lightY,float& lightZ) {
 

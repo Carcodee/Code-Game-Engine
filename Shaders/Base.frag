@@ -62,12 +62,6 @@ struct SpotLight {
     vec3 specular;       
 };
 
-   /* vec3 norm = normalize(Normal);
-   /* vec3 viewDir = normalize(viewPos - FragPos);
-   /* vec3 result= CalculateDirLight(dirLight, norm, viewDir);
-    // phase 2: point lights
-  /* for(int i = 0; i < NR_POINT_LIGHTS; i++)
-   /* result += CalculatePointLight(pointLights[i], norm, FragPos, viewDir); */  
 
 // material parameters
 uniform sampler2D albedoMap;
@@ -85,14 +79,20 @@ uniform Material material;
 uniform DirLight dirLight;
 uniform bool shadowsOn;
 
- 
+uniform float roughnessM;
+uniform float metallicM;
+uniform float aoM;
+uniform float albedoM;
+
+
+
 uniform vec3 lightPositions[1];
 uniform vec3 lightColors[1];
 
 vec3 CalculateDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 float ShadowCalculation(vec4 fragPosLightSpace);
-
+vec3 ReturnNormalLight();
 
 vec3 getNormalFromMap()
 {
@@ -155,10 +155,10 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 void main()
 {
 
-    vec3 albedo     = pow(texture(albedoMap, TrueTextCoord).rgb, vec3(2.2));
-    float metallic  = texture(metallicMap, TrueTextCoord).r;
-    float roughness = texture(roughnessMap, TrueTextCoord).r;
-    float ao        = texture(aoMap, TrueTextCoord).r;
+    vec3 albedo     = pow(texture(albedoMap, TrueTextCoord).rgb * albedoM, vec3(2.2));
+    float metallic  = texture(metallicMap, TrueTextCoord).r * metallicM;
+    float roughness = texture(roughnessMap, TrueTextCoord).r * roughnessM;
+    float ao        = texture(aoMap, TrueTextCoord).r * aoM;
 
     vec3 N = getNormalFromMap();
     vec3 V = normalize(viewPos - FragPos);
@@ -264,6 +264,17 @@ float ShadowCalculation(vec4 fragPosLightSpace)
         shadow = 0.0;
 
     return shadow;
+}
+
+vec3 ReturnNormalLight(){
+	vec3 norm = normalize(Normal);
+    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 result= CalculateDirLight(dirLight, norm, viewDir);
+    // phase 2: point lights
+    for(int i = 0; i < NR_POINT_LIGHTS; i++)
+    result += CalculatePointLight(pointLights[i], norm, FragPos, viewDir);
+    return result;
+
 }
 
 vec3 CalculateDirLight(DirLight light, vec3 normal, vec3 viewDir){

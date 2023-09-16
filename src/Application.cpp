@@ -27,6 +27,10 @@ bool flipUVS= false;
 float heightScaleFactor = 0.1f;
 bool PBR = false;
 int modelsLoadedCounter = 0;
+float roughnessM = 1.0f;
+float metallicM = 1.0f;
+float aoM = 1.0f;
+float albedoM = 1.0f;
 
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -100,96 +104,8 @@ int main(void)
 	ShaderClass shadowShaderDepth("Shaders/ShadowMap.vert", "Shaders/ShadowMap.frag");
 
 
-	std::vector <GLfloat> cubeLightVertices = {
-			-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-			 1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
-			 1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right         
-			 1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
-			-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-			-1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
-			// front face
-			-1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
-			 1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // bottom-right
-			 1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
-			 1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
-			-1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // top-left
-			-1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
-			// left face
-			-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
-			-1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left
-			-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
-			-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
-			-1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right
-			-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
-			// right face
-			 1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
-			 1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
-			 1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right         
-			 1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
-			 1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
-			 1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left     
-			 // bottom face
-			 -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
-			  1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left
-			  1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
-			  1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
-			 -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right
-			 -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
-			 // top face
-			 -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
-			  1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
-			  1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right     
-			  1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
-			 -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
-			 -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left   
-
-	
-	};
-
-	std::vector <GLfloat> vertices = {
-		   // positions          // colour     // texture       //normal 
-	    -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,  0.0f, -1.0f,
-		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,  0.0f, -1.0f,
-		 0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,  0.0f, -1.0f,
-		 0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,  0.0f, -1.0f,
-		-0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,  0.0f, -1.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,  0.0f, -1.0f,
- 
-		-0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,  0.0f,  1.0f,
-		 0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,  0.0f,  1.0f,
-		 0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,  0.0f,  1.0f,
-		 0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,  0.0f,  1.0f,
-		-0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,  0.0f,  1.0f,
-
-		-0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
-
-		 0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,  0.0f,  0.0f,
-		 0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,  0.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,  0.0f,  0.0f,
-
-		-0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, -1.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f,  0.0f,
- 
-		-0.5f,  0.5f, -0.5f, 1.0f, 0.0f,0.0f, 0.0f, 1.0f, 0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f, -0.5f, 0.0f, 1.0f,0.0f, 1.0f, 1.0f, 0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f, 0.0f, 0.0f,1.0f, 1.0f, 0.0f, 0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f, 1.0f, 0.0f,0.0f, 1.0f, 0.0f, 0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f, 0.0f, 1.0f,0.0f, 0.0f, 0.0f, 0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f, 0.0f, 0.0f,1.0f, 0.0f, 1.0f, 0.0f,  1.0f,  0.0f,
-	};
+	std::vector <GLfloat> cubeLightVertices = util::returnVertices(util::cube3Layout);
+	std::vector <GLfloat> vertices = util::returnVertices(util::cube4Layout);
 	 //index data
 	std::vector <GLuint> indices = {
 		// front and back
@@ -273,50 +189,7 @@ int main(void)
 	myShader.setInt("aoMap", 4);
 	//Cubemap
 
-	std::vector <GLfloat> skyboxVertices = {
-		// positions          
-		-1.0f,  1.0f, -1.0f,
-		-1.0f, -1.0f, -1.0f,
-		 1.0f, -1.0f, -1.0f,
-		 1.0f, -1.0f, -1.0f,
-		 1.0f,  1.0f, -1.0f,
-		-1.0f,  1.0f, -1.0f,
-
-		-1.0f, -1.0f,  1.0f,
-		-1.0f, -1.0f, -1.0f,
-		-1.0f,  1.0f, -1.0f,
-		-1.0f,  1.0f, -1.0f,
-		-1.0f,  1.0f,  1.0f,
-		-1.0f, -1.0f,  1.0f,
-
-		 1.0f, -1.0f, -1.0f,
-		 1.0f, -1.0f,  1.0f,
-		 1.0f,  1.0f,  1.0f,
-		 1.0f,  1.0f,  1.0f,
-		 1.0f,  1.0f, -1.0f,
-		 1.0f, -1.0f, -1.0f,
-
-		-1.0f, -1.0f,  1.0f,
-		-1.0f,  1.0f,  1.0f,
-		 1.0f,  1.0f,  1.0f,
-		 1.0f,  1.0f,  1.0f,
-		 1.0f, -1.0f,  1.0f,
-		-1.0f, -1.0f,  1.0f,
-
-		-1.0f,  1.0f, -1.0f,
-		 1.0f,  1.0f, -1.0f,
-		 1.0f,  1.0f,  1.0f,
-		 1.0f,  1.0f,  1.0f,
-		-1.0f,  1.0f,  1.0f,
-		-1.0f,  1.0f, -1.0f,
-
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f,  1.0f,
-		 1.0f, -1.0f, -1.0f,
-		 1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f,  1.0f,
-		 1.0f, -1.0f,  1.0f
-	};
+	std::vector <GLfloat> skyboxVertices = util::returnVertices(util::cube1Layout);
 
 	VAO skyboxVAO;
 	skyboxVAO.Bind();
@@ -508,9 +381,6 @@ int main(void)
 	
 #pragma endregion
 
-		Framebuffer finalFbo;
-		finalFbo.generateTexture(window);
-		fbShader.setInt("screenTexture", 0);
 
 #pragma region Bloom
 
@@ -582,6 +452,9 @@ int main(void)
 
 #pragma endregion
 	
+		Framebuffer finalFbo;
+		finalFbo.generateTexture(window);
+		fbShader.setInt("screenTexture", 0);
 
 
 
@@ -616,6 +489,12 @@ int main(void)
 	glm::vec3 lightColors[] = {
 		glm::vec3(150.0f, 150.0f, 150.0f),
 	};
+
+
+
+
+
+
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
@@ -726,8 +605,6 @@ int main(void)
 #pragma endregion
 
 
-		int* y;
-		
 
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 		(bloom) ? glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO) : glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -770,6 +647,11 @@ int main(void)
 		myShader.setInt("material.diffuse", 0);
 		myShader.setInt("material.specular", 1);
 		myShader.setFloat("material.shininess", 256.0f);
+		myShader.setFloat("roughnessM", roughnessM);
+		myShader.setFloat("metallicM", metallicM);
+		myShader.setFloat("aoM", aoM);
+		myShader.setFloat("albedoM", albedoM);
+
 		myShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, albedo);
@@ -1018,7 +900,7 @@ int main(void)
 		
 		myImgui.CreateNode([&]() {MoveCubes(speedMultiplier, speedRotation); });
 		myImgui.CreateNode([&]() {cubes_Movement(cubePosX, cubePosY, cubePosZ, noiseMult); });
-		myImgui.CreateNode([&]() {cube_Amount(amount); });
+		myImgui.CreateNode([&]() {cube_Amount(amount, roughnessM, metallicM, aoM, albedoM); });
 		myImgui.CreateNode([&]() {light_Movement(lightX, lightY, lightZ); });
 		myImgui.CreateNode([&]() {height_Mapping(heightScaleFactor); });
 		myImgui.CreateNode([&]() {light_Settings(dirLightOn, spotLightOn, pointLightOn, HDR, bloom, shadows); });
