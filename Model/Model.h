@@ -20,6 +20,7 @@ struct ModelConfigs
     float metallic=1.0f;
     float ao=1.0f;
     bool isPBR=false;
+    int id;
 };
 
 class Model

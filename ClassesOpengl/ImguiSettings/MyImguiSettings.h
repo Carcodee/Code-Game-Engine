@@ -288,13 +288,49 @@ auto model_Loader = [](std::vector<Model>& ourModels,std::vector<ModelConfigs>& 
 				0.0f,0.0f,0.0f,
 				1.0f,1.0f,1.0f,
 				1.0f,1.0f,1.0f,
-				1.0f,PBRon
+				1.0f,PBRon,modelCounter
 			};
 			configs.push_back(config);
 			ourModels.push_back(Model());
-			ourModels[modelCounter].StartModel(buf1, config.isPBR);
+			ourModels[modelCounter].StartModel(strPath, config.isPBR);
 			modelCounter++;
 
+		}
+		if (ImGui::Button("Load Cube")) {
+			//"Models/BackpackModel/backpack.obj"
+			//Models/pizzaCar/myPizzaMovil.obj
+			//Models/pig/pig.obj
+			std::string strPath = "Models/Cube/Cube.obj";
+			flipUVS = flipUvs;
+			ModelConfigs config{
+				0.0f,0.0f,0.0f,
+				0.0f,0.0f,0.0f,
+				1.0f,1.0f,1.0f,
+				1.0f,1.0f,1.0f,
+				1.0f,false
+			};
+			configs.push_back(config);
+			ourModels.push_back(Model());
+			ourModels[modelCounter].StartModel(strPath, config.isPBR);
+			modelCounter++;
+		}
+		if (ImGui::Button("Load Sphere")) {
+			//"Models/BackpackModel/backpack.obj"
+			//Models/pizzaCar/myPizzaMovil.obj
+			//Models/pig/pig.obj
+			std::string strPath = "Models/Sphere/Sphere.obj";
+			flipUVS = flipUvs;
+			ModelConfigs config{
+				0.0f,0.0f,0.0f,
+				0.0f,0.0f,0.0f,
+				1.0f,1.0f,1.0f,
+				1.0f,1.0f,1.0f,
+				1.0f,false 
+			};
+			configs.push_back(config);
+			ourModels.push_back(Model());
+			ourModels[modelCounter].StartModel(strPath, config.isPBR);
+			modelCounter++;
 		}
 
 		ImGui::SameLine();
@@ -313,12 +349,13 @@ auto model_configs = [](std::vector<Model>& ourModels, std::vector<ModelConfigs>
 		{
 			if (ourModels[i].isLoaded)
 			{
-				if (ImGui::TreeNode("Model Config: " + i))
+				if (ImGui::TreeNode("Object "+i))
 				{
+					const float spacing1 = 4;
+					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing1, spacing1));
 			
-					if (ImGui::TreeNode("Light Configs "))
+					if (ImGui::TreeNode("Light Configs: "))
 					{
-
 
 						static float f1 = 1.0f;
 						ImGui::SliderFloat("Rougness", &f1, 0.0f, 5.0f, "%.4f");
@@ -390,8 +427,7 @@ auto model_configs = [](std::vector<Model>& ourModels, std::vector<ModelConfigs>
 						ImGui::TreePop();
 						ImGui::Spacing();
 					}
-
-
+					ImGui::PopStyleVar();
 					ImGui::TreePop();
 					ImGui::Spacing();
 
