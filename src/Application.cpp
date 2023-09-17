@@ -39,6 +39,7 @@ void processInput(GLFWwindow* window);
 
 
 std::vector <Model> ourModels;
+std::vector <ModelConfigs> modelsConfigs;
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
@@ -125,7 +126,7 @@ int main(void)
 		22, 23, 20
 	};
 	
-
+	
 
 
 
@@ -748,15 +749,24 @@ int main(void)
 				modelShader.setVec3("dirLight.ambient", ambientColor);
 				modelShader.setVec3("dirLight.diffuse", glm::vec3(1.0f));
 				modelShader.setVec3("dirLight.specular", glm::vec3(.5f));
+				modelShader.setFloat("albedoM", modelsConfigs[i].albedo);
+				modelShader.setFloat("roughnessM", modelsConfigs[i].roughness);
+				modelShader.setFloat("metallicM", modelsConfigs[i].metallic);
+				modelShader.setFloat("aoM", modelsConfigs[i].ao);
+
 				// view/projection transformations
 				modelShader.setMat4("projection", projectionM);
 				modelShader.setMat4("view", viewM);
 				modelShader.setFloat("height_scale", heightScaleFactor);
-				modelShader.setInt("PBRon", PBR);
-				// render the loaded model
+				modelShader.setInt("PBRon", modelsConfigs[i].isPBR);
+				// render the loaded models
 				glm::mat4 modelM = glm::mat4(1.0f);
-				modelM = glm::translate(modelM, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-				modelM = glm::scale(modelM, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+				modelM = glm::translate(modelM, glm::vec3(modelsConfigs[i].posX, modelsConfigs[i].posY, modelsConfigs[i].posZ)); // translate it down so it's at the center of the scene
+				modelM = glm::scale(modelM, glm::vec3(modelsConfigs[i].scaleX, modelsConfigs[i].scaleY, modelsConfigs[i].scaleZ));	// it's a bit too big for our scene, so scale it down
+				modelM = glm::rotate(modelM, glm::radians(modelsConfigs[i].rotX), glm::vec3(1.0f, 0.0f, 0.0f));
+				modelM = glm::rotate(modelM, glm::radians(modelsConfigs[i].rotY), glm::vec3(0.0f, 1.0f, 0.0f));
+				modelM = glm::rotate(modelM, glm::radians(modelsConfigs[i].rotZ), glm::vec3(0.0f, 0.0f, 1.0f));
+
 				modelShader.setMat4("model", modelM);
 			}
 			if (flipUVS)
@@ -904,7 +914,8 @@ int main(void)
 		myImgui.CreateNode([&]() {light_Movement(lightX, lightY, lightZ); });
 		myImgui.CreateNode([&]() {height_Mapping(heightScaleFactor); });
 		myImgui.CreateNode([&]() {light_Settings(dirLightOn, spotLightOn, pointLightOn, HDR, bloom, shadows); });
-		myImgui.CreateNode([&]() {model_Loader(ourModels, flipUVS,PBR,modelsLoadedCounter); });
+		myImgui.CreateNode([&]() {model_Loader(ourModels, modelsConfigs ,flipUVS,PBR,modelsLoadedCounter); });
+		myImgui.CreateNode([&]() {model_configs(ourModels, modelsConfigs); });
 		
 
 		ImGui::ShowDemoWindow();

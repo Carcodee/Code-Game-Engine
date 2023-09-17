@@ -35,7 +35,10 @@ uniform int heighmap;
 uniform int roughtnessMap;
 uniform int metallicMap;
 uniform int aoMap;
-
+uniform float albedoM;
+uniform float roughnessM;
+uniform float metallicM;
+uniform float aoM;
 
 uniform Material materials[NR_MATERIAL_SIZE];
 uniform DirLight dirLight;
@@ -92,28 +95,27 @@ void main()
 vec3 CalculatePBR(){
 
     
-    vec3 albedo     = pow(texture(texture_diffuse1, TexCoords).rgb, vec3(2.2));
+    vec3 albedo     = pow(texture(texture_diffuse1, TexCoords).rgb*albedoM, vec3(2.2));
     float metallic;
     float roughness;
     float ao;  
     if(metallicMap==1){
-    metallic= texture(texture_metallic1, TexCoords).r;
+    metallic= texture(texture_metallic1, TexCoords).r * metallicM;
     }else{
-    metallic=0.01f;
+    metallic=0.01f* metallicM;
     }
-
     if(roughtnessMap==1){
-    roughness= texture(texture_roughness1, TexCoords).r;
+    roughness= texture(texture_roughness1, TexCoords).r * roughnessM;
     }else
     {
-    roughness=0.01f;
+    roughness=0.01f* roughnessM;
     }
 
     if(aoMap==1){
-    ao= texture(texture_ao1, TexCoords).r;
+    ao= texture(texture_ao1, TexCoords).r*aoM;
     }else
     {
-    ao=0.01f;
+    ao=0.01f * aoM;
     }
 
 
@@ -264,15 +266,15 @@ vec3 CalculateDirLight(DirLight light, vec3 normal, vec3 viewDir, Material mat,v
     // combine results
     if(texturesOn==1){
     vec3 ambient  = light.ambient  * vec3(0.2f);
-    vec3 diffuse  = light.diffuse  * diff * vec3(texture(texture_diffuse1, textCords));
+    vec3 diffuse  = light.diffuse  * diff * vec3(texture(texture_diffuse1, textCords))* albedoM;
     vec3 specularMap= calculateSpecular(textCords);
-    vec3 specular = light.specular * spec * specularMap;
+    vec3 specular = light.specular * spec * specularMap * metallicM;
     return (ambient + diffuse + specular);
     }
     if(texturesOn==0){
     vec3 ambient  = light.ambient  * vec3(0.2f);
-    vec3 diffuse  = light.diffuse  * diff * vec3(mat.diffuse);
-    vec3 specular = light.specular * spec * vec3(mat.specular);
+    vec3 diffuse  = light.diffuse  * diff * vec3(mat.diffuse)* albedoM;
+    vec3 specular = light.specular * spec * vec3(mat.specular)* metallicM;
     return (ambient + diffuse + specular);
     }
 

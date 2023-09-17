@@ -10,6 +10,17 @@
 #include <mutex>
 #include <memory>
 
+struct ModelConfigs
+{
+    float posX, posY, posZ=0.0f;
+    float rotX, rotY, rotZ=0.0;
+    float scaleX, scaleY, scaleZ=1.0f;
+    float albedo=1.0f;
+    float roughness=1.0f;
+    float metallic=1.0f;
+    float ao=1.0f;
+    bool isPBR=false;
+};
 
 class Model
 {

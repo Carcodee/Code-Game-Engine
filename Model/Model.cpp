@@ -217,17 +217,32 @@ void Model::LoadPBRTextures(std::string typeName,std::vector<Texture>& textures)
     std::string prefixSize="texture_";
     std::string textName = typeName.substr(prefixSize.size());
 
-    std::string myPath = "PBRTextures/" + textName + ".jpg";
-    myPBRText.id = TextureFromFile(myPath.c_str(), this->directory, false);
-    if (myPBRText.id==0)
+    std::string myPathJPG = "PBRTextures/" + textName + ".jpg";
+    std::string myPathPNG = "PBRTextures/" + textName + ".png";
+
+
+    myPBRText.id = TextureFromFile(myPathJPG.c_str(), this->directory, false);
+    if (myPBRText.id!=0)
     {
-        std::cout << "Failed to load texture " + typeName << "\n";
+        myPBRText.type = typeName;
+        myPBRText.path = path;
+        textures.push_back(myPBRText);
+        textures_loaded.push_back(myPBRText); // add to loaded textures
+        std::cout << "PBR texture loaded: " + typeName << "\n";
+        return;
+    }  
+    myPBRText.id = TextureFromFile(myPathPNG.c_str(), this->directory, false);
+    if (myPBRText.id != 0)
+    {
+        myPBRText.type = typeName;
+        myPBRText.path = path;
+        textures.push_back(myPBRText);
+        textures_loaded.push_back(myPBRText); // add to loaded textures
+        std::cout << "PBR texture loaded: " + typeName << "\n";
+        return;
     }
-    myPBRText.type = typeName;
-    myPBRText.path = path;
-    textures.push_back(myPBRText);
-    textures_loaded.push_back(myPBRText); // add to loaded textures
-    std::cout << "PBR texture loaded: " + typeName << "\n";
+
+    std::cout << "Failed to load texture " + typeName << "\n";
 }
 
 unsigned int Model::TextureFromFile(const char* path, const std::string& directory, bool gamma)

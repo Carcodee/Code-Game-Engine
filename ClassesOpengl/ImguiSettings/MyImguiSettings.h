@@ -103,16 +103,16 @@ auto cube_Amount = [](int& amount, float& roughness, float& metalness, float& ao
 		ImGui::VSliderInt("##int", ImVec2(18, 160), &amount, 1, 10);
 
 		static float f1 = 1.0f;
-		ImGui::SliderFloat("Rougness", &f1, 0.0f, 5.0f, "");
+		ImGui::SliderFloat("Rougness", &f1, 0.0f, 5.0f, "%.4f");
 		roughness = f1;
 		static float f2 = 1.0f;
-		ImGui::SliderFloat("Metalness", &f2, 0.0f, 5.0f, "");
+		ImGui::SliderFloat("Metalness", &f2, 0.0f, 5.0f, "%.4f");
 		metalness = f2;
 		static float f3 = 1.0f;
-		ImGui::SliderFloat("Ao intensity", &f3, 0.0f, 5.0f, "");
+		ImGui::SliderFloat("Ao intensity", &f3, 0.0f, 5.0f, "%.4f");
 		ao = f3;
 		static float f4 = 1.0f;
-		ImGui::SliderFloat("albedo Intensity", &f4, 0.0f, 5.0f, "");
+		ImGui::SliderFloat("albedo Intensity", &f4, 0.0f, 5.0f, "%.4f");
 		albedo = f4;
 
 		ImGui::PopStyleVar();
@@ -246,7 +246,7 @@ auto light_Settings = [](bool& dirLightOn, bool& spotLightOn, bool& pointLightOn
 	}
 
 	};
-auto model_Loader = [](std::vector<Model>& ourModels, bool& flipUVS,bool& PBR,int& modelCounter) {
+auto model_Loader = [](std::vector<Model>& ourModels,std::vector<ModelConfigs>& configs, bool& flipUVS,bool& PBR,int& modelCounter) {
 
 	if (ImGui::TreeNode("Model Loader"))
 	{
@@ -282,15 +282,127 @@ auto model_Loader = [](std::vector<Model>& ourModels, bool& flipUVS,bool& PBR,in
 			//Models/pizzaCar/myPizzaMovil.obj
 			//Models/pig/pig.obj
 			std::string strPath = buf1;
-			PBR = PBRon;
 			flipUVS = flipUvs;
+			ModelConfigs config{
+				0.0f,0.0f,0.0f,
+				0.0f,0.0f,0.0f,
+				1.0f,1.0f,1.0f,
+				1.0f,1.0f,1.0f,
+				1.0f,PBRon
+			};
+			configs.push_back(config);
 			ourModels.push_back(Model());
-			ourModels[modelCounter].StartModel(buf1,PBR);
+			ourModels[modelCounter].StartModel(buf1, config.isPBR);
 			modelCounter++;
+
 		}
 
 		ImGui::SameLine();
 		ImGui::TreePop();
 		ImGui::Spacing();
 	};
+};
+auto model_configs = [](std::vector<Model>& ourModels, std::vector<ModelConfigs>& configs) {
+
+	if (ImGui::TreeNode("MODELS DATA"))
+	{
+		const float spacing1 = 4;
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing1, spacing1));
+
+		for (size_t i = 0; i < ourModels.size(); i++)
+		{
+			if (ourModels[i].isLoaded)
+			{
+				if (ImGui::TreeNode("Model Config: " + i))
+				{
+			
+					if (ImGui::TreeNode("Light Configs "))
+					{
+
+
+						static float f1 = 1.0f;
+						ImGui::SliderFloat("Rougness", &f1, 0.0f, 5.0f, "%.4f");
+						configs[i].roughness = f1;
+						static float f2 = 1.0f;
+						ImGui::SliderFloat("Metalness", &f2, 0.0f, 5.0f, "%.4f");
+						configs[i].metallic = f2;
+						static float f3 = 1.0f;
+						ImGui::SliderFloat("Ao intensity", &f3, 0.0f, 5.0f, "%.4f");
+						configs[i].ao = f3;
+						static float f4 = 1.0f;
+						ImGui::SliderFloat("albedo Intensity", &f4, 0.0f, 5.0f, "%.4f");
+						configs[i].albedo = f4;
+
+						ImGui::TreePop();
+						ImGui::Spacing();
+
+
+					}
+					if (ImGui::TreeNode("TRANSFORM"))
+					{
+						if (ImGui::TreeNode("POSITION"))
+						{
+							static float f1 = 0.0f;
+							ImGui::SliderFloat("X", &f1, -100.0f, 100.0f, "%.4f");
+							configs[i].posX = f1;
+							static float f2 = 0.0f;
+							ImGui::SliderFloat("Y", &f2, -100.0f, 100.0f, "%.4f");
+							configs[i].posY = f2;
+							static float f3 = 0.0f;
+							ImGui::SliderFloat("Z", &f3, -100.0f, 100.0f, "%.4f");
+							configs[i].posZ = f3;
+
+							ImGui::TreePop();
+							ImGui::Spacing();
+						}
+						if (ImGui::TreeNode("ROTATION"))
+						{
+							static float f1 = 0.0f;
+							ImGui::SliderFloat("X", &f1, -200.0f, 200.0f, "%.4f");
+							configs[i].rotX = f1;
+							static float f2 = 0.0f;
+							ImGui::SliderFloat("Y", &f2, -200.0f, 200.0f, "%.4f");
+							configs[i].rotY = f2;
+							static float f3 = 0.0f;
+							ImGui::SliderFloat("Z", &f3, -200.0f, 200.0f, "%.4f");
+							configs[i].rotZ = f3;
+							static float f4 = 1.0f;
+
+							ImGui::TreePop();
+							ImGui::Spacing();
+						}
+						if (ImGui::TreeNode("SCALE"))
+						{
+							static float f1 = 1.0f;
+							ImGui::SliderFloat("X", &f1, -10.0f, 10.0f, "%.4f");
+							configs[i].scaleX = f1;
+							static float f2 = 1.0f;
+							ImGui::SliderFloat("Y", &f2, -10.0f, 10.0f, "%.4f");
+							configs[i].scaleY = f2;
+							static float f3 = 1.0f;
+							ImGui::SliderFloat("Z", &f3, -10.0f, 10.0f, "%.4f");
+							configs[i].scaleZ = f3;
+							static float f4 = 1.0f;
+
+							ImGui::TreePop();
+							ImGui::Spacing();
+						}
+						ImGui::TreePop();
+						ImGui::Spacing();
+					}
+
+
+					ImGui::TreePop();
+					ImGui::Spacing();
+
+				}
+
+			
+			}
+		}
+		ImGui::PopStyleVar();
+		ImGui::TreePop();
+		ImGui::Spacing();
+	}
+
 };
