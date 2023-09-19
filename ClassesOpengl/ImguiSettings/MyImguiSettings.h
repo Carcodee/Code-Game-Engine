@@ -307,7 +307,7 @@ auto model_Loader = [](std::vector<Model>& ourModels,std::vector<ModelConfigs>& 
 				0.0f,0.0f,0.0f,
 				1.0f,1.0f,1.0f,
 				1.0f,1.0f,1.0f,
-				1.0f,false
+				1.0f,false,modelCounter
 			};
 			configs.push_back(config);
 			ourModels.push_back(Model());
@@ -325,7 +325,7 @@ auto model_Loader = [](std::vector<Model>& ourModels,std::vector<ModelConfigs>& 
 				0.0f,0.0f,0.0f,
 				1.0f,1.0f,1.0f,
 				1.0f,1.0f,1.0f,
-				1.0f,false 
+				1.0f,false ,modelCounter
 			};
 			configs.push_back(config);
 			ourModels.push_back(Model());
@@ -349,7 +349,8 @@ auto model_configs = [](std::vector<Model>& ourModels, std::vector<ModelConfigs>
 		{
 			if (ourModels[i].isLoaded)
 			{
-				if (ImGui::TreeNode("Object "+i))
+				std::string name = "Object " + std::to_string(configs[i].id);
+				if (ImGui::TreeNode(name.c_str()))
 				{
 					const float spacing1 = 4;
 					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing1, spacing1));

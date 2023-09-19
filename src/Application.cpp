@@ -749,6 +749,8 @@ int main(void)
 				modelShader.setVec3("dirLight.ambient", ambientColor);
 				modelShader.setVec3("dirLight.diffuse", glm::vec3(1.0f));
 				modelShader.setVec3("dirLight.specular", glm::vec3(.5f));
+				modelShader.setVec3("dirLight.direction", -lightPos);
+
 				modelShader.setFloat("albedoM", modelsConfigs[i].albedo);
 				modelShader.setFloat("roughnessM", modelsConfigs[i].roughness);
 				modelShader.setFloat("metallicM", modelsConfigs[i].metallic);
