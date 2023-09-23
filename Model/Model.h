@@ -30,6 +30,18 @@ public:
     Model();
     Model(const Model& other);
 
+    Model operator=(const Model& other) {
+        this->meshes = other.meshes;
+		this->textures_loaded = other.textures_loaded;
+		this->directory = other.directory;
+		this->path = other.path;
+		this->gammaCorrection = other.gammaCorrection;
+		this->isPBR = other.isPBR;
+		this->materials = other.materials;
+		this->isLoaded = other.isLoaded;
+        return *this;
+    };
+
     void StartModel(std::string const& path ,bool isPBR,bool gamma = false) {
        myFuture = loadSceneAsync(path,directory,isLoaded,modelMutex);
        this->isPBR=isPBR;

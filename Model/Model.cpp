@@ -231,16 +231,6 @@ void Model::LoadPBRTextures(std::string typeName,std::vector<Texture>& textures)
         std::cout << "PBR texture loaded: " + typeName << "\n";
         return;
     }  
-    myPBRText.id = TextureFromFile(myPathPNG.c_str(), this->directory, false);
-    if (myPBRText.id != 0)
-    {
-        myPBRText.type = typeName;
-        myPBRText.path = path;
-        textures.push_back(myPBRText);
-        textures_loaded.push_back(myPBRText); // add to loaded textures
-        std::cout << "PBR texture loaded: " + typeName << "\n";
-        return;
-    }
 
     std::cout << "Failed to load texture " + typeName << "\n";
 }

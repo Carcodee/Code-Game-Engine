@@ -22,7 +22,7 @@ const unsigned int SCR_HEIGHT = 600;
 
 bool bloomKeyPressed = true;
 float exposure = 1.0f;
-bool dirLightOn = true, pointLightOn = true, spotLightOn = true, HDR = true,bloom = true, useGbuffer = false, shadows = true;
+bool dirLightOn = true, pointLightOn = true, spotLightOn = true, HDR = false,bloom = false, useGbuffer = false, shadows = true;
 bool flipUVS= false;
 float heightScaleFactor = 0.1f;
 bool PBR = false;
@@ -40,6 +40,9 @@ void processInput(GLFWwindow* window);
 
 std::vector <Model> ourModels;
 std::vector <ModelConfigs> modelsConfigs;
+ModelHandler modelHandler;
+
+
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
@@ -125,8 +128,8 @@ int main(void)
 		20, 21, 22,
 		22, 23, 20
 	};
-	
-	
+
+
 
 
 
@@ -738,48 +741,37 @@ int main(void)
 
 #pragma region ModelRegion
 
-		for (size_t i = 0; i < ourModels.size(); i++)
+		for (size_t i = 0; i < modelHandler.models.size(); i++)
 		{
-			if (ourModels[i].isLoaded)
+			if (modelHandler.models[i].newModel.isLoaded)
 			{
 				// don't forget to enable shader before setting uniforms
 				modelShader.use();
 				modelShader.setVec3("viewPos", camera.Position);
 				modelShader.setVec3("lightPos", -lightPos);
 				modelShader.setVec3("dirLight.ambient", ambientColor);
-				modelShader.setVec3("dirLight.diffuse", glm::vec3(1.0f));
+				modelShader.setVec3("dirLight.diffuse", glm::vec3(0.3f,0.8f,0.8f));
 				modelShader.setVec3("dirLight.specular", glm::vec3(.5f));
 				modelShader.setVec3("dirLight.direction", -lightPos);
 
-				modelShader.setFloat("albedoM", modelsConfigs[i].albedo);
-				modelShader.setFloat("roughnessM", modelsConfigs[i].roughness);
-				modelShader.setFloat("metallicM", modelsConfigs[i].metallic);
-				modelShader.setFloat("aoM", modelsConfigs[i].ao);
+				modelShader.setFloat("albedoM", 1);
+				modelShader.setFloat("roughnessM", 1);
+				modelShader.setFloat("metallicM", 1);
+				modelShader.setFloat("aoM", 1);
+				modelShader.setFloat("height_scale",1);
+				modelShader.setInt("PBRon", 1);
 
-				// view/projection transformations
-				modelShader.setMat4("projection", projectionM);
-				modelShader.setMat4("view", viewM);
-				modelShader.setFloat("height_scale", heightScaleFactor);
-				modelShader.setInt("PBRon", modelsConfigs[i].isPBR);
-				// render the loaded models
-				glm::mat4 modelM = glm::mat4(1.0f);
-				modelM = glm::translate(modelM, glm::vec3(modelsConfigs[i].posX, modelsConfigs[i].posY, modelsConfigs[i].posZ)); // translate it down so it's at the center of the scene
-				modelM = glm::scale(modelM, glm::vec3(modelsConfigs[i].scaleX, modelsConfigs[i].scaleY, modelsConfigs[i].scaleZ));	// it's a bit too big for our scene, so scale it down
-				modelM = glm::rotate(modelM, glm::radians(modelsConfigs[i].rotX), glm::vec3(1.0f, 0.0f, 0.0f));
-				modelM = glm::rotate(modelM, glm::radians(modelsConfigs[i].rotY), glm::vec3(0.0f, 1.0f, 0.0f));
-				modelM = glm::rotate(modelM, glm::radians(modelsConfigs[i].rotZ), glm::vec3(0.0f, 0.0f, 1.0f));
 
-				modelShader.setMat4("model", modelM);
 			}
 			if (flipUVS)
 			{
 				stbi_set_flip_vertically_on_load(true);
-				ourModels[i].Draw(modelShader);
+				modelHandler.DrawModel(modelShader, i,projectionM,viewM);
 				stbi_set_flip_vertically_on_load(false);
 			}
 			else
 			{
-				ourModels[i].Draw(modelShader);
+				modelHandler.DrawModel(modelShader, i, projectionM, viewM);
 
 			}
 		}
@@ -916,9 +908,9 @@ int main(void)
 		myImgui.CreateNode([&]() {light_Movement(lightX, lightY, lightZ); });
 		myImgui.CreateNode([&]() {height_Mapping(heightScaleFactor); });
 		myImgui.CreateNode([&]() {light_Settings(dirLightOn, spotLightOn, pointLightOn, HDR, bloom, shadows); });
-		myImgui.CreateNode([&]() {model_Loader(ourModels, modelsConfigs ,flipUVS,PBR,modelsLoadedCounter); });
-		myImgui.CreateNode([&]() {model_configs(ourModels, modelsConfigs); });
-		
+		myImgui.CreateNode([&]() {model_LoaderTest(modelHandler, flipUVS, modelsLoadedCounter); });
+		myImgui.CreateNode([&]() {model_configs(modelHandler); });
+
 
 		ImGui::ShowDemoWindow();
 		

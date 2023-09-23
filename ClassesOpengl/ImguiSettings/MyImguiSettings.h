@@ -4,6 +4,7 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 #include <iostream>
+#include "../ClassesOpengl/ModelHandler/ModelHandler.h"
 #include "../Model/Model.h"
 
 auto MoveCubes = [](float& speed, float& rotationSpeed) {
@@ -246,7 +247,189 @@ auto light_Settings = [](bool& dirLightOn, bool& spotLightOn, bool& pointLightOn
 	}
 
 	};
-auto model_Loader = [](std::vector<Model>& ourModels,std::vector<ModelConfigs>& configs, bool& flipUVS,bool& PBR,int& modelCounter) {
+//auto model_Loader = [](std::vector<Model>& ourModels,std::vector<ModelConfigs>& configs, bool& flipUVS,bool& PBR,int& modelCounter) {
+//
+//	if (ImGui::TreeNode("Model Loader"))
+//	{
+//		struct TextFilters
+//		{
+//			// Modify character input by altering 'data->Eventchar' (ImGuiInputTextFlags_CallbackCharFilter callback)
+//			static int FilterCasingSwap(ImGuiInputTextCallbackData* data)
+//			{
+//				if (data->EventChar >= 'a' && data->EventChar <= 'z') { data->EventChar -= 'a' - 'A'; } // Lowercase becomes uppercase
+//				else if (data->EventChar >= 'A' && data->EventChar <= 'Z') { data->EventChar += 'a' - 'A'; } // Uppercase becomes lowercase
+//				return 0;
+//			}
+//
+//			// Return 0 (pass) if the character is 'i' or 'm' or 'g' or 'u' or 'i', otherwise return 1 (filter out)
+//			static int FilterImGuiLetters(ImGuiInputTextCallbackData* data)
+//			{
+//				if (data->EventChar < 256 && strchr("imgui", (char)data->EventChar))
+//					return 0;
+//				return 1;
+//			}
+//		};
+//
+//		static char buf1[400] = ""; ImGui::InputText("Model path here:", buf1, 400);
+//		// Save/Revert button
+//		static ImGuiComboFlags flipUvs = 1;
+//		static ImGuiComboFlags PBRon = 1;
+//
+//		ImGui::CheckboxFlags("Flip UVS", &flipUvs, ImGuiComboFlags_PopupAlignLeft);
+//		ImGui::CheckboxFlags("PBR", &PBRon, ImGuiComboFlags_PopupAlignLeft);
+//
+//		if (ImGui::Button("Load")) {
+//			//"Models/BackpackModel/backpack.obj"
+//			//Models/pizzaCar/myPizzaMovil.obj
+//			//Models/pig/pig.obj
+//			std::string strPath = buf1;
+//			flipUVS = flipUvs;
+//			ModelConfigs config{
+//				0.0f,0.0f,0.0f,
+//				0.0f,0.0f,0.0f,
+//				1.0f,1.0f,1.0f,
+//				1.0f,1.0f,1.0f,
+//				1.0f,PBRon,modelCounter
+//			};
+//			configs.push_back(config);
+//			ourModels.push_back(Model());
+//			ourModels[modelCounter].StartModel(strPath, config.isPBR);
+//			modelCounter++;
+//
+//		}
+//		if (ImGui::Button("Load Cube")) {
+//			//"Models/BackpackModel/backpack.obj"
+//			//Models/pizzaCar/myPizzaMovil.obj
+//			//Models/pig/pig.obj
+//			std::string strPath = "Models/Cube/Cube.obj";
+//			flipUVS = flipUvs;
+//			ModelConfigs config{
+//				0.0f,0.0f,0.0f,
+//				0.0f,0.0f,0.0f,
+//				1.0f,1.0f,1.0f,
+//				1.0f,1.0f,1.0f,
+//				1.0f,PBRon,modelCounter
+//			};
+//			configs.push_back(config);
+//			ourModels.push_back(Model());
+//			ourModels[modelCounter].StartModel(strPath, config.isPBR);
+//			modelCounter++;
+//		}
+//		if (ImGui::Button("Load Sphere")) {
+//			//"Models/BackpackModel/backpack.obj"
+//			//Models/pizzaCar/myPizzaMovil.obj
+//			//Models/pig/pig.obj
+//			std::string strPath = "Models/Sphere/Sphere.obj";
+//			flipUVS = flipUvs;
+//			ModelConfigs config{
+//				0.0f,0.0f,0.0f,
+//				0.0f,0.0f,0.0f,
+//				1.0f,1.0f,1.0f,
+//				1.0f,1.0f,1.0f,
+//				1.0f,PBRon ,modelCounter
+//			};
+//			configs.push_back(config);
+//			ourModels.push_back(Model());
+//			ourModels[modelCounter].StartModel(strPath, config.isPBR);
+//			modelCounter++;
+//		}
+//
+//		ImGui::SameLine();
+//		ImGui::TreePop();
+//		ImGui::Spacing();
+//	};
+//};
+auto model_configs = [](ModelHandler& myModelHandler) {
+
+	if (ImGui::TreeNode("MODELS DATA"))
+	{
+		const float spacing1 = 4;
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing1, spacing1));
+
+		for (size_t i = 0; i < myModelHandler.models.size(); i++)
+		{
+			if (myModelHandler.models[i].newModel.isLoaded)
+			{
+				std::string name = "Object " + std::to_string(myModelHandler.models[i].modelID);
+				if (ImGui::TreeNode(name.c_str()))
+				{
+
+			
+					if (ImGui::TreeNode("Light Configs: "))
+					{
+
+						//static float f1 = 1.0f;
+						//ImGui::SliderFloat("Rougness", &f1, 0.0f, 5.0f, "%.4f");
+						//configs[i].roughness = f1;
+						//static float f2 = 1.0f;
+						//ImGui::SliderFloat("Metalness", &f2, 0.0f, 5.0f, "%.4f");
+						//configs[i].metallic = f2;
+						//static float f3 = 1.0f;
+						//ImGui::SliderFloat("Ao intensity", &f3, 0.0f, 5.0f, "%.4f");
+						//configs[i].ao = f3;
+						//static float f4 = 1.0f;
+						//ImGui::SliderFloat("albedo Intensity", &f4, 0.0f, 5.0f, "%.4f");
+						//configs[i].albedo = f4;
+
+						ImGui::TreePop();
+						ImGui::Spacing();
+
+
+					}
+					if (ImGui::TreeNode("TRANSFORM"))
+					{
+						
+							ImGui::Text("Position");
+							static float f1=0.0f,f2=0.0f,f3 = 0.0f;
+							ImGui::SliderFloat("PX", &f1, -10.0f, 10.0f, "%.4f");
+							ImGui::SliderFloat("PY", &f2, -10.0f, 10.0f, "%.4f");
+							ImGui::SliderFloat("PZ", &f3, -10.0f, 10.0f, "%.4f");
+							myModelHandler.SetModelPosition(i, glm::vec3(f1, f2, f3));
+
+
+							
+					
+							ImGui::Text("Rotation");
+							static float f4=0.0f, f5=0.0f, f6 = 0.0f;
+							ImGui::SliderFloat("RX", &f4, -200.0f, 200.0f, "%.4f");
+							ImGui::SliderFloat("RY", &f5, -200.0f, 200.0f, "%.4f");
+							ImGui::SliderFloat("RZ", &f6, -200.0f, 200.0f, "%.4f");
+
+
+							myModelHandler.SetModelRotationX(i, f4);
+							myModelHandler.SetModelRotationY(i, f5);
+							myModelHandler.SetModelRotationZ(i, f6);
+
+					
+
+							ImGui::Text("Scale");
+							static float S1=1.0f, S2=1.0f, S3= 1.0f;
+							ImGui::SliderFloat("SX", &S1, -10.0f, 10.0f, "%.4f");
+							ImGui::SliderFloat("SY", &S2, -10.0f, 10.0f, "%.4f");
+							ImGui::SliderFloat("SZ", &S3, -10.0f, 10.0f, "%.4f");
+
+							myModelHandler.SetModelScale(i, glm::vec3(S1, S2, S3));
+
+
+						
+						ImGui::TreePop();
+						ImGui::Spacing();
+					}
+					ImGui::TreePop();
+					ImGui::Spacing();
+
+				}
+
+			
+			}
+		}
+		ImGui::PopStyleVar();
+		ImGui::TreePop();
+		ImGui::Spacing();
+	}
+
+};
+auto model_LoaderTest = [](ModelHandler& models, bool& flipUVS, int& modelCounter) {
 
 	if (ImGui::TreeNode("Model Loader"))
 	{
@@ -277,59 +460,16 @@ auto model_Loader = [](std::vector<Model>& ourModels,std::vector<ModelConfigs>& 
 		ImGui::CheckboxFlags("Flip UVS", &flipUvs, ImGuiComboFlags_PopupAlignLeft);
 		ImGui::CheckboxFlags("PBR", &PBRon, ImGuiComboFlags_PopupAlignLeft);
 
-		if (ImGui::Button("Load")) {
-			//"Models/BackpackModel/backpack.obj"
-			//Models/pizzaCar/myPizzaMovil.obj
-			//Models/pig/pig.obj
-			std::string strPath = buf1;
-			flipUVS = flipUvs;
-			ModelConfigs config{
-				0.0f,0.0f,0.0f,
-				0.0f,0.0f,0.0f,
-				1.0f,1.0f,1.0f,
-				1.0f,1.0f,1.0f,
-				1.0f,PBRon,modelCounter
-			};
-			configs.push_back(config);
-			ourModels.push_back(Model());
-			ourModels[modelCounter].StartModel(strPath, config.isPBR);
-			modelCounter++;
 
-		}
 		if (ImGui::Button("Load Cube")) {
 			//"Models/BackpackModel/backpack.obj"
 			//Models/pizzaCar/myPizzaMovil.obj
 			//Models/pig/pig.obj
 			std::string strPath = "Models/Cube/Cube.obj";
 			flipUVS = flipUvs;
-			ModelConfigs config{
-				0.0f,0.0f,0.0f,
-				0.0f,0.0f,0.0f,
-				1.0f,1.0f,1.0f,
-				1.0f,1.0f,1.0f,
-				1.0f,false,modelCounter
-			};
-			configs.push_back(config);
-			ourModels.push_back(Model());
-			ourModels[modelCounter].StartModel(strPath, config.isPBR);
-			modelCounter++;
-		}
-		if (ImGui::Button("Load Sphere")) {
-			//"Models/BackpackModel/backpack.obj"
-			//Models/pizzaCar/myPizzaMovil.obj
-			//Models/pig/pig.obj
-			std::string strPath = "Models/Sphere/Sphere.obj";
-			flipUVS = flipUvs;
-			ModelConfigs config{
-				0.0f,0.0f,0.0f,
-				0.0f,0.0f,0.0f,
-				1.0f,1.0f,1.0f,
-				1.0f,1.0f,1.0f,
-				1.0f,false ,modelCounter
-			};
-			configs.push_back(config);
-			ourModels.push_back(Model());
-			ourModels[modelCounter].StartModel(strPath, config.isPBR);
+			ModelItem model(Model(), modelCounter, "Cube ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base");
+			models.AddModel(model);
+			models.startLoadModel(strPath, true, modelCounter);
 			modelCounter++;
 		}
 
@@ -337,109 +477,4 @@ auto model_Loader = [](std::vector<Model>& ourModels,std::vector<ModelConfigs>& 
 		ImGui::TreePop();
 		ImGui::Spacing();
 	};
-};
-auto model_configs = [](std::vector<Model>& ourModels, std::vector<ModelConfigs>& configs) {
-
-	if (ImGui::TreeNode("MODELS DATA"))
-	{
-		const float spacing1 = 4;
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing1, spacing1));
-
-		for (size_t i = 0; i < ourModels.size(); i++)
-		{
-			if (ourModels[i].isLoaded)
-			{
-				std::string name = "Object " + std::to_string(configs[i].id);
-				if (ImGui::TreeNode(name.c_str()))
-				{
-					const float spacing1 = 4;
-					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing1, spacing1));
-			
-					if (ImGui::TreeNode("Light Configs: "))
-					{
-
-						static float f1 = 1.0f;
-						ImGui::SliderFloat("Rougness", &f1, 0.0f, 5.0f, "%.4f");
-						configs[i].roughness = f1;
-						static float f2 = 1.0f;
-						ImGui::SliderFloat("Metalness", &f2, 0.0f, 5.0f, "%.4f");
-						configs[i].metallic = f2;
-						static float f3 = 1.0f;
-						ImGui::SliderFloat("Ao intensity", &f3, 0.0f, 5.0f, "%.4f");
-						configs[i].ao = f3;
-						static float f4 = 1.0f;
-						ImGui::SliderFloat("albedo Intensity", &f4, 0.0f, 5.0f, "%.4f");
-						configs[i].albedo = f4;
-
-						ImGui::TreePop();
-						ImGui::Spacing();
-
-
-					}
-					if (ImGui::TreeNode("TRANSFORM"))
-					{
-						if (ImGui::TreeNode("POSITION"))
-						{
-							static float f1 = 0.0f;
-							ImGui::SliderFloat("X", &f1, -100.0f, 100.0f, "%.4f");
-							configs[i].posX = f1;
-							static float f2 = 0.0f;
-							ImGui::SliderFloat("Y", &f2, -100.0f, 100.0f, "%.4f");
-							configs[i].posY = f2;
-							static float f3 = 0.0f;
-							ImGui::SliderFloat("Z", &f3, -100.0f, 100.0f, "%.4f");
-							configs[i].posZ = f3;
-
-							ImGui::TreePop();
-							ImGui::Spacing();
-						}
-						if (ImGui::TreeNode("ROTATION"))
-						{
-							static float f1 = 0.0f;
-							ImGui::SliderFloat("X", &f1, -200.0f, 200.0f, "%.4f");
-							configs[i].rotX = f1;
-							static float f2 = 0.0f;
-							ImGui::SliderFloat("Y", &f2, -200.0f, 200.0f, "%.4f");
-							configs[i].rotY = f2;
-							static float f3 = 0.0f;
-							ImGui::SliderFloat("Z", &f3, -200.0f, 200.0f, "%.4f");
-							configs[i].rotZ = f3;
-							static float f4 = 1.0f;
-
-							ImGui::TreePop();
-							ImGui::Spacing();
-						}
-						if (ImGui::TreeNode("SCALE"))
-						{
-							static float f1 = 1.0f;
-							ImGui::SliderFloat("X", &f1, -10.0f, 10.0f, "%.4f");
-							configs[i].scaleX = f1;
-							static float f2 = 1.0f;
-							ImGui::SliderFloat("Y", &f2, -10.0f, 10.0f, "%.4f");
-							configs[i].scaleY = f2;
-							static float f3 = 1.0f;
-							ImGui::SliderFloat("Z", &f3, -10.0f, 10.0f, "%.4f");
-							configs[i].scaleZ = f3;
-							static float f4 = 1.0f;
-
-							ImGui::TreePop();
-							ImGui::Spacing();
-						}
-						ImGui::TreePop();
-						ImGui::Spacing();
-					}
-					ImGui::PopStyleVar();
-					ImGui::TreePop();
-					ImGui::Spacing();
-
-				}
-
-			
-			}
-		}
-		ImGui::PopStyleVar();
-		ImGui::TreePop();
-		ImGui::Spacing();
-	}
-
-};
+	};

@@ -47,6 +47,7 @@ void Mesh::Draw(ShaderClass& shader, int mIndex)
         // and finally bind the texture
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
+    int diffuseMapping = (diffuseNr > 1) ? 1 : 0;
     int normalMapping = (normalNr > 1) ? 1 : 0;
     int specularMapping = (specularNr > 1) ? 1 : 0;
     int heightmapping= (heightNr > 1) ? 1 : 0;
@@ -57,6 +58,7 @@ void Mesh::Draw(ShaderClass& shader, int mIndex)
 
     shader.use();
     shader.setInt("meshCount", mIndex);
+    shader.setInt("diffuseMapping", diffuseMapping);
     shader.setInt("normalMapping", normalMapping);
     shader.setInt("specularMapping", specularMapping);
     shader.setInt("heighmap", heightmapping);

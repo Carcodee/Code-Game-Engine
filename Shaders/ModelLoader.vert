@@ -31,11 +31,12 @@ void main()
     Normal=aNormal;
     TexCoords = aTexCoords;    
     FragPos = vec3(model * vec4(aPos, 1.0));
-    gl_Position = projection * view * model * vec4(aPos, 1.0);
+    gl_Position = projection * view * vec4(FragPos, 1.0);
     
     calculateNormals = normalMapping;
     PBR = PBRon;
-    if(calculateNormals == 1&& PBRon != 1){
+    calculateNormals=0;
+    if(calculateNormals==1){
         vec3 T = normalize(vec3(model * vec4(aTangent,   0.0)));
         vec3 B = normalize(vec3(model * vec4(aBitangent, 0.0)));
         vec3 N = normalize(vec3(model * vec4(aNormal,    0.0)));

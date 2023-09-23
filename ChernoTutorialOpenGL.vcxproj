@@ -164,7 +164,9 @@
     <ClCompile Include="Includes\imgui\imgui_tables.cpp" />
     <ClCompile Include="Includes\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Includes\Noise\PerlinNoise.cpp" />
+    <ClCompile Include="ClassesOpengl\Mateial\Material.cpp" />
     <ClCompile Include="Mesh\Mesh.cpp" />
+    <ClCompile Include="ClassesOpengl\ModelHandler\ModelHandler.cpp" />
     <ClCompile Include="Model\Model.cpp" />
     <ClCompile Include="ClassesOpengl\Renderer\Renderer.cpp" />
     <ClCompile Include="Shaders\ShaderClass.cpp" />
@@ -194,7 +196,9 @@
     <ClInclude Include="Includes\imgui\imstb_truetype.h" />
     <ClInclude Include="Includes\Noise\PerlinNoise.h" />
     <ClInclude Include="Includes\OBJLoader\OBJ_Loader.h" />
+    <ClInclude Include="ClassesOpengl\Mateial\Material.h" />
     <ClInclude Include="Mesh\Mesh.h" />
+    <ClInclude Include="ClassesOpengl\ModelHandler\ModelHandler.h" />
     <ClInclude Include="Model\Model.h" />
     <ClInclude Include="ClassesOpengl\Renderer\Renderer.h" />
     <ClInclude Include="Shaders\ShaderClass.h" />

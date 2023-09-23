@@ -25,4 +25,7 @@
 #include "../Camera/CameraHandler.h"
 #include "../ClassesOpengl/Framebuffer.h"
 #include "stb-master/stb_image.h"
+#include "../ClassesOpengl/Mateial/Material.h"
+#include "../ClassesOpengl/ModelHandler/ModelHandler.h"
+
 #define STB_IMAGE_IMPLEMENTATION
