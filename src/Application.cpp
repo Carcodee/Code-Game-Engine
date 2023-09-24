@@ -754,13 +754,6 @@ int main(void)
 				modelShader.setVec3("dirLight.specular", glm::vec3(.5f));
 				modelShader.setVec3("dirLight.direction", -lightPos);
 
-				modelShader.setFloat("albedoM", 1);
-				modelShader.setFloat("roughnessM", 1);
-				modelShader.setFloat("metallicM", 1);
-				modelShader.setFloat("aoM", 1);
-				modelShader.setFloat("height_scale",1);
-				modelShader.setInt("PBRon", 1);
-
 
 			}
 			if (flipUVS)

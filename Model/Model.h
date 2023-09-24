@@ -37,10 +37,12 @@ public:
 		this->path = other.path;
 		this->gammaCorrection = other.gammaCorrection;
 		this->isPBR = other.isPBR;
-		this->materials = other.materials;
 		this->isLoaded = other.isLoaded;
         return *this;
     };
+
+    //TODO: add move constructor
+    
 
     void StartModel(std::string const& path ,bool isPBR,bool gamma = false) {
        myFuture = loadSceneAsync(path,directory,isLoaded,modelMutex);
@@ -50,16 +52,18 @@ public:
     }
     void Draw(ShaderClass& shader);
     bool isLoaded;
+    Material material;
+
 private:
     std::mutex modelMutex;
     // model data
     std::vector<Texture> textures_loaded;
     std::vector<Mesh> meshes;
-    std::vector<Material> materials;
     std::string directory;
     std::string path;
     bool gammaCorrection;
     bool isPBR;
+    bool useTexture;
     std::future<const aiScene*> myFuture;
     Assimp::Importer import;
     void loadModel(std::string path);

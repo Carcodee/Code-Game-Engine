@@ -85,7 +85,6 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
-
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
         Vertex vertex;
@@ -135,31 +134,32 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
             indices.push_back(face.mIndices[j]);
     }
 
-    aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+    aiMaterial* aiMaterial = scene->mMaterials[mesh->mMaterialIndex];
     std::string errorTexture = "errorTexture::UNABLE TO READ THE TEXTURE= ";
-
-
-    if (!isPBR)
+    useTexture=true;
+    if (!isPBR && useTexture)
     {
-        std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+        std::vector<Texture> diffuseMaps = loadMaterialTextures(aiMaterial, aiTextureType_DIFFUSE, "texture_diffuse");
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
         (diffuseMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(diffuseMaps) << "\n" : std::cout << "diffuse ok" << "\n";
         //2. specular maps
-        std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+        std::vector<Texture> specularMaps = loadMaterialTextures(aiMaterial, aiTextureType_SPECULAR, "texture_specular");
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
         (specularMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(specularMaps) << "\n" : std::cout << "specular ok" << "\n";
         //3. normal maps
-        std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+        std::vector<Texture> normalMaps = loadMaterialTextures(aiMaterial, aiTextureType_HEIGHT, "texture_normal");
         textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
         (normalMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(normalMaps) << "\n" : std::cout << "normalmap ok" << "\n";
         //4. height maps
-        std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_DISPLACEMENT, "texture_height");
+        std::vector<Texture> heightMaps = loadMaterialTextures(aiMaterial, aiTextureType_DISPLACEMENT, "texture_height");
         textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
         (heightMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(heightMaps) << "\n" : std::cout << "heightmap ok" << "\n";
+        material.setConfigurations(isPBR, true);
+        material.SetTexture(textures);
     }
-    else
-    {
 
+    if (isPBR)
+    {
         //1. roughtness maps
         LoadPBRTextures("texture_diffuse", textures);
         //2. Normal maps
@@ -170,14 +170,20 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         LoadPBRTextures("texture_metallic", textures);
         //5. ao maps
         LoadPBRTextures("texture_ao", textures);
+        material.setConfigurations(isPBR, true);
+        material.SetTexture(textures);
+    }
+    
+    if(!useTexture)
+    {
+        material.setConfigurations(isPBR, false);
     }
 
-    //insertmaterials in fragment shader  with a method in the mesh
-    Material materials = loadMaterial(material);
+
 
     //std::cout << materials.Diffuse.x<< " ," << materials.Diffuse.y << " ," << materials.Diffuse.z << "\n";
 
-    return Mesh(vertices, indices, textures, materials);
+    return Mesh(vertices, indices, material);
 }
 
 std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
@@ -228,11 +234,21 @@ void Model::LoadPBRTextures(std::string typeName,std::vector<Texture>& textures)
         myPBRText.path = path;
         textures.push_back(myPBRText);
         textures_loaded.push_back(myPBRText); // add to loaded textures
-        std::cout << "PBR texture loaded: " + typeName << "\n";
-        return;
+        std::cout << "PBR jpg texture loaded: " + typeName << "\n";
+       return;
     }  
+    myPBRText.id = TextureFromFile(myPathPNG.c_str(), this->directory, false);
+    if (myPBRText.id != 0)
+    {
+        myPBRText.type = typeName;
+        myPBRText.path = path;
+        textures.push_back(myPBRText);
+        textures_loaded.push_back(myPBRText); // add to loaded textures
+        std::cout << "PBR png texture loaded: " + typeName << "\n";
+        return;
+    }
 
-    std::cout << "Failed to load texture " + typeName << "\n";
+    std::cout << "Failed to load textures PBR" + typeName << "\n";
 }
 
 unsigned int Model::TextureFromFile(const char* path, const std::string& directory, bool gamma)
@@ -268,8 +284,9 @@ unsigned int Model::TextureFromFile(const char* path, const std::string& directo
     }
     else
     {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
         stbi_image_free(data);
+        glDeleteTextures(1, &textureID);
+        return 0;
     }
     return textureID;
 
@@ -283,19 +300,6 @@ Material Model::loadMaterial(aiMaterial* mat)
     Material material;
     aiColor3D color(0.f, 0.f, 0.f);
     float shininess;
-
-    mat->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-    material.Diffuse = glm::vec3(randDiff.r, randDiff.b, randDiff.g);
-
-    mat->Get(AI_MATKEY_COLOR_AMBIENT, color);
-    material.Ambient = glm::vec3(color.r, color.b, color.g);
-
-    mat->Get(AI_MATKEY_COLOR_SPECULAR, color);
-    material.Specular = glm::vec3(randDiff.r, randDiff.b, randDiff.g);
-
-    mat->Get(AI_MATKEY_SHININESS, shininess);
-    material.Shininess = shininess;
-
     return material;
 }
 

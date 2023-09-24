@@ -1,86 +1,20 @@
 #include "Mesh.h"
 
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, Material mat)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Material& mat)
 {
     this->vertices = vertices;
     this->indices = indices;
-    this->textures = textures;
     this->mat = mat;
     setupMesh();
 }
 
 void Mesh::Draw(ShaderClass& shader, int mIndex)
 {
-    // bind appropriate textures
-    unsigned int diffuseNr = 1;
-    unsigned int specularNr = 1;
-    unsigned int normalNr = 1;
-    unsigned int heightNr = 1;
-    unsigned int roguhtnessNr=1;
-    unsigned int metallicNr=1;
-    unsigned int aoNr=1;
-
-    for (unsigned int i = 0; i < textures.size(); i++)
-    {
-        glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
-        // retrieve texture number (the N in diffuse_textureN)
-        std::string number;
-        std::string name = textures[i].type;
-        if (name == "texture_diffuse")
-            number = std::to_string(diffuseNr++);
-        else if (name == "texture_specular")
-            number = std::to_string(specularNr++); // transfer unsigned int to string
-        else if (name == "texture_normal")
-            number = std::to_string(normalNr++); // transfer unsigned int to string
-        else if (name == "texture_height")
-            number = std::to_string(heightNr++); // transfer unsigned int to string
-        else if (name == "texture_metallic")
-            number = std::to_string(metallicNr++); // transfer unsigned int to string
-        else if (name == "texture_ao")
-            number = std::to_string(aoNr++); // transfer unsigned int to string
-        else if (name == "texture_roughness")
-            number = std::to_string(roguhtnessNr++); // transfer unsigned int to string
-
-        // now set the sampler to the correct texture unit
-        glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
-        // and finally bind the texture
-        glBindTexture(GL_TEXTURE_2D, textures[i].id);
-    }
-    int diffuseMapping = (diffuseNr > 1) ? 1 : 0;
-    int normalMapping = (normalNr > 1) ? 1 : 0;
-    int specularMapping = (specularNr > 1) ? 1 : 0;
-    int heightmapping= (heightNr > 1) ? 1 : 0;
-    int roughtnessmapping = (roguhtnessNr > 1) ? 1 : 0;
-    int metallicmapping = (metallicNr > 1) ? 1 : 0;
-    int aomapping = (aoNr > 1) ? 1 : 0;
 
 
-    shader.use();
-    shader.setInt("meshCount", mIndex);
-    shader.setInt("diffuseMapping", diffuseMapping);
-    shader.setInt("normalMapping", normalMapping);
-    shader.setInt("specularMapping", specularMapping);
-    shader.setInt("heighmap", heightmapping);
-    shader.setInt("roughnessMap", roughtnessmapping);
-    shader.setInt("metallicMap", metallicmapping);
-    shader.setInt("aoMap", aomapping);
+    mat.SetMaterial(shader, mIndex);
 
-
-    shader.setVec3("materials[" + std::to_string(mIndex) + "].diffuse", mat.Diffuse);
-    shader.setVec3("materials[" + std::to_string(mIndex) + "].specular", mat.Specular);
-    shader.setVec3("materials[" + std::to_string(mIndex) + "].ambient", mat.Ambient);
-    shader.setFloat("materials[" + std::to_string(mIndex) + "].shininess", mat.Shininess);
-
-    if (textures.size()==0)
-    {
-        shader.setInt("texturesOn", 0);
-    }
-    else
-    {
-        shader.setInt("texturesOn", 1);
-
-    }
     // draw mesh
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
@@ -133,15 +67,6 @@ void Mesh::setupMesh()
     glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_Weights));
     glBindVertexArray(0);
 
-    if (textures.size() == 0)
-    {
-        std::cout << "THERE IS NOT TEXTURES FINDED" << "\n";
-    }
-    else
-    {
-        std::cout << "TEXTURES LOADED CORRECTLY" << "\n";
-
-    }
 }
 
 

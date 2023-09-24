@@ -350,7 +350,7 @@ auto model_configs = [](ModelHandler& myModelHandler) {
 		{
 			if (myModelHandler.models[i].newModel.isLoaded)
 			{
-				std::string name = "Object " + std::to_string(myModelHandler.models[i].modelID);
+				std::string name = myModelHandler.models[i].name +" " + std::to_string(myModelHandler.models[i].modelID);
 				if (ImGui::TreeNode(name.c_str()))
 				{
 
@@ -460,7 +460,17 @@ auto model_LoaderTest = [](ModelHandler& models, bool& flipUVS, int& modelCounte
 		ImGui::CheckboxFlags("Flip UVS", &flipUvs, ImGuiComboFlags_PopupAlignLeft);
 		ImGui::CheckboxFlags("PBR", &PBRon, ImGuiComboFlags_PopupAlignLeft);
 
-
+		if (ImGui::Button("Load Model")) {
+			//"Models/BackpackModel/backpack.obj"
+			//Models/pizzaCar/myPizzaMovil.obj
+			//Models/pig/pig.obj
+			std::string strPath = buf1;
+			flipUVS = flipUvs;
+			ModelItem model(Model(), modelCounter, "Model ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base");
+			models.AddModel(model);
+			models.startLoadModel(strPath, PBRon, modelCounter);
+			modelCounter++;
+		}
 		if (ImGui::Button("Load Cube")) {
 			//"Models/BackpackModel/backpack.obj"
 			//Models/pizzaCar/myPizzaMovil.obj
@@ -469,7 +479,7 @@ auto model_LoaderTest = [](ModelHandler& models, bool& flipUVS, int& modelCounte
 			flipUVS = flipUvs;
 			ModelItem model(Model(), modelCounter, "Cube ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base");
 			models.AddModel(model);
-			models.startLoadModel(strPath, true, modelCounter);
+			models.startLoadModel(strPath, PBRon, modelCounter);
 			modelCounter++;
 		}
 

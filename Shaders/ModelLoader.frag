@@ -32,10 +32,14 @@ uniform int texturesOn;
 uniform int specular;
 uniform int heighmap;
 uniform int diffuseMapping;
-uniform int roughtnessMap;
+uniform int roughnessMap;
 uniform int metallicMap;
 uniform int aoMap;
-uniform float albedoM;
+
+uniform float albedoR;
+uniform float albedoG;
+uniform float albedoB;
+
 uniform float roughnessM;
 uniform float metallicM;
 uniform float aoM;
@@ -68,6 +72,7 @@ vec3 setNormalLight();
 //PBR
 vec3 CalculatePBR();
 vec3 CalculatePBRNoTextures();
+vec3 getNormalFromMapNoTexture();
 vec3 getNormalFromMap();
 float DistributionGGX(vec3 N, vec3 H, float roughness);
 float GeometrySchlickGGX(float NdotV, float roughness);
@@ -78,11 +83,13 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0);
 void main()
 {    
     vec3 result;
-//	if(PBRon==1){
-        result=CalculatePBRNoTextures();
-//    }else{
-//		result=setNormalLight();
-//	}
+
+	if(texturesOn==1){
+        if(PBRon==1)result=CalculatePBR();
+        if(PBRon==0)result=CalculateDirLight(dirLight, Normal, TangentViewPos, materials[meshCount],TexCoords);
+    }else{
+		result=CalculatePBRNoTextures();
+	}
     FragColor = vec4(result, 1.0f);
     float brightness = dot(FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
 
@@ -95,27 +102,28 @@ vec3 CalculatePBR(){
     float metallic;
     float roughness;
     float ao;  
+
     if(diffuseMapping==1){
-     albedo= pow(texture(texture_diffuse1, TexCoords).rgb*albedoM, vec3(2.2));
+     albedo= pow(texture(texture_diffuse1, TexCoords).rgb, vec3(2.2));
     }else{
-    albedo=vec3(1.0f) *albedoM;
+    albedo=vec3(albedoR,albedoG,albedoB);
     }
     if(metallicMap==1){
     metallic= texture(texture_metallic1, TexCoords).r * metallicM;
     }else{
-    metallic=1.0f* metallicM;
+    metallic=metallicM;
     }
-    if(roughtnessMap==1){
+    if(roughnessMap==1){
     roughness= texture(texture_roughness1, TexCoords).r * roughnessM;
     }else
     {
-    roughness=1.0f* roughnessM;
+    roughness=roughnessM;
     }
     if(aoMap==1){
     ao= texture(texture_ao1, TexCoords).r*aoM;
     }else
     {
-    ao=1.0f * aoM;
+    ao=aoM;
     }
 
     vec3 N = getNormalFromMap();
@@ -180,12 +188,12 @@ vec3 CalculatePBR(){
 
 vec3 CalculatePBRNoTextures(){
     
-   vec3 albedo=vec3(albedoM,0.3f,0.5f);
+   vec3 albedo=vec3(albedoR,albedoG,albedoB);
    float metallic=metallicM;
    float roughness=roughnessM;
    float ao=aoM;
 
-    vec3 N = getNormalFromMap();
+    vec3 N = getNormalFromMapNoTexture();
     vec3 V = normalize(TangentViewPos - FragPos);
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
@@ -327,18 +335,18 @@ vec3 CalculateDirLight(DirLight light, vec3 normal, vec3 viewDir, Material mat,v
     float diff = max(dot(normal, lightDir), 0.1);
     // specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.1), 225.0f);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.1), mat.shininess);
     // combine results
     if(texturesOn==1){
     vec3 ambient  = light.ambient  * vec3(0.2f);
-    vec3 diffuse  = light.diffuse  * diff * vec3(texture(texture_diffuse1, textCords))* albedoM;
+    vec3 diffuse  = light.diffuse  * diff * vec3(texture(texture_diffuse1, textCords));
     vec3 specularMap= calculateSpecular(textCords);
     vec3 specular = light.specular * spec * specularMap * metallicM;
     return (ambient + diffuse + specular);
     }
     if(texturesOn==0){
     vec3 ambient  = light.ambient  * vec3(0.2f);
-    vec3 diffuse  = light.diffuse  * diff * vec3(mat.diffuse)* albedoM;
+    vec3 diffuse  = light.diffuse  * diff * vec3(mat.diffuse);
     vec3 specular = light.specular * spec * vec3(mat.specular)* metallicM;
     return (ambient + diffuse + specular);
     }
@@ -350,6 +358,24 @@ vec3 CalculateDirLight(DirLight light, vec3 normal, vec3 viewDir, Material mat,v
 vec3 getNormalFromMap()
 {
     vec3 tangentNormal = texture(texture_normal1, TexCoords).xyz * 2.0 - 1.0;
+
+    vec3 Q1  = dFdx(FragPos);
+    vec3 Q2  = dFdy(FragPos);
+    vec2 st1 = dFdx(TexCoords);
+    vec2 st2 = dFdy(TexCoords);
+
+    vec3 N   = normalize(Normal);
+    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
+    vec3 B  = -normalize(cross(N, T));
+    mat3 TBN = mat3(T, B, N);
+
+    return normalize(TBN * tangentNormal);
+}
+
+//-------------------------------------PBR-------------------------------------
+vec3 getNormalFromMapNoTexture()
+{
+    vec3 tangentNormal =vec3(0,1,0) * 2.0 - 1.0;
 
     vec3 Q1  = dFdx(FragPos);
     vec3 Q2  = dFdy(FragPos);

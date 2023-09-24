@@ -18,6 +18,7 @@ struct ModelItem
 	glm::vec3 scale;
 	float rotationX, rotationY, rotationZ;
 	std::string materialName;
+	Material material;
 
 	//generate a default constructor for this struct with parameters
 	ModelItem(Model newModel,int modelID, std::string name, glm::vec3 position, glm::vec3 scale, float rotationX, float rotationY, float rotationZ, std::string materialName) {
@@ -30,6 +31,7 @@ struct ModelItem
 		this->rotationY = rotationY;
 		this->rotationZ = rotationZ;
 		this->materialName = materialName;
+		material = newModel.material;
 	};
 
 

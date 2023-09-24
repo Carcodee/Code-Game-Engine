@@ -9,15 +9,10 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <vector>
+#include "../ClassesOpengl/Mateial/Material.h"
 
 
 
-struct Material {
-    glm::vec3 Diffuse;
-    glm::vec3 Specular;
-    glm::vec3 Ambient;
-    float Shininess;
-};
 #define MAX_BONE_INFLUENCE 4
 struct Vertex {
     glm::vec3 Position;
@@ -33,26 +28,19 @@ struct Vertex {
     float m_Weights[MAX_BONE_INFLUENCE];
 };
 
-struct Texture {
-    unsigned int id;
-    std::string type;
-    std::string path;
-};
 class Mesh
 {
 public:
 
     // mesh data
+    Material mat;
     std::vector<Vertex>       vertices;
     std::vector<unsigned int> indices;
-    std::vector<Texture>      textures;
-    Material mat;
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, Material mat);
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Material& mat);
     void Draw(ShaderClass& shader, int mIndex);
 private:
     //  render data
     unsigned int VAO, VBO, EBO;
-
     void setupMesh();
 
 };
