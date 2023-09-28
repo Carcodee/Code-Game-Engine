@@ -4,6 +4,8 @@
 
 Model::Model()
 {
+    isPBR = true;
+    useTexture = true;
     isLoaded = false;
     gammaCorrection = false;
 }
@@ -136,29 +138,39 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 
     aiMaterial* aiMaterial = scene->mMaterials[mesh->mMaterialIndex];
     std::string errorTexture = "errorTexture::UNABLE TO READ THE TEXTURE= ";
-    useTexture=true;
-    if (!isPBR && useTexture)
+    
+    
+    if (!isPBR)
     {
+        std::cout<<"entered"<< "\n";
         std::vector<Texture> diffuseMaps = loadMaterialTextures(aiMaterial, aiTextureType_DIFFUSE, "texture_diffuse");
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
         (diffuseMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(diffuseMaps) << "\n" : std::cout << "diffuse ok" << "\n";
+        useTexture = (diffuseMaps.size() != 0);
         //2. specular maps
         std::vector<Texture> specularMaps = loadMaterialTextures(aiMaterial, aiTextureType_SPECULAR, "texture_specular");
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-        (specularMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(specularMaps) << "\n" : std::cout << "specular ok" << "\n";
+        useTexture = (specularMaps.size() != 0);
         //3. normal maps
         std::vector<Texture> normalMaps = loadMaterialTextures(aiMaterial, aiTextureType_HEIGHT, "texture_normal");
         textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
         (normalMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(normalMaps) << "\n" : std::cout << "normalmap ok" << "\n";
+        useTexture = (normalMaps.size() != 0);
         //4. height maps
         std::vector<Texture> heightMaps = loadMaterialTextures(aiMaterial, aiTextureType_DISPLACEMENT, "texture_height");
         textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
         (heightMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(heightMaps) << "\n" : std::cout << "heightmap ok" << "\n";
-        material.setConfigurations(isPBR, true);
-        material.SetTexture(textures);
+        useTexture = (heightMaps.size() != 0);
+
+        if (useTexture)
+        {
+            material.setConfigurations(false, true);
+            material.SetTexture(textures);
+        }
+
     }
 
-    if (isPBR)
+    if (isPBR && useTexture)
     {
         //1. roughtness maps
         LoadPBRTextures("texture_diffuse", textures);
@@ -170,13 +182,13 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         LoadPBRTextures("texture_metallic", textures);
         //5. ao maps
         LoadPBRTextures("texture_ao", textures);
-        material.setConfigurations(isPBR, true);
+        material.setConfigurations(true, true);
         material.SetTexture(textures);
     }
     
     if(!useTexture)
     {
-        material.setConfigurations(isPBR, false);
+        material.setConfigurations(true, false);
     }
 
 

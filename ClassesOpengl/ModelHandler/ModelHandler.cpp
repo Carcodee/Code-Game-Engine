@@ -51,11 +51,12 @@ void ModelHandler::DrawModel(ShaderClass& shader, int modelID,glm::mat4 projecti
 
 		shader.use();
 		glm::mat4 modelM = glm::mat4(1.0f);
-		modelM = glm::translate(modelM, glm::vec3(models[modelID].position)); // translate it down so it's at the center of the scene
+		modelM = glm::translate(modelM, glm::vec3(models[modelID].position)); 
 		modelM = glm::rotate(modelM, glm::radians(models[modelID].rotationX), glm::vec3(1.0f, 0.0f, 0.0f));
 		modelM = glm::rotate(modelM, glm::radians(models[modelID].rotationY), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelM = glm::rotate(modelM, glm::radians(models[modelID].rotationZ), glm::vec3(0.0f, 0.0f, 1.0f));
-		modelM = glm::scale(modelM, glm::vec3(models[modelID].scale));	// it's a bit too big for our scene, so scale it down
+		modelM = glm::scale(modelM, glm::vec3(models[modelID].scale));	
+
 
 		shader.setMat4("model", modelM);
 		shader.setMat4("view", this->view);

@@ -7,7 +7,7 @@ in vec3 FragPos;
 in vec3 TangentViewPos;
 in vec3 TangentFragPos;
 in vec3 TangentLightPos;
-flat in int PBRon;
+flat in int PBR;
 flat in int calculateNormals;
 
 struct DirLight {
@@ -83,13 +83,13 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0);
 void main()
 {    
     vec3 result;
-
-	if(texturesOn==1){
-        if(PBRon==1)result=CalculatePBR();
-        if(PBRon==0)result=CalculateDirLight(dirLight, Normal, TangentViewPos, materials[meshCount],TexCoords);
-    }else{
-		result=CalculatePBRNoTextures();
-	}
+    if(texturesOn==1){
+		if(PBR==1)result=CalculatePBR();
+		if(PBR==0) result=setNormalLight();
+	}else{
+        result=CalculatePBRNoTextures();
+        }
+	
     FragColor = vec4(result, 1.0f);
     float brightness = dot(FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
 
@@ -103,28 +103,28 @@ vec3 CalculatePBR(){
     float roughness;
     float ao;  
 
-    if(diffuseMapping==1){
+//    if(diffuseMapping==1){
      albedo= pow(texture(texture_diffuse1, TexCoords).rgb, vec3(2.2));
-    }else{
-    albedo=vec3(albedoR,albedoG,albedoB);
-    }
-    if(metallicMap==1){
-    metallic= texture(texture_metallic1, TexCoords).r * metallicM;
-    }else{
-    metallic=metallicM;
-    }
-    if(roughnessMap==1){
-    roughness= texture(texture_roughness1, TexCoords).r * roughnessM;
-    }else
-    {
-    roughness=roughnessM;
-    }
-    if(aoMap==1){
-    ao= texture(texture_ao1, TexCoords).r*aoM;
-    }else
-    {
-    ao=aoM;
-    }
+//    }else{
+//    albedo=vec3(albedoR,albedoG,albedoB);
+//    }
+//    if(metallicMap==1){
+    metallic= texture(texture_metallic1, TexCoords).r;
+//    }else{
+//    metallic=metallicM;
+//    }
+//    if(roughnessMap==1){
+    roughness= texture(texture_roughness1, TexCoords).r;
+//    }else
+//    {
+//    roughness=roughnessM;
+//    }
+//    if(aoMap==1){
+    ao= texture(texture_ao1, TexCoords).r;
+//    }else
+//    {
+//    ao=aoM;
+//    }
 
     vec3 N = getNormalFromMap();
     vec3 V = normalize(TangentViewPos - FragPos);
@@ -139,9 +139,9 @@ vec3 CalculatePBR(){
     for(int i = 0; i < 1; ++i) 
     {
         // calculate per-light radiance
-        vec3 L = normalize(dirLight.direction - FragPos);
+        vec3 L = normalize(-dirLight.direction - FragPos);
         vec3 H = normalize(V + L);
-        float distance = length(dirLight.direction - FragPos);
+        float distance = length(-dirLight.direction - FragPos);
         float attenuation = 1.0 / (distance * distance);
         vec3 radiance = dirLight.diffuse * attenuation;
 
@@ -341,7 +341,7 @@ vec3 CalculateDirLight(DirLight light, vec3 normal, vec3 viewDir, Material mat,v
     vec3 ambient  = light.ambient  * vec3(0.2f);
     vec3 diffuse  = light.diffuse  * diff * vec3(texture(texture_diffuse1, textCords));
     vec3 specularMap= calculateSpecular(textCords);
-    vec3 specular = light.specular * spec * specularMap * metallicM;
+    vec3 specular = light.specular * spec * specularMap ;
     return (ambient + diffuse + specular);
     }
     if(texturesOn==0){

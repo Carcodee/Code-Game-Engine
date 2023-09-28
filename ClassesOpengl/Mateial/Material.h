@@ -43,12 +43,23 @@ public:
 	};
 
 	//TODO: add move constructor
+	Material(const Material& other) {
+		this->pbrMaterial = other.pbrMaterial;
+		this->noPBRMaterial = other.noPBRMaterial;
+		this->textures = other.textures;
+		this->isPBR = other.isPBR;
+		this->UseTexture = other.UseTexture;
+	}
+	//to do
+	~Material() {
+	
+	};
 
 	void setConfigurations(bool isPBR, bool useTextures);
-	void SetTexture(std::vector <Texture> texture);
-	void ConfigurateTextures(ShaderClass&, int mIndex);
+	void SetTexture(std::vector <Texture>& texture);
+	void ConfigurateTextures(ShaderClass&, int& mIndex);
 	void SetDefaultMaterial(ShaderClass& shader, int mIndex);
-	void SetMaterial(ShaderClass& shader,int mIndex);
+	void SetMaterial(ShaderClass& shader,int& mIndex);
 
 private:
 	

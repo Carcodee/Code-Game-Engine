@@ -44,7 +44,7 @@ public:
     //TODO: add move constructor
     
 
-    void StartModel(std::string const& path ,bool isPBR,bool gamma = false) {
+    void StartModel(std::string const& path ,bool& isPBR,bool gamma = false) {
        myFuture = loadSceneAsync(path,directory,isLoaded,modelMutex);
        this->isPBR=isPBR;
        this->path = path;
