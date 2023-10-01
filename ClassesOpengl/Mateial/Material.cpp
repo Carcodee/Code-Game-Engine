@@ -44,6 +44,11 @@ void Material::SetMaterial(ShaderClass& shader, int& mIndex)
     }
 }
 
+void Material::SetMaterialColor(glm::vec3 color)
+{
+	pbrMaterial.albedo = color;
+}
+
 void Material::SetMaterialProperties(float albedoIntensity, float roughness, float metallic, float ao)
 {
     pbrMaterial.albedoIntensity = albedoIntensity;

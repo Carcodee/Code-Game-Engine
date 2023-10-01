@@ -267,6 +267,13 @@ auto model_configs = [](ModelHandler& myModelHandler) {
 			
 					if (ImGui::TreeNode("MaterialConfigs: "))
 					{
+				
+						static float col1[3] = { 1.0f, 1.0f, 1.0f };
+
+						ImGui::ColorPicker3("Material Color", col1);
+						myModelHandler.models[i].material->SetMaterialColor(glm::vec3(col1[0], col1[1], col1[2]));
+
+						
 						static float f4 = 1.0f;
 						ImGui::SliderFloat("albedo Intensity", &f4, 0.0f, 5.0f, "%.4f");
 
@@ -281,6 +288,8 @@ auto model_configs = [](ModelHandler& myModelHandler) {
 						
 						
 						myModelHandler.models[i].material->SetMaterialProperties(f4,f1, f2, f3);
+
+
 
 						ImGui::TreePop();
 						ImGui::Spacing();

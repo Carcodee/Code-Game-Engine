@@ -20,7 +20,7 @@ struct ModelItem
 	std::string materialName;
 	std::shared_ptr <Material> material;
 
-	//generate a default constructor for this struct with parameters
+	////generate a default constructor for this struct with parameters
 	//ModelItem(int modelID, std::string name, glm::vec3 position, glm::vec3 scale, float rotationX, float rotationY, float rotationZ, std::string materialName, Material& mat) {
 	//	this->modelID = modelID;
 	//	this->name = name;

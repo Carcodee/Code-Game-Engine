@@ -61,7 +61,9 @@ public:
 	void ConfigurateTextures(ShaderClass&, int& mIndex);
 	void SetDefaultMaterial(ShaderClass& shader, int mIndex);
 	void SetMaterial(ShaderClass& shader,int& mIndex);
+	void SetMaterialColor(glm::vec3 color);
 	void SetMaterialProperties(float albedoIntensity, float roughness, float metallic, float ao);
+	bool isPBR;
 
 private:
 	
@@ -70,7 +72,6 @@ private:
 	NoPRBMaterial noPBRMaterial;
 	std::vector<Texture> textures;
 
-	bool isPBR;
 	bool UseTexture;
 	
 

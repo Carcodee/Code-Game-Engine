@@ -66,11 +66,12 @@ public:
     }
     void Draw(ShaderClass& shader);
     bool isLoaded;
-    std::shared_ptr<Material> material;
+
 
 private:
     std::mutex modelMutex;
     // model data
+    std::shared_ptr<Material> material;
     std::vector<Texture> textures_loaded;
     std::vector<Mesh> meshes;
     std::string directory;
