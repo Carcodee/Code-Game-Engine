@@ -13,6 +13,7 @@ struct Texture {
 
 struct PBRMaterial {
 	glm::vec3 albedo;
+	float albedoIntensity;
 	float metallic;
 	float roughness;
 	float ao;
@@ -33,7 +34,7 @@ public:
 
 	Material();
 
-	Material operator=(const Material& other) {
+	Material& operator=(const Material& other) {
 		this->pbrMaterial = other.pbrMaterial;
 		this->noPBRMaterial = other.noPBRMaterial;
 		this->textures = other.textures;
@@ -60,11 +61,11 @@ public:
 	void ConfigurateTextures(ShaderClass&, int& mIndex);
 	void SetDefaultMaterial(ShaderClass& shader, int mIndex);
 	void SetMaterial(ShaderClass& shader,int& mIndex);
+	void SetMaterialProperties(float albedoIntensity, float roughness, float metallic, float ao);
 
 private:
 	
 
-	
 	PBRMaterial pbrMaterial;
 	NoPRBMaterial noPBRMaterial;
 	std::vector<Texture> textures;

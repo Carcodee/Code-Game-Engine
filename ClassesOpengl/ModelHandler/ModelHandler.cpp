@@ -7,14 +7,15 @@ ModelHandler::ModelHandler()
 	this->projection = glm::mat4(1.0f);
 }
 
-void ModelHandler::AddModel(ModelItem modelItem)
+void ModelHandler::AddModel(ModelItem& modelItem)
 {
 	models.push_back(modelItem);
 }
 
-void ModelHandler::startLoadModel(std::string const& path, bool isPBR, int count)
+void ModelHandler::startLoadModel(std::string const& path, bool isPBR, std::shared_ptr<Material> material, int count)
 {
-	models[count].newModel.StartModel(path, isPBR);
+
+	models[count].newModel.StartModel(path, isPBR, material);
 }
 
 void ModelHandler::SetModelPosition(int modelID, glm::vec3 position)
@@ -27,6 +28,7 @@ void ModelHandler::SetModelRotationX(int modelID, float rotation)
 
 	models[modelID].rotationX = rotation;
 }
+
 void ModelHandler::SetModelRotationY(int modelID, float rotation)
 {
 
@@ -65,6 +67,8 @@ void ModelHandler::DrawModel(ShaderClass& shader, int modelID,glm::mat4 projecti
 
 		models[modelID].newModel.Draw(shader);
 
-	
+		
 
 }
+
+

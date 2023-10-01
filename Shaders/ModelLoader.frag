@@ -36,10 +36,12 @@ uniform int roughnessMap;
 uniform int metallicMap;
 uniform int aoMap;
 
+
 uniform float albedoR;
 uniform float albedoG;
 uniform float albedoB;
 
+uniform float albedoM;
 uniform float roughnessM;
 uniform float metallicM;
 uniform float aoM;
@@ -103,28 +105,28 @@ vec3 CalculatePBR(){
     float roughness;
     float ao;  
 
-//    if(diffuseMapping==1){
-     albedo= pow(texture(texture_diffuse1, TexCoords).rgb, vec3(2.2));
-//    }else{
-//    albedo=vec3(albedoR,albedoG,albedoB);
-//    }
-//    if(metallicMap==1){
-    metallic= texture(texture_metallic1, TexCoords).r;
-//    }else{
-//    metallic=metallicM;
-//    }
-//    if(roughnessMap==1){
-    roughness= texture(texture_roughness1, TexCoords).r;
-//    }else
-//    {
-//    roughness=roughnessM;
-//    }
-//    if(aoMap==1){
-    ao= texture(texture_ao1, TexCoords).r;
-//    }else
-//    {
-//    ao=aoM;
-//    }
+    if(diffuseMapping==1){
+     albedo= pow(texture(texture_diffuse1, TexCoords).rgb*albedoM, vec3(2.2));
+    }else{
+    albedo=vec3(albedoR,albedoG,albedoB);
+    }
+    if(metallicMap==1){
+    metallic= texture(texture_metallic1, TexCoords).r * metallicM;
+    }else{
+    metallic=metallicM;
+    }
+    if(roughnessMap==1){
+    roughness= texture(texture_roughness1, TexCoords).r * roughnessM;
+    }else
+    {
+    roughness=roughnessM;
+    }
+    if(aoMap==1){
+    ao= texture(texture_ao1, TexCoords).r *aoM;
+    }else
+    {
+    ao=aoM;
+    }
 
     vec3 N = getNormalFromMap();
     vec3 V = normalize(TangentViewPos - FragPos);

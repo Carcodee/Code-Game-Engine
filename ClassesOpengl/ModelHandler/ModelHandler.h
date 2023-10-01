@@ -18,22 +18,45 @@ struct ModelItem
 	glm::vec3 scale;
 	float rotationX, rotationY, rotationZ;
 	std::string materialName;
-	Material material;
+	std::shared_ptr <Material> material;
 
 	//generate a default constructor for this struct with parameters
-	ModelItem(Model newModel,int modelID, std::string name, glm::vec3 position, glm::vec3 scale, float rotationX, float rotationY, float rotationZ, std::string materialName) {
-		this->newModel = newModel;
-		this->modelID = modelID;
-		this->name = name;
-		this->position = position;
-		this->scale = scale;
-		this->rotationX = rotationX;
-		this->rotationY = rotationY;
-		this->rotationZ = rotationZ;
-		this->materialName = materialName;
-		material = newModel.material;
-	};
+	//ModelItem(int modelID, std::string name, glm::vec3 position, glm::vec3 scale, float rotationX, float rotationY, float rotationZ, std::string materialName, Material& mat) {
+	//	this->modelID = modelID;
+	//	this->name = name;
+	//	this->position = position;
+	//	this->scale = scale;
+	//	this->rotationX = rotationX;
+	//	this->rotationY = rotationY;
+	//	this->rotationZ = rotationZ;
+	//	this->materialName = materialName;
+	//	this->material = mat;
+	//};
 
+	//ModelItem(const ModelItem& other) {
+	//	this->modelID = other.modelID;
+	//	this->name = other.name;
+	//	this->position = other.position;
+	//	this->scale = other.scale;
+	//	this->rotationX = other.rotationX;
+	//	this->rotationY = other.rotationY;
+	//	this->rotationZ = other.rotationZ;
+	//	this->materialName = other.materialName;
+	//	this->material = other.material;
+	//}
+
+	//ModelItem& operator=(const ModelItem& other) {
+	//	this->modelID = other.modelID;
+	//	this->name = other.name;
+	//	this->position = other.position;
+	//	this->scale = other.scale;
+	//	this->rotationX = other.rotationX;
+	//	this->rotationY = other.rotationY;
+	//	this->rotationZ = other.rotationZ;
+	//	this->materialName = other.materialName;
+	//	this->material = other.material;
+	//	return *this;
+	//}
 
 };
 
@@ -42,8 +65,8 @@ class ModelHandler
 	public:
 		ModelHandler();
 
-		void AddModel(ModelItem model);
-		void startLoadModel(std::string const& path, bool isPBR, int count);
+		void AddModel(ModelItem& model);
+		void startLoadModel(std::string const& path, bool isPBR, std::shared_ptr<Material> material, int count);
 		void SetModelPosition(int modelID, glm::vec3 position);
 		void SetModelRotationX(int modelID, float rotation);
 		void SetModelRotationY(int modelID, float rotation);
@@ -52,6 +75,8 @@ class ModelHandler
 		void SetModelScale(int modelID, glm::vec3 scale);
 		void DrawModel(ShaderClass& shader, int modelID, glm::mat4 projection, glm::mat4 view);
 		std::vector <ModelItem> models;
+
+
 
 
 private:

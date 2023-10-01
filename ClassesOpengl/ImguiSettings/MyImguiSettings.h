@@ -9,6 +9,8 @@
 
 auto MoveCubes = [](float& speed, float& rotationSpeed) {
 
+
+
 	if (ImGui::TreeNode("Cube Speed"))
 	{
 		const float spacing = 4;
@@ -247,98 +249,7 @@ auto light_Settings = [](bool& dirLightOn, bool& spotLightOn, bool& pointLightOn
 	}
 
 	};
-//auto model_Loader = [](std::vector<Model>& ourModels,std::vector<ModelConfigs>& configs, bool& flipUVS,bool& PBR,int& modelCounter) {
-//
-//	if (ImGui::TreeNode("Model Loader"))
-//	{
-//		struct TextFilters
-//		{
-//			// Modify character input by altering 'data->Eventchar' (ImGuiInputTextFlags_CallbackCharFilter callback)
-//			static int FilterCasingSwap(ImGuiInputTextCallbackData* data)
-//			{
-//				if (data->EventChar >= 'a' && data->EventChar <= 'z') { data->EventChar -= 'a' - 'A'; } // Lowercase becomes uppercase
-//				else if (data->EventChar >= 'A' && data->EventChar <= 'Z') { data->EventChar += 'a' - 'A'; } // Uppercase becomes lowercase
-//				return 0;
-//			}
-//
-//			// Return 0 (pass) if the character is 'i' or 'm' or 'g' or 'u' or 'i', otherwise return 1 (filter out)
-//			static int FilterImGuiLetters(ImGuiInputTextCallbackData* data)
-//			{
-//				if (data->EventChar < 256 && strchr("imgui", (char)data->EventChar))
-//					return 0;
-//				return 1;
-//			}
-//		};
-//
-//		static char buf1[400] = ""; ImGui::InputText("Model path here:", buf1, 400);
-//		// Save/Revert button
-//		static ImGuiComboFlags flipUvs = 1;
-//		static ImGuiComboFlags PBRon = 1;
-//
-//		ImGui::CheckboxFlags("Flip UVS", &flipUvs, ImGuiComboFlags_PopupAlignLeft);
-//		ImGui::CheckboxFlags("PBR", &PBRon, ImGuiComboFlags_PopupAlignLeft);
-//
-//		if (ImGui::Button("Load")) {
-//			//"Models/BackpackModel/backpack.obj"
-//			//Models/pizzaCar/myPizzaMovil.obj
-//			//Models/pig/pig.obj
-//			std::string strPath = buf1;
-//			flipUVS = flipUvs;
-//			ModelConfigs config{
-//				0.0f,0.0f,0.0f,
-//				0.0f,0.0f,0.0f,
-//				1.0f,1.0f,1.0f,
-//				1.0f,1.0f,1.0f,
-//				1.0f,PBRon,modelCounter
-//			};
-//			configs.push_back(config);
-//			ourModels.push_back(Model());
-//			ourModels[modelCounter].StartModel(strPath, config.isPBR);
-//			modelCounter++;
-//
-//		}
-//		if (ImGui::Button("Load Cube")) {
-//			//"Models/BackpackModel/backpack.obj"
-//			//Models/pizzaCar/myPizzaMovil.obj
-//			//Models/pig/pig.obj
-//			std::string strPath = "Models/Cube/Cube.obj";
-//			flipUVS = flipUvs;
-//			ModelConfigs config{
-//				0.0f,0.0f,0.0f,
-//				0.0f,0.0f,0.0f,
-//				1.0f,1.0f,1.0f,
-//				1.0f,1.0f,1.0f,
-//				1.0f,PBRon,modelCounter
-//			};
-//			configs.push_back(config);
-//			ourModels.push_back(Model());
-//			ourModels[modelCounter].StartModel(strPath, config.isPBR);
-//			modelCounter++;
-//		}
-//		if (ImGui::Button("Load Sphere")) {
-//			//"Models/BackpackModel/backpack.obj"
-//			//Models/pizzaCar/myPizzaMovil.obj
-//			//Models/pig/pig.obj
-//			std::string strPath = "Models/Sphere/Sphere.obj";
-//			flipUVS = flipUvs;
-//			ModelConfigs config{
-//				0.0f,0.0f,0.0f,
-//				0.0f,0.0f,0.0f,
-//				1.0f,1.0f,1.0f,
-//				1.0f,1.0f,1.0f,
-//				1.0f,PBRon ,modelCounter
-//			};
-//			configs.push_back(config);
-//			ourModels.push_back(Model());
-//			ourModels[modelCounter].StartModel(strPath, config.isPBR);
-//			modelCounter++;
-//		}
-//
-//		ImGui::SameLine();
-//		ImGui::TreePop();
-//		ImGui::Spacing();
-//	};
-//};
+
 auto model_configs = [](ModelHandler& myModelHandler) {
 
 	if (ImGui::TreeNode("MODELS DATA"))
@@ -353,23 +264,23 @@ auto model_configs = [](ModelHandler& myModelHandler) {
 				std::string name = myModelHandler.models[i].name +" " + std::to_string(myModelHandler.models[i].modelID);
 				if (ImGui::TreeNode(name.c_str()))
 				{
-
 			
-					if (ImGui::TreeNode("Light Configs: "))
+					if (ImGui::TreeNode("MaterialConfigs: "))
 					{
+						static float f4 = 1.0f;
+						ImGui::SliderFloat("albedo Intensity", &f4, 0.0f, 5.0f, "%.4f");
 
-						//static float f1 = 1.0f;
-						//ImGui::SliderFloat("Rougness", &f1, 0.0f, 5.0f, "%.4f");
-						//configs[i].roughness = f1;
-						//static float f2 = 1.0f;
-						//ImGui::SliderFloat("Metalness", &f2, 0.0f, 5.0f, "%.4f");
-						//configs[i].metallic = f2;
-						//static float f3 = 1.0f;
-						//ImGui::SliderFloat("Ao intensity", &f3, 0.0f, 5.0f, "%.4f");
-						//configs[i].ao = f3;
-						//static float f4 = 1.0f;
-						//ImGui::SliderFloat("albedo Intensity", &f4, 0.0f, 5.0f, "%.4f");
-						//configs[i].albedo = f4;
+						static float f2 = 1.0f;
+						ImGui::SliderFloat("Metalness", &f2, 0.0f, 5.0f, "%.4f");
+
+						static float f1 = 1.0f;
+						ImGui::SliderFloat("Rougness", &f1, 0.0f, 5.0f, "%.4f");
+
+						static float f3 = 1.0f;
+						ImGui::SliderFloat("Ao intensity", &f3, 0.0f, 5.0f, "%.4f");
+						
+						
+						myModelHandler.models[i].material->SetMaterialProperties(f4,f1, f2, f3);
 
 						ImGui::TreePop();
 						ImGui::Spacing();
@@ -466,9 +377,10 @@ auto model_LoaderTest = [](ModelHandler& models, bool& flipUVS, int& modelCounte
 			//Models/pig/pig.obj
 			std::string strPath = buf1;
 			flipUVS = flipUvs;
-			ModelItem model(Model(), modelCounter, "Model ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base");
+			std::shared_ptr<Material> material = std::make_shared<Material>();
+			ModelItem model = { Model(),modelCounter, "Cube ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base", material };
 			models.AddModel(model);
-			models.startLoadModel(strPath, PBRon, modelCounter);
+			models.startLoadModel(strPath, PBRon, material,modelCounter);
 			modelCounter++;
 		}
 		if (ImGui::Button("Load Cube")) {
@@ -477,9 +389,12 @@ auto model_LoaderTest = [](ModelHandler& models, bool& flipUVS, int& modelCounte
 			//Models/pig/pig.obj
 			std::string strPath = "Models/Cube/Cube.obj";
 			flipUVS = flipUvs;
-			ModelItem model(Model(), modelCounter, "Cube ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base");
+			std::shared_ptr<Material> material = std::make_shared<Material>();
+			ModelItem model = { Model(),modelCounter, "Cube ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base", material};
 			models.AddModel(model);
-			models.startLoadModel(strPath, PBRon, modelCounter);
+			//the problem is that the material that i give to the item is not being used, instead i am creating one in the model class
+
+			models.startLoadModel(strPath, PBRon, material, modelCounter);
 			modelCounter++;
 		}
 

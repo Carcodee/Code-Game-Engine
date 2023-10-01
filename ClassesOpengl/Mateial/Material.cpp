@@ -3,9 +3,11 @@
 
 Material::Material()
 {
+    std::cout << "Material created" << std::endl;
     pbrMaterial.albedo = glm::vec3(1.0f, 0.0f, 0.0f);
-    pbrMaterial.metallic = 0.5f;
-    pbrMaterial.roughness = 0.5f;
+    pbrMaterial.albedoIntensity = 1.0f;
+    pbrMaterial.metallic = 1.0f;
+    pbrMaterial.roughness = 1.0f;
     pbrMaterial.ao = 1.0f;
 
     noPBRMaterial.difuse = glm::vec3(0.5f, 0.0f, 0.0f);
@@ -40,6 +42,14 @@ void Material::SetMaterial(ShaderClass& shader, int& mIndex)
     {
         SetDefaultMaterial(shader, mIndex);
     }
+}
+
+void Material::SetMaterialProperties(float albedoIntensity, float roughness, float metallic, float ao)
+{
+    pbrMaterial.albedoIntensity = albedoIntensity;
+	pbrMaterial.metallic = metallic;
+	pbrMaterial.roughness = roughness;
+	pbrMaterial.ao = ao;
 }
 
 
@@ -98,20 +108,27 @@ void Material::ConfigurateTextures(ShaderClass& shader, int& mIndex)
     shader.setInt("heighmap", heightmapping);
     shader.setInt("normalMapping", normalMapping);
     shader.setInt("diffuseMapping", diffuseMapping);
+
     if (isPBR)
     {
-        std::cout << isPBR << std::endl;
-
         shader.use();
         shader.setInt("PBRon", 1);
         shader.setInt("roughnessMap", roughtnessmapping);
         shader.setInt("metallicMap", metallicmapping);
         shader.setInt("aoMap", aomapping);
+        shader.setFloat("albedoR", pbrMaterial.albedo.x);
+        shader.setFloat("albedoG", pbrMaterial.albedo.y);
+        shader.setFloat("albedoB", pbrMaterial.albedo.z);
+
+        shader.setFloat("albedoM", pbrMaterial.albedoIntensity);
+        shader.setFloat("metallicM", pbrMaterial.metallic);
+        shader.setFloat("roughnessM", pbrMaterial.roughness);
+        shader.setFloat("aoM", pbrMaterial.ao);
 
     }else 
     {
+        shader.use();
         shader.setInt("PBRon", 0);
-
         shader.setInt("specularMapping", specularMapping);
         shader.setVec3("materials[" + std::to_string(mIndex) + "].diffuse", noPBRMaterial.difuse);
         shader.setVec3("materials[" + std::to_string(mIndex) + "].specular", noPBRMaterial.specular);
@@ -144,7 +161,6 @@ void Material::SetDefaultMaterial(ShaderClass& shader, int mIndex)
     shader.setFloat("metallicM", pbrMaterial.metallic);
     shader.setFloat("roughnessM", pbrMaterial.roughness);
     shader.setFloat("aoM", pbrMaterial.ao);
-
 
 }
 

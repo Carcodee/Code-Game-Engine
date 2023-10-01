@@ -9,16 +9,7 @@ Model::Model()
     isLoaded = false;
     gammaCorrection = false;
 }
-Model::Model(const Model& other)
-{
-    this->meshes = other.meshes;
-	this->directory = other.directory;
-	this->textures_loaded = other.textures_loaded;
-	this->isLoaded = other.isLoaded;
-	this->gammaCorrection = other.gammaCorrection;
-	this->path = other.path;
-	this->isPBR = other.isPBR;
-}
+
 
 
 void Model::Draw(ShaderClass& shader)
@@ -39,7 +30,7 @@ void Model::Draw(ShaderClass& shader)
         shader.setInt("matSize", meshes.size());
         for (unsigned int i = 0; i < meshes.size(); i++) {
 
-            meshes[i].Draw(shader, i);
+            meshes[i].Draw(shader, i, material);
         }
     }
 
@@ -139,7 +130,6 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     aiMaterial* aiMaterial = scene->mMaterials[mesh->mMaterialIndex];
     std::string errorTexture = "errorTexture::UNABLE TO READ THE TEXTURE= ";
     
-    
     if (!isPBR)
     {
         std::cout<<"entered"<< "\n";
@@ -164,8 +154,8 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 
         if (useTexture)
         {
-            material.setConfigurations(false, true);
-            material.SetTexture(textures);
+            material->setConfigurations(false, true);
+            material->SetTexture(textures);
         }
 
     }
@@ -182,13 +172,13 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         LoadPBRTextures("texture_metallic", textures);
         //5. ao maps
         LoadPBRTextures("texture_ao", textures);
-        material.setConfigurations(true, true);
-        material.SetTexture(textures);
+        material->setConfigurations(true, true);
+        material->SetTexture(textures);
     }
     
     if(!useTexture)
     {
-        material.setConfigurations(true, false);
+        material->setConfigurations(true, false);
     }
 
 
@@ -305,15 +295,7 @@ unsigned int Model::TextureFromFile(const char* path, const std::string& directo
 
 }
 
-Material Model::loadMaterial(aiMaterial* mat)
-{
 
-    glm::vec3 randDiff((float)rand() / RAND_MAX, (float)rand() / RAND_MAX, (float)rand() / RAND_MAX);
-    Material material;
-    aiColor3D color(0.f, 0.f, 0.f);
-    float shininess;
-    return material;
-}
 
 std::future<const aiScene*> Model::loadSceneAsync(std::string path, std::string& directory, bool& isLoaded, std::mutex& mutex)
 {

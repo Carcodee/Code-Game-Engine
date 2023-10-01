@@ -1,20 +1,18 @@
 #include "Mesh.h"
 
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Material& mat)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::shared_ptr<Material> material)
 {
     this->vertices = vertices;
     this->indices = indices;
-    this->mat = mat;
+    this->mat = material;
     setupMesh();
 }
 
-void Mesh::Draw(ShaderClass& shader, int mIndex)
+void Mesh::Draw(ShaderClass& shader, int mIndex, std::shared_ptr<Material> material)
 {
 
-
-    mat.SetMaterial(shader, mIndex);
-
+    mat->SetMaterial(shader, mIndex);
     // draw mesh
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);

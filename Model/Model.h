@@ -28,9 +28,8 @@ class Model
 
 public:
     Model();
-    Model(const Model& other);
 
-    Model operator=(const Model& other) {
+    Model& operator=(const Model& other) {
         this->meshes = other.meshes;
 		this->textures_loaded = other.textures_loaded;
 		this->directory = other.directory;
@@ -38,21 +37,36 @@ public:
 		this->gammaCorrection = other.gammaCorrection;
 		this->isPBR = other.isPBR;
 		this->isLoaded = other.isLoaded;
+        this->material = other.material;
         return *this;
     };
+    Model(const Model& other)
+    {
+        this->meshes = other.meshes;
+        this->directory = other.directory;
+        this->textures_loaded = other.textures_loaded;
+        this->isLoaded = other.isLoaded;
+        this->gammaCorrection = other.gammaCorrection;
+        this->path = other.path;
+        this->isPBR = other.isPBR;
+        this->material = other.material;
 
+    }
     //TODO: add move constructor
     
 
-    void StartModel(std::string const& path ,bool& isPBR,bool gamma = false) {
+    void StartModel(std::string const& path ,bool& isPBR, std::shared_ptr<Material> material, bool gamma = false) {
        myFuture = loadSceneAsync(path,directory,isLoaded,modelMutex);
        this->isPBR=isPBR;
        this->path = path;
+       this->gammaCorrection = gamma;
+       this->material = material;
         //loadModel(path);
+
     }
     void Draw(ShaderClass& shader);
     bool isLoaded;
-    Material material;
+    std::shared_ptr<Material> material;
 
 private:
     std::mutex modelMutex;
@@ -72,7 +86,6 @@ private:
     std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
     void LoadPBRTextures(std::string typeName,std::vector<Texture>& texture);
     unsigned int TextureFromFile(const char* path, const std::string& directory,bool gamma);
-    Material loadMaterial(aiMaterial* mat);
     std::future<const aiScene*> loadSceneAsync(std::string path, std::string& directory, bool& isLoaded, std::mutex& mutex);
     
 };

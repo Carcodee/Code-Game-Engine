@@ -498,7 +498,8 @@ int main(void)
 
 
 
-
+	ImGuiIO& io = ImGui::GetIO();
+	ImFont* font1 = io.Fonts->AddFontFromFileTTF("Fonts/Roboto-MediumItalic.ttf", 13.0f);
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
@@ -510,6 +511,7 @@ int main(void)
 
 		myImgui.NewFrame();
 
+		ImGui::PushFont(font1);
 
 		/* Render here */
 		// render
@@ -894,7 +896,6 @@ int main(void)
 
 #pragma region imgui
 
-		
 		myImgui.CreateNode([&]() {MoveCubes(speedMultiplier, speedRotation); });
 		myImgui.CreateNode([&]() {cubes_Movement(cubePosX, cubePosY, cubePosZ, noiseMult); });
 		myImgui.CreateNode([&]() {cube_Amount(amount, roughnessM, metallicM, aoM, albedoM); });
@@ -903,6 +904,8 @@ int main(void)
 		myImgui.CreateNode([&]() {light_Settings(dirLightOn, spotLightOn, pointLightOn, HDR, bloom, shadows); });
 		myImgui.CreateNode([&]() {model_LoaderTest(modelHandler, flipUVS, modelsLoadedCounter); });
 		myImgui.CreateNode([&]() {model_configs(modelHandler); });
+
+		ImGui::PopFont();
 
 
 		ImGui::ShowDemoWindow();
