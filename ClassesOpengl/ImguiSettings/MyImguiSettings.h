@@ -335,6 +335,33 @@ auto model_configs = [](ModelHandler& myModelHandler) {
 						ImGui::TreePop();
 						ImGui::Spacing();
 					}
+					struct TextFilters
+					{
+						// Modify character input by altering 'data->Eventchar' (ImGuiInputTextFlags_CallbackCharFilter callback)
+						static int FilterCasingSwap(ImGuiInputTextCallbackData* data)
+						{
+							if (data->EventChar >= 'a' && data->EventChar <= 'z') { data->EventChar -= 'a' - 'A'; } // Lowercase becomes uppercase
+							else if (data->EventChar >= 'A' && data->EventChar <= 'Z') { data->EventChar += 'a' - 'A'; } // Uppercase becomes lowercase
+							return 0;
+						}
+
+						// Return 0 (pass) if the character is 'i' or 'm' or 'g' or 'u' or 'i', otherwise return 1 (filter out)
+						static int FilterImGuiLetters(ImGuiInputTextCallbackData* data)
+						{
+							if (data->EventChar < 256 && strchr("imgui", (char)data->EventChar))
+								return 0;
+							return 1;
+						}
+					};
+
+					static char buf1[400] = ""; ImGui::InputText("Model path here:", buf1, 400);
+
+					if (ImGui::Button("Extract material")) {
+						//"Models/BackpackModel/backpack.obj"
+						//Models/pizzaCar/myPizzaMovil.obj
+						//Models/pig/pig.obj
+						myModelHandler.ExtractModelMaterial(i, buf1);
+					}
 					ImGui::TreePop();
 					ImGui::Spacing();
 
@@ -349,7 +376,7 @@ auto model_configs = [](ModelHandler& myModelHandler) {
 	}
 
 };
-auto model_LoaderTest = [](ModelHandler& models, bool& flipUVS, int& modelCounter) {
+auto model_LoaderTest = [](ModelHandler& models, bool& flipUVS, int& modelCounter, std::string& path) {
 
 	if (ImGui::TreeNode("Model Loader"))
 	{
@@ -384,7 +411,7 @@ auto model_LoaderTest = [](ModelHandler& models, bool& flipUVS, int& modelCounte
 			//"Models/BackpackModel/backpack.obj"
 			//Models/pizzaCar/myPizzaMovil.obj
 			//Models/pig/pig.obj
-			std::string strPath = buf1;
+			std::string strPath = path;
 			flipUVS = flipUvs;
 			std::shared_ptr<Material> material = std::make_shared<Material>();
 			ModelItem model = { Model(),modelCounter, "Cube ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base", material };

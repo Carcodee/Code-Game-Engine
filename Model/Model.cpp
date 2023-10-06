@@ -19,6 +19,11 @@ void Model::Draw(ShaderClass& shader)
         if (myFuture.valid())
         {
             const aiScene* scene = myFuture.get();
+            if (scene==NULL)
+            {
+                std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
+                return;
+            }
             processNode(scene->mRootNode, scene);
             isLoaded = true;
         }
@@ -130,56 +135,56 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     aiMaterial* aiMaterial = scene->mMaterials[mesh->mMaterialIndex];
     std::string errorTexture = "errorTexture::UNABLE TO READ THE TEXTURE= ";
     
-    if (!isPBR)
-    {
-        std::cout<<"entered"<< "\n";
-        std::vector<Texture> diffuseMaps = loadMaterialTextures(aiMaterial, aiTextureType_DIFFUSE, "texture_diffuse");
-        textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-        (diffuseMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(diffuseMaps) << "\n" : std::cout << "diffuse ok" << "\n";
-        useTexture = (diffuseMaps.size() != 0);
-        //2. specular maps
-        std::vector<Texture> specularMaps = loadMaterialTextures(aiMaterial, aiTextureType_SPECULAR, "texture_specular");
-        textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-        useTexture = (specularMaps.size() != 0);
-        //3. normal maps
-        std::vector<Texture> normalMaps = loadMaterialTextures(aiMaterial, aiTextureType_HEIGHT, "texture_normal");
-        textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-        (normalMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(normalMaps) << "\n" : std::cout << "normalmap ok" << "\n";
-        useTexture = (normalMaps.size() != 0);
-        //4. height maps
-        std::vector<Texture> heightMaps = loadMaterialTextures(aiMaterial, aiTextureType_DISPLACEMENT, "texture_height");
-        textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
-        (heightMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(heightMaps) << "\n" : std::cout << "heightmap ok" << "\n";
-        useTexture = (heightMaps.size() != 0);
+    //if (!isPBR)
+    //{
+    //    std::cout<<"entered"<< "\n";
+    //    std::vector<Texture> diffuseMaps = loadMaterialTextures(aiMaterial, aiTextureType_DIFFUSE, "texture_diffuse");
+    //    textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+    //    (diffuseMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(diffuseMaps) << "\n" : std::cout << "diffuse ok" << "\n";
+    //    useTexture = (diffuseMaps.size() != 0);
+    //    //2. specular maps
+    //    std::vector<Texture> specularMaps = loadMaterialTextures(aiMaterial, aiTextureType_SPECULAR, "texture_specular");
+    //    textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+    //    useTexture = (specularMaps.size() != 0);
+    //    //3. normal maps
+    //    std::vector<Texture> normalMaps = loadMaterialTextures(aiMaterial, aiTextureType_HEIGHT, "texture_normal");
+    //    textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+    //    (normalMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(normalMaps) << "\n" : std::cout << "normalmap ok" << "\n";
+    //    useTexture = (normalMaps.size() != 0);
+    //    //4. height maps
+    //    std::vector<Texture> heightMaps = loadMaterialTextures(aiMaterial, aiTextureType_DISPLACEMENT, "texture_height");
+    //    textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+    //    (heightMaps.size() == 0) ? std::cout << errorTexture + GET_VARIABLE_NAME(heightMaps) << "\n" : std::cout << "heightmap ok" << "\n";
+    //    useTexture = (heightMaps.size() != 0);
 
-        if (useTexture)
-        {
-            material->setConfigurations(false, true);
-            material->SetTexture(textures);
-        }
+    //    if (useTexture)
+    //    {
+    //        material->setConfigurations(false, true);
+    //        material->SetTexture(textures);
+    //    }
 
-    }
+    //}
 
-    if (isPBR && useTexture)
-    {
-        //1. roughtness maps
-        LoadPBRTextures("texture_diffuse", textures);
-        //2. Normal maps
-        LoadPBRTextures("texture_normal", textures);
-        //3. roughtness maps
-        LoadPBRTextures("texture_roughness", textures);
-        //4. metallic maps
-        LoadPBRTextures("texture_metallic", textures);
-        //5. ao maps
-        LoadPBRTextures("texture_ao", textures);
-        material->setConfigurations(true, true);
-        material->SetTexture(textures);
-    }
-    
-    if(!useTexture)
-    {
+    //if (isPBR && useTexture)
+    //{
+    //    //1. roughtness maps
+    //    LoadPBRTextures("texture_diffuse", textures);
+    //    //2. Normal maps
+    //    LoadPBRTextures("texture_normal", textures);
+    //    //3. roughtness maps
+    //    LoadPBRTextures("texture_roughness", textures);
+    //    //4. metallic maps
+    //    LoadPBRTextures("texture_metallic", textures);
+    //    //5. ao maps
+    //    LoadPBRTextures("texture_ao", textures);
+    //    material->setConfigurations(true, true);
+    //    material->SetTexture(textures);
+    //}
+    //
+    //if(!useTexture)
+    //{
         material->setConfigurations(true, false);
-    }
+    //}
 
 
 
@@ -253,10 +258,10 @@ void Model::LoadPBRTextures(std::string typeName,std::vector<Texture>& textures)
     std::cout << "Failed to load textures PBR" + typeName << "\n";
 }
 
+
 unsigned int Model::TextureFromFile(const char* path, const std::string& directory, bool gamma)
 {
     std::string filename = std::string(path);
-    filename = directory + '/' + filename;
 
     unsigned int textureID;
     glGenTextures(1, &textureID);
@@ -316,15 +321,67 @@ std::future<const aiScene*> Model::loadSceneAsync(std::string path, std::string&
     std::future <const aiScene*> sceneFuture = std::async(std::launch::async,sceneLoader);
 
     return sceneFuture;
-    //if (sceneFuture.valid())
-    //{
-    //    std::cout << "Done" << "\n";
-    //    isLoaded = true;
-    //    const aiScene* scene = import.GetOrphanedScene();
-    //    this->processNode(scene->mRootNode, scene);
-    //}
 
 
+}
+
+void Model::ExtractMaterials(const char* path)
+{
+    std::vector<Texture> textures;
+
+        //1. roughtness maps
+    ExtractTextures("texture_diffuse", textures, path);
+        //2. Normal maps
+    ExtractTextures("texture_normal", textures, path);
+        //3. roughtness maps
+    ExtractTextures("texture_roughness", textures, path);
+        //4. metallic maps
+    ExtractTextures("texture_metallic", textures, path);
+        //5. ao maps
+    ExtractTextures("texture_ao", textures, path);
+
+        material->setConfigurations(true, true);
+        material->SetTexture(textures);
+    
+}
+
+void Model::ExtractTextures(std::string typeName, std::vector<Texture>& textures, const char* path)
+{
+    Texture myPBRText;
+    std::string prefixSize = "texture_";
+    std::string textName = typeName.substr(prefixSize.size());
+    std::string pathName = path;
+    std::string myPathJPG = path + textName + ".jpg";
+    std::string myPathPNG = path + textName + ".png";
+
+
+    myPBRText.id = TextureFromFile(myPathJPG.c_str(), this->directory, false);
+    if (myPBRText.id != 0)
+    {
+        myPBRText.type = typeName;
+        myPBRText.path = path;
+        textures.push_back(myPBRText);
+        textures_loaded.push_back(myPBRText); // add to loaded textures
+        std::cout << "PBR jpg texture loaded: " + typeName << "\n";
+        return;
+    }
+    myPBRText.id = TextureFromFile(myPathPNG.c_str(), this->directory, false);
+    if (myPBRText.id != 0)
+    {
+        myPBRText.type = typeName;
+        myPBRText.path = path;
+        textures.push_back(myPBRText);
+        textures_loaded.push_back(myPBRText); // add to loaded textures
+        std::cout << "PBR png texture loaded: " + typeName << "\n";
+        return;
+    }
+
+    std::cout << "Failed to load textures PBR" + typeName << "\n";
+}
+
+void Model::SetMaterial(std::shared_ptr<Material> mat)
+{
+    this->material=mat;
 }
 
 

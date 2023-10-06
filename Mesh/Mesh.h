@@ -38,6 +38,7 @@ public:
     std::vector<unsigned int> indices;
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::shared_ptr <Material> material);
     void Draw(ShaderClass& shader, int mIndex, std::shared_ptr<Material> material);
+    void SetMaterial(std::shared_ptr<Material> material);
 private:
     //  render data
     unsigned int VAO, VBO, EBO;

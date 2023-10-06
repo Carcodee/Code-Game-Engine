@@ -66,7 +66,8 @@ public:
     }
     void Draw(ShaderClass& shader);
     bool isLoaded;
-
+    void ExtractMaterials(const char* path);
+    void SetMaterial(std::shared_ptr<Material> mat);
 
 private:
     std::mutex modelMutex;
@@ -88,5 +89,6 @@ private:
     void LoadPBRTextures(std::string typeName,std::vector<Texture>& texture);
     unsigned int TextureFromFile(const char* path, const std::string& directory,bool gamma);
     std::future<const aiScene*> loadSceneAsync(std::string path, std::string& directory, bool& isLoaded, std::mutex& mutex);
-    
+    void ExtractTextures(std::string typeName, std::vector<Texture>& textures, const char* path);
+
 };

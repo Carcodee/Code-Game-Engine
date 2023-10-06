@@ -32,16 +32,14 @@ float metallicM = 1.0f;
 float aoM = 1.0f;
 float albedoM = 1.0f;
 
+void DropCallback(GLFWwindow* window, int count, const char** paths);
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
-
-std::vector <Model> ourModels;
-std::vector <ModelConfigs> modelsConfigs;
 ModelHandler modelHandler;
-
+std::string path;
 
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -90,6 +88,7 @@ int main(void)
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
 
+	glfwSetDropCallback(window, DropCallback);
 	// configure global opengl state
 // -----------------------------
 	glEnable(GL_DEPTH_TEST);
@@ -902,7 +901,7 @@ int main(void)
 		myImgui.CreateNode([&]() {light_Movement(lightX, lightY, lightZ); });
 		myImgui.CreateNode([&]() {height_Mapping(heightScaleFactor); });
 		myImgui.CreateNode([&]() {light_Settings(dirLightOn, spotLightOn, pointLightOn, HDR, bloom, shadows); });
-		myImgui.CreateNode([&]() {model_LoaderTest(modelHandler, flipUVS, modelsLoadedCounter); });
+		myImgui.CreateNode([&]() {model_LoaderTest(modelHandler, flipUVS, modelsLoadedCounter,path); });
 		myImgui.CreateNode([&]() {model_configs(modelHandler); });
 
 		ImGui::PopFont();
@@ -926,6 +925,7 @@ int main(void)
 	return 0;
 }
 
+#pragma region  callbacks
 
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------
@@ -1007,3 +1007,18 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	// height will be significantly larger than specified on retina displays.
 	glViewport(0, 0, width, height);
 }
+void DropCallback(GLFWwindow* window, int count, const char** paths)
+{
+	for (int i = 0; i < count; ++i)
+	{
+		std::cout << paths[i] << std::endl;
+		path= paths[i];
+	}
+	std::shared_ptr<Material> material = std::make_shared<Material>();
+	ModelItem model = { Model(),modelsLoadedCounter , "Cube ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base", material };
+	modelHandler.models.push_back(model);
+	modelHandler.models[modelsLoadedCounter].newModel.StartModel(path, PBR, material);
+	modelsLoadedCounter++;
+
+}
+#pragma endregion

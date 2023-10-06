@@ -74,6 +74,7 @@ class ModelHandler
 
 		void SetModelScale(int modelID, glm::vec3 scale);
 		void DrawModel(ShaderClass& shader, int modelID, glm::mat4 projection, glm::mat4 view);
+		void ExtractModelMaterial(int modelID, const char* path);
 		std::vector <ModelItem> models;
 
 

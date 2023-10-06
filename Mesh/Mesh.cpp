@@ -9,6 +9,8 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
     setupMesh();
 }
 
+
+
 void Mesh::Draw(ShaderClass& shader, int mIndex, std::shared_ptr<Material> material)
 {
 
@@ -20,6 +22,11 @@ void Mesh::Draw(ShaderClass& shader, int mIndex, std::shared_ptr<Material> mater
 
     // always good practice to set everything back to defaults once configured.
     glActiveTexture(GL_TEXTURE0);
+}
+
+void Mesh::SetMaterial(std::shared_ptr<Material> material)
+{
+	this->mat = material;
 }
 
 void Mesh::setupMesh()

@@ -71,4 +71,9 @@ void ModelHandler::DrawModel(ShaderClass& shader, int modelID,glm::mat4 projecti
 
 }
 
+void ModelHandler::ExtractModelMaterial(int modelID,const char* path)
+{
+	models[modelID].newModel.ExtractMaterials(path);
+}
+
 
