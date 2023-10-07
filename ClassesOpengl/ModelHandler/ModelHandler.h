@@ -81,12 +81,12 @@ class ModelHandler
 		glm::mat4 GetCurrentModelMatrix(int count);
 		void SetModelMatrix(float* matrix, int count);
 		std::vector <ModelItem> models;
-
-
+		void SetModelPicked(int modelID);
+		int GetModelPicked();
 
 
 private:
-	
+	int modelPicked;
 glm::mat4 view;
 glm::mat4 projection;
 glm::mat4 currentModel;

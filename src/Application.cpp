@@ -46,6 +46,7 @@ std::string path;
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 MousePos mousePos;
+
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -501,7 +502,7 @@ int main(void)
 
 #pragma region Picking ObjectRegion
 
-		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+		glViewport(0, 0, myImgui.viewportWindowSize.x, myImgui.viewportWindowSize.y);
 		pickingFbo.Bind();
 		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 		glClearDepth(1.0);
@@ -527,14 +528,19 @@ int main(void)
 		{
 
 			unsigned char data[4];
+
 			glReadPixels(mousePos.xpos, mousePos.ypos, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
-			std::cout<<mousePos.xpos<<" "<<mousePos.ypos<<std::endl;
+			std::cout<< mousePos.xpos <<" "<< mousePos.ypos <<std::endl;
 			std::cout << "R: " << (int)data[0] << " G: " << (int)data[1] << " B: " << (int)data[2] << std::endl;
 			int pickedID =
 				data[0] +
 				data[1] * 256 +
 				data[2] * 256 * 256;
-			//std::cout << "pickedID: " << pickedID << std::endl;
+			if (pickedID<=modelHandler.models.size())
+			{
+				modelHandler.SetModelPicked(pickedID);
+			}
+			std::cout << "pickedID: " << pickedID << std::endl;
 		}
 
 		pickingFbo.UnBind();
@@ -947,6 +953,7 @@ void processInput(GLFWwindow* window)
 
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 	{
+		
 		glfwGetCursorPos(window, &mousePos.xpos, &mousePos.ypos);
 		mousePos.isPressed=true;
 

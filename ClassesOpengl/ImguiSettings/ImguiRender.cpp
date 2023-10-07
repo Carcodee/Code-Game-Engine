@@ -35,20 +35,27 @@ void ImguiRender::CreateViewPort(unsigned int textureID, ModelHandler& modelHand
 {
 
 	ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoMove);
-	ImVec2 viewportSize = ImGui::GetWindowSize();
-	glViewport(0, 0, viewportSize.x, viewportSize.y);
+	viewportWindowSize = ImGui::GetWindowSize();
+	glViewport(0, 0, viewportWindowSize.x, viewportWindowSize.y);
 	//ImGui::SetNextWindowSize(ImVec2(SCR_WIDTH, SCR_HEIGHT));
 	//maintain the window the same size of the glfw window
 	ImGui::GetWindowDrawList()->AddImage(
 		(void*)textureID,
 		ImVec2(ImGui::GetCursorScreenPos()),
-		viewportSize,
+		viewportWindowSize,
 		ImVec2(0, 1),
 		ImVec2(1, 0));
+	CreateGuizmos(modelHandler);
 
-	for (size_t i = 0; i < modelHandler.models.size(); i++)
+	
+
+
+}
+
+void ImguiRender::CreateGuizmos(ModelHandler& modelHandler)
+{
+	if (modelHandler.models.size() > 0)
 	{
-
 		ImGuiIO& io = ImGui::GetIO();
 		float viewManipulateRight = io.DisplaySize.x;
 		float viewManipulateTop = 0;
@@ -60,17 +67,15 @@ void ImguiRender::CreateViewPort(unsigned int textureID, ModelHandler& modelHand
 		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
 		viewManipulateRight = ImGui::GetWindowPos().x + windowWidth;
 		viewManipulateTop = ImGui::GetWindowPos().y;
-		float * model= (float*)glm::value_ptr(modelHandler.GetCurrentModelMatrix(i));
+		float* model = (float*)glm::value_ptr(modelHandler.GetCurrentModelMatrix(modelHandler.GetModelPicked()));
 
 		ImGuizmo::Manipulate(glm::value_ptr(modelHandler.GetViewMatrix()), glm::value_ptr(modelHandler.GetProjectionMatrix()),
 			ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::MODE::LOCAL, model,
 			NULL, NULL, NULL, NULL);
-		modelHandler.SetModelMatrix(model,i);
+		modelHandler.SetModelMatrix(model, modelHandler.GetModelPicked());
 		ImGuizmo::ViewManipulate((float*)glm::value_ptr(modelHandler.GetViewMatrix()), 8.0f, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);
-	
+
 	}
-
-
 }
 
 

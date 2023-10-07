@@ -19,8 +19,9 @@ class ImguiRender
 	void CreateNode(Lambda myLambda) {
 		myLambda();
 	};
-
+	ImVec2 viewportWindowSize;
 	void CreateViewPort(unsigned int textureID,ModelHandler& modelHandler);
+	void CreateGuizmos(ModelHandler& modelHandler);
 	private:
 };
 

@@ -90,10 +90,23 @@ glm::mat4 ModelHandler::GetCurrentModelMatrix(int count)
 	return this->models[count].modelMatrix;
 }
 
+
+
 void ModelHandler::SetModelMatrix(float* matrix, int count)
 {
 	this->models[count].modelMatrix = glm::make_mat4(matrix);
 }
+
+void ModelHandler::SetModelPicked(int modelID)
+{
+	this->modelPicked = modelID;
+}
+
+int ModelHandler::GetModelPicked()
+{
+	return this->modelPicked;
+}
+
 
 
 
