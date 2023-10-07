@@ -6,7 +6,6 @@
 #include <iostream>
 #include "../ClassesOpengl/ModelHandler/ModelHandler.h"
 #include "../Model/Model.h"
-
 auto MoveCubes = [](float& speed, float& rotationSpeed) {
 
 
@@ -331,7 +330,27 @@ auto model_configs = [](ModelHandler& myModelHandler) {
 							myModelHandler.SetModelScale(i, glm::vec3(S1, S2, S3));
 
 
-						
+							ImGuiIO& io = ImGui::GetIO();
+							float viewManipulateRight = io.DisplaySize.x;
+							float viewManipulateTop = 0;
+							static ImGuiWindowFlags gizmoWindowFlags = 0;
+
+							ImGui::SetNextWindowSize(ImVec2(800, 400), ImGuiCond_Appearing);
+							ImGui::SetNextWindowPos(ImVec2(400, 20), ImGuiCond_Appearing);
+							ImGui::Begin("Gizmo", 0, gizmoWindowFlags);
+							ImGuizmo::SetDrawlist();
+							float windowWidth = (float)ImGui::GetWindowWidth();
+							float windowHeight = (float)ImGui::GetWindowHeight();
+							ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+							viewManipulateRight = ImGui::GetWindowPos().x + windowWidth;
+							viewManipulateTop = ImGui::GetWindowPos().y;
+
+							ImGuizmo::Manipulate(glm::value_ptr(myModelHandler.GetViewMatrix()), glm::value_ptr(myModelHandler.GetProjectionMatrix()), 
+								ImGuizmo::OPERATION::ROTATE, ImGuizmo::MODE::WORLD, (float*)glm::value_ptr(myModelHandler.GetCurrentModelMatrix(i)),
+								NULL, NULL, NULL, NULL);
+							ImGuizmo::ViewManipulate((float*)glm::value_ptr(myModelHandler.GetViewMatrix()),8.0f, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);
+							ImGui::End();
+
 						ImGui::TreePop();
 						ImGui::Spacing();
 					}
@@ -414,7 +433,7 @@ auto model_LoaderTest = [](ModelHandler& models, bool& flipUVS, int& modelCounte
 			std::string strPath = path;
 			flipUVS = flipUvs;
 			std::shared_ptr<Material> material = std::make_shared<Material>();
-			ModelItem model = { Model(),modelCounter, "Cube ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base", material };
+			ModelItem model = { Model(),modelCounter, glm::mat4(1.0f),"Cube ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base", material};
 			models.AddModel(model);
 			models.startLoadModel(strPath, PBRon, material,modelCounter);
 			modelCounter++;
@@ -426,7 +445,7 @@ auto model_LoaderTest = [](ModelHandler& models, bool& flipUVS, int& modelCounte
 			std::string strPath = "Models/Cube/Cube.obj";
 			flipUVS = flipUvs;
 			std::shared_ptr<Material> material = std::make_shared<Material>();
-			ModelItem model = { Model(),modelCounter, "Cube ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base", material};
+			ModelItem model = { Model(),modelCounter, glm::mat4(1.0f),"Cube ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base", material};
 			models.AddModel(model);
 			//the problem is that the material that i give to the item is not being used, instead i am creating one in the model class
 

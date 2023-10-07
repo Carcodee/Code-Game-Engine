@@ -6,7 +6,8 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <functional>
-
+#include "imgui/ImGuizmo.h"
+#include "../ClassesOpengl/ModelHandler/ModelHandler.h"
 class ImguiRender
 {
 	public:
@@ -19,7 +20,7 @@ class ImguiRender
 		myLambda();
 	};
 
-	void CreateViewPort(unsigned int textureID);
+	void CreateViewPort(unsigned int textureID,ModelHandler& modelHandler);
 	private:
 };
 

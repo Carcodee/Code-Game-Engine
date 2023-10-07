@@ -31,7 +31,7 @@ void ImguiRender::Render()
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void ImguiRender::CreateViewPort(unsigned int textureID)
+void ImguiRender::CreateViewPort(unsigned int textureID, ModelHandler& modelHandler)
 {
 
 	ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoMove);
@@ -45,6 +45,30 @@ void ImguiRender::CreateViewPort(unsigned int textureID)
 		viewportSize,
 		ImVec2(0, 1),
 		ImVec2(1, 0));
+	for (size_t i = 0; i < modelHandler.models.size(); i++)
+	{
+
+		ImGuiIO& io = ImGui::GetIO();
+		float viewManipulateRight = io.DisplaySize.x;
+		float viewManipulateTop = 0;
+		static ImGuiWindowFlags gizmoWindowFlags = 0;
+
+		ImGuizmo::SetDrawlist();
+		float windowWidth = (float)ImGui::GetWindowWidth();
+		float windowHeight = (float)ImGui::GetWindowHeight();
+		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+		viewManipulateRight = ImGui::GetWindowPos().x + windowWidth;
+		viewManipulateTop = ImGui::GetWindowPos().y;
+		float * model= (float*)glm::value_ptr(modelHandler.GetCurrentModelMatrix(i));
+
+		ImGuizmo::Manipulate(glm::value_ptr(modelHandler.GetViewMatrix()), glm::value_ptr(modelHandler.GetProjectionMatrix()),
+			ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::MODE::LOCAL, model,
+			NULL, NULL, NULL, NULL);
+		modelHandler.SetModelMatrix(model,i);
+		ImGuizmo::ViewManipulate((float*)glm::value_ptr(modelHandler.GetViewMatrix()), 8.0f, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);
+	
+	}
+
 
 }
 

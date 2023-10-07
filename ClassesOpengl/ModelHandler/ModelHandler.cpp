@@ -50,17 +50,16 @@ void ModelHandler::DrawModel(ShaderClass& shader, int modelID,glm::mat4 projecti
 
 		this->projection = projection;
 		this->view = view;
-
 		shader.use();
-		glm::mat4 modelM = glm::mat4(1.0f);
-		modelM = glm::translate(modelM, glm::vec3(models[modelID].position)); 
-		modelM = glm::rotate(modelM, glm::radians(models[modelID].rotationX), glm::vec3(1.0f, 0.0f, 0.0f));
-		modelM = glm::rotate(modelM, glm::radians(models[modelID].rotationY), glm::vec3(0.0f, 1.0f, 0.0f));
-		modelM = glm::rotate(modelM, glm::radians(models[modelID].rotationZ), glm::vec3(0.0f, 0.0f, 1.0f));
-		modelM = glm::scale(modelM, glm::vec3(models[modelID].scale));	
+		//models[modelID].modelMatrix = glm::mat4(1.0f);
+		//models[modelID].modelMatrix = glm::translate(models[modelID].modelMatrix, glm::vec3(models[modelID].position));
+		//models[modelID].modelMatrix = glm::rotate(models[modelID].modelMatrix, glm::radians(models[modelID].rotationX), glm::vec3(1.0f, 0.0f, 0.0f));
+		//models[modelID].modelMatrix = glm::rotate(models[modelID].modelMatrix, glm::radians(models[modelID].rotationY), glm::vec3(0.0f, 1.0f, 0.0f));
+		//models[modelID].modelMatrix = glm::rotate(models[modelID].modelMatrix, glm::radians(models[modelID].rotationZ), glm::vec3(0.0f, 0.0f, 1.0f));
+		//models[modelID].modelMatrix = glm::scale(models[modelID].modelMatrix, glm::vec3(models[modelID].scale));
 
-
-		shader.setMat4("model", modelM);
+		this->currentModel = models[modelID].modelMatrix;
+		shader.setMat4("model", currentModel);
 		shader.setMat4("view", this->view);
 		shader.setMat4("projection", this->projection);
 
@@ -75,5 +74,27 @@ void ModelHandler::ExtractModelMaterial(int modelID,const char* path)
 {
 	models[modelID].newModel.ExtractMaterials(path);
 }
+
+glm::mat4 ModelHandler::GetViewMatrix()
+{
+	return this->view;
+}
+
+glm::mat4 ModelHandler::GetProjectionMatrix()
+{
+	return this->projection;
+}
+
+glm::mat4 ModelHandler::GetCurrentModelMatrix(int count)
+{
+	return this->models[count].modelMatrix;
+}
+
+void ModelHandler::SetModelMatrix(float* matrix, int count)
+{
+	this->models[count].modelMatrix = glm::make_mat4(matrix);
+}
+
+
 
 

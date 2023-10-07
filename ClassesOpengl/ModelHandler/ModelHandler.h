@@ -13,6 +13,7 @@ struct ModelItem
 {
 	Model newModel;
 	int modelID;
+	glm::mat4 modelMatrix;
 	std::string name;
 	glm::vec3 position;
 	glm::vec3 scale;
@@ -75,15 +76,20 @@ class ModelHandler
 		void SetModelScale(int modelID, glm::vec3 scale);
 		void DrawModel(ShaderClass& shader, int modelID, glm::mat4 projection, glm::mat4 view);
 		void ExtractModelMaterial(int modelID, const char* path);
+		glm::mat4 GetViewMatrix();
+		glm::mat4 GetProjectionMatrix();
+		glm::mat4 GetCurrentModelMatrix(int count);
+		void SetModelMatrix(float* matrix, int count);
 		std::vector <ModelItem> models;
 
 
 
 
 private:
-
+	
 glm::mat4 view;
 glm::mat4 projection;
-
+glm::mat4 currentModel;
+int counter;
 };
 

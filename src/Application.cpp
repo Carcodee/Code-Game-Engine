@@ -3,6 +3,7 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+
 #include"../ClassesOpengl/ImguiSettings/ImguiRender.h"
 #include "../ClassesOpengl/ImguiSettings/MyImguiSettings.h"
 #include "headers/headers.h"
@@ -909,7 +910,7 @@ int main(void)
 
 		ImGui::ShowDemoWindow();
 		
-		myImgui.CreateViewPort(finalFbo.m_Texture);
+		myImgui.CreateViewPort(finalFbo.m_Texture, modelHandler);
 		myImgui.Render();
 
 #pragma endregion
@@ -1015,7 +1016,7 @@ void DropCallback(GLFWwindow* window, int count, const char** paths)
 		path= paths[i];
 	}
 	std::shared_ptr<Material> material = std::make_shared<Material>();
-	ModelItem model = { Model(),modelsLoadedCounter , "Cube ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base", material };
+	ModelItem model = { Model(),modelsLoadedCounter ,glm::mat4(1.0f), "Entity ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base", material };
 	modelHandler.models.push_back(model);
 	modelHandler.models[modelsLoadedCounter].newModel.StartModel(path, PBR, material);
 	modelsLoadedCounter++;

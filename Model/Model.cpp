@@ -165,26 +165,26 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 
     //}
 
-    //if (isPBR && useTexture)
-    //{
-    //    //1. roughtness maps
-    //    LoadPBRTextures("texture_diffuse", textures);
-    //    //2. Normal maps
-    //    LoadPBRTextures("texture_normal", textures);
-    //    //3. roughtness maps
-    //    LoadPBRTextures("texture_roughness", textures);
-    //    //4. metallic maps
-    //    LoadPBRTextures("texture_metallic", textures);
-    //    //5. ao maps
-    //    LoadPBRTextures("texture_ao", textures);
-    //    material->setConfigurations(true, true);
-    //    material->SetTexture(textures);
-    //}
-    //
-    //if(!useTexture)
-    //{
+    if (isPBR && useTexture)
+    {
+        //1. roughtness maps
+        LoadPBRTextures("texture_diffuse", textures);
+        //2. Normal maps
+        LoadPBRTextures("texture_normal", textures);
+        //3. roughtness maps
+        LoadPBRTextures("texture_roughness", textures);
+        //4. metallic maps
+        LoadPBRTextures("texture_metallic", textures);
+        //5. ao maps
+        LoadPBRTextures("texture_ao", textures);
+        material->setConfigurations(true, true);
+        material->SetTexture(textures);
+    }
+    
+    if(!useTexture)
+    {
         material->setConfigurations(true, false);
-    //}
+    }
 
 
 
@@ -259,46 +259,6 @@ void Model::LoadPBRTextures(std::string typeName,std::vector<Texture>& textures)
 }
 
 
-unsigned int Model::TextureFromFile(const char* path, const std::string& directory, bool gamma)
-{
-    std::string filename = std::string(path);
-
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-
-    int width, height, nrComponents;
-    unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
-    if (data)
-    {
-        GLenum format;
-        if (nrComponents == 1)
-            format = GL_RED;
-        else if (nrComponents == 3)
-            format = GL_RGB;
-        else if (nrComponents == 4)
-            format = GL_RGBA;
-
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        stbi_image_free(data);
-    }
-    else
-    {
-        stbi_image_free(data);
-        glDeleteTextures(1, &textureID);
-        return 0;
-    }
-    return textureID;
-
-
-}
 
 
 
@@ -351,9 +311,13 @@ void Model::ExtractTextures(std::string typeName, std::vector<Texture>& textures
     std::string prefixSize = "texture_";
     std::string textName = typeName.substr(prefixSize.size());
     std::string pathName = path;
-    std::string myPathJPG = path + textName + ".jpg";
-    std::string myPathPNG = path + textName + ".png";
-
+    std::replace(pathName.begin(), pathName.end(), '\\', '/');
+    if (pathName[pathName.length()] != '/')
+    {
+        pathName = pathName + '/';
+    }
+    std::string myPathJPG = pathName + textName + ".jpg";
+    std::string myPathPNG = pathName + textName + ".png";
 
     myPBRText.id = TextureFromFile(myPathJPG.c_str(), this->directory, false);
     if (myPBRText.id != 0)
@@ -377,6 +341,48 @@ void Model::ExtractTextures(std::string typeName, std::vector<Texture>& textures
     }
 
     std::cout << "Failed to load textures PBR" + typeName << "\n";
+}
+
+
+unsigned int Model::TextureFromFile(const char* path, const std::string& directory, bool gamma)
+{
+    std::string filename = std::string(path);
+
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+
+    int width, height, nrComponents;
+    unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+    if (data)
+    {
+        GLenum format;
+        if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB;
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    }
+    else
+    {
+        stbi_image_free(data);
+        glDeleteTextures(1, &textureID);
+        return 0;
+    }
+    return textureID;
+
+
 }
 
 void Model::SetMaterial(std::shared_ptr<Material> mat)
