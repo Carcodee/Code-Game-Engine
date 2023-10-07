@@ -15,6 +15,11 @@ enum Camera_Movement {
     UP,
     DOWN
 };
+struct MousePos {
+    bool isPressed;
+	double xpos;
+    double ypos;
+};
 
 // Default camera values
 const float YAW = -90.0f;

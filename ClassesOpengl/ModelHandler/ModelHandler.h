@@ -6,7 +6,7 @@
 #include <glm/glm.hpp>
 #include "../Model/Model.h"
 #include "../Mateial/Material.h"
-#include "../Shaders/ShaderClass.h"
+#include "../Shaders/Classes/ShaderClass.h"
 
 
 struct ModelItem

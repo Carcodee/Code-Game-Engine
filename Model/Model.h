@@ -2,7 +2,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include "../Shaders/ShaderClass.h"
+#include "../Shaders/Classes/ShaderClass.h"
 #include <iostream>
 #include <vector>
 #include "../Mesh/Mesh.h"

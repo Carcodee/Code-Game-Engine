@@ -27,7 +27,7 @@
     <ClCompile Include="ClassesOpengl\EBO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Shaders\ShaderClass.cpp">
+    <ClCompile Include="Shaders\Classes\ShaderClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Includes\imgui\imgui.cpp">
@@ -110,7 +110,7 @@
     <ClInclude Include="ClassesOpengl\EBO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Shaders\ShaderClass.h">
+    <ClInclude Include="Shaders\Classes\ShaderClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Includes\imgui\imconfig.h">
@@ -224,6 +224,8 @@
     <None Include="Shaders\LightPass.frag" />
     <None Include="Shaders\ShadowMap.frag" />
     <None Include="Shaders\ShadowMap.vert" />
+    <None Include="Shaders\Picking.frag" />
+    <None Include="Shaders\Picking.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Includes\imgui-docking\LICENSE.txt" />

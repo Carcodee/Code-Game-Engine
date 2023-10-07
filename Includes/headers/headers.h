@@ -13,7 +13,7 @@
 #include "../ClassesOpengl/VAO.h"
 #include "../ClassesOpengl/VBO.h"
 #include "../ClassesOpengl/EBO.h"
-#include "../Shaders/ShaderClass.h"
+#include "../Shaders/Classes/ShaderClass.h"
 #include "../Mesh/Mesh.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

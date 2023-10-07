@@ -12,7 +12,7 @@ class Framebuffer
 		void UnBind();
 		~Framebuffer();
 		GLuint m_Texture;
-
+		void InitPickingFramebuffer(GLFWwindow* window);
 	private:
 		GLuint m_Fbo;
 		GLuint m_Rbo;

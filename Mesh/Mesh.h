@@ -2,7 +2,7 @@
 #include <vector>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include "../Shaders/ShaderClass.h"
+#include "../Shaders/Classes/ShaderClass.h"
 #include "stb-master/stb_image.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

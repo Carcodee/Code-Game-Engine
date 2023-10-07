@@ -174,7 +174,7 @@
     <ClCompile Include="ClassesOpengl\ModelHandler\ModelHandler.cpp" />
     <ClCompile Include="Model\Model.cpp" />
     <ClCompile Include="ClassesOpengl\Renderer\Renderer.cpp" />
-    <ClCompile Include="Shaders\ShaderClass.cpp" />
+    <ClCompile Include="Shaders\Classes\ShaderClass.cpp" />
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="ClassesOpengl\VAO.cpp" />
     <ClCompile Include="ClassesOpengl\VBO.cpp" />
@@ -211,7 +211,7 @@
     <ClInclude Include="ClassesOpengl\ModelHandler\ModelHandler.h" />
     <ClInclude Include="Model\Model.h" />
     <ClInclude Include="ClassesOpengl\Renderer\Renderer.h" />
-    <ClInclude Include="Shaders\ShaderClass.h" />
+    <ClInclude Include="Shaders\Classes\ShaderClass.h" />
     <ClInclude Include="Functions\Utility.h" />
   </ItemGroup>
   <ItemGroup>
@@ -238,6 +238,8 @@
     <None Include="Shaders\LightPass.vert" />
     <None Include="Shaders\ModelLoader.frag" />
     <None Include="Shaders\ModelLoader.vert" />
+    <None Include="Shaders\Picking.frag" />
+    <None Include="Shaders\Picking.vert" />
     <None Include="Shaders\ShadowMap.frag" />
     <None Include="Shaders\ShadowMap.vert" />
   </ItemGroup>

@@ -22,6 +22,7 @@ uniform mat4 view;
 uniform mat4 projection;
 uniform vec3 viewPos;
 uniform vec3 lightPos;
+uniform vec3 mousePos;
 uniform int normalMapping;
 uniform int PBRon;
 

@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <glm/glm.hpp>
-#include "../Shaders/ShaderClass.h"
+#include "../Shaders/Classes/ShaderClass.h"
 
 struct Texture {
 	unsigned int id;

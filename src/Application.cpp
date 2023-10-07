@@ -39,11 +39,13 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
+
 ModelHandler modelHandler;
 std::string path;
 
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+MousePos mousePos;
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -106,7 +108,7 @@ int main(void)
 	ShaderClass geometricBufferShader("Shaders/GBuffer.vert", "Shaders/GBuffer.frag");
 	ShaderClass gBufferLightPassShader("Shaders/LightPass.vert", "Shaders/LightPass.frag");
 	ShaderClass shadowShaderDepth("Shaders/ShadowMap.vert", "Shaders/ShadowMap.frag");
-
+	ShaderClass pickingShader("Shaders/Picking.vert", "Shaders/Picking.frag");
 
 	std::vector <GLfloat> cubeLightVertices = util::returnVertices(util::cube3Layout);
 	std::vector <GLfloat> vertices = util::returnVertices(util::cube4Layout);
@@ -261,72 +263,6 @@ int main(void)
 	lightVAO.UnBind();
 
 
-
-#pragma region GBuffer
-
-
-	//unsigned int gBuffer;
-	//glGenFramebuffers(1, &gBuffer);
-	//glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-	//unsigned int gPosition, gNormal, gAlbedoSpec;
-	//// position color buffer
-	//glGenTextures(1, &gPosition);
-	//glBindTexture(GL_TEXTURE_2D, gPosition);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
-	//// normal color buffer
-	//glGenTextures(1, &gNormal);
-	//glBindTexture(GL_TEXTURE_2D, gNormal);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
-	//// color + specular color buffer
-	//glGenTextures(1, &gAlbedoSpec);
-	//glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
-	//// tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
-	//unsigned int gAttachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-	//glDrawBuffers(3, gAttachments);
-	//// create and attach depth buffer (renderbuffer)
-	//unsigned int gRboDepth;
-	//glGenRenderbuffers(1, &gRboDepth);
-	//glBindRenderbuffer(GL_RENDERBUFFER, gRboDepth);
-	//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
-	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, gRboDepth);
-	//// finally check if framebuffer is complete
-	//if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	//	std::cout << "Framebuffer not complete!" << std::endl;
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	//const unsigned int NR_LIGHTS = 32;
-	//std::vector<glm::vec3> lightPositions;
-	//std::vector<glm::vec3> lightColors;
-	//srand(13);
-	//for (unsigned int i = 0; i < NR_LIGHTS; i++)
-	//{
-	//	// calculate slightly random offsets
-	//	float xPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 3.0);
-	//	float yPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 4.0);
-	//	float zPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 3.0);
-	//	lightPositions.push_back(glm::vec3(xPos, yPos, zPos));
-	//	// also calculate random color
-	//	float rColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
-	//	float gColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
-	//	float bColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
-	//	lightColors.push_back(glm::vec3(rColor, gColor, bColor));
-	//}
-	//gBufferLightPassShader.use();
-	//gBufferLightPassShader.setInt("gPosition", 0);
-	//gBufferLightPassShader.setInt("gNormal", 1);
-	//gBufferLightPassShader.setInt("gAlbedoSpec", 2);
-
-#pragma endregion
-
 #pragma region ShadowFramebuffer
 
 	unsigned int depthMapFBO;
@@ -460,6 +396,8 @@ int main(void)
 		finalFbo.generateTexture(window);
 		fbShader.setInt("screenTexture", 0);
 
+		Framebuffer pickingFbo;
+		pickingFbo.generateTexture(window);
 
 
 	//Color
@@ -503,6 +441,7 @@ int main(void)
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
+		
 		float currentFrame = static_cast<float>(glfwGetTime());
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
@@ -516,6 +455,7 @@ int main(void)
 		/* Render here */
 		// render
 		// ------
+
 		glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
 		//glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 		// make sure we clear the framebuffer's content
@@ -559,6 +499,48 @@ int main(void)
 
 #pragma endregion
 
+#pragma region Picking ObjectRegion
+
+		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+		pickingFbo.Bind();
+		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+		glClearDepth(1.0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		pickingShader.use();
+
+		for (size_t i = 0; i < modelHandler.models.size(); i++)
+		{
+			int r = (i & 0x000000FF) >> 0;
+			int g = (i & 0x0000FF00) >> 8;
+			int b = (i & 0x00FF0000) >> 16;
+			glm::vec3 color(r/255.0f, g/255.0f, b/255.0f);
+
+			pickingShader.setVec3("UniqueColor", color);
+			modelHandler.DrawModel(pickingShader, i, projectionM, viewM);
+
+		}
+		glFlush();
+		glFinish();
+
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		if (mousePos.isPressed)
+		{
+
+			unsigned char data[4];
+			glReadPixels(mousePos.xpos, mousePos.ypos, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			std::cout<<mousePos.xpos<<" "<<mousePos.ypos<<std::endl;
+			std::cout << "R: " << (int)data[0] << " G: " << (int)data[1] << " B: " << (int)data[2] << std::endl;
+			int pickedID =
+				data[0] +
+				data[1] * 256 +
+				data[2] * 256 * 256;
+			//std::cout << "pickedID: " << pickedID << std::endl;
+		}
+
+		pickingFbo.UnBind();
+
+
+#pragma endregion
 
 #pragma region ShadowsRegion
 
@@ -614,8 +596,6 @@ int main(void)
 
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 		(bloom) ? glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO) : glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-		//glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-		// make sure we clear the framebuffer's content
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -741,6 +721,7 @@ int main(void)
 
 #pragma endregion
 
+
 #pragma region ModelRegion
 
 		for (size_t i = 0; i < modelHandler.models.size(); i++)
@@ -854,42 +835,6 @@ int main(void)
 
 #pragma endregion
 
-#pragma region Gbuffer
-
-
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_2D, gPosition);
-		//glActiveTexture(GL_TEXTURE1);
-		//glBindTexture(GL_TEXTURE_2D, gNormal);
-		//glActiveTexture(GL_TEXTURE2);
-		//glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
-		//// also send light relevant uniforms
-		//gBufferLightPassShader.use();
-		//for (unsigned int i = 0; i < lightPositions.size(); i++)
-		//{
-		//	gBufferLightPassShader.setVec3("lights[" + std::to_string(i) + "].Position", lightPositions[i]);
-		//	gBufferLightPassShader.setVec3("lights[" + std::to_string(i) + "].Color", lightColors[i]);
-		//	// update attenuation parameters and calculate radius
-		//	const float linear = 0.7f;
-		//	const float quadratic = 1.8f;
-		//	gBufferLightPassShader.setFloat("lights[" + std::to_string(i) + "].Linear", linear);
-		//	gBufferLightPassShader.setFloat("lights[" + std::to_string(i) + "].Quadratic", quadratic);
-		//}
-		//gBufferLightPassShader.setVec3("viewPos", camera.Position);
-		//renderQuad();
-		//glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
-		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
-		//// blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.
-		//// the internal formats are implementation defined. This works on all of my systems, but if it doesn't on yours you'll likely have to write to the 		
-		//// depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
-		//glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-#pragma endregion
-
-
 
 		glEnd();
 
@@ -999,6 +944,19 @@ void processInput(GLFWwindow* window)
 		camera.SetMouseSpeed(false);
 
 	}
+
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+	{
+		glfwGetCursorPos(window, &mousePos.xpos, &mousePos.ypos);
+		mousePos.isPressed=true;
+
+	}
+	else
+	{
+
+		mousePos.isPressed = false;
+	}
+
 }
 
 

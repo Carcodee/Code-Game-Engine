@@ -44,3 +44,18 @@ Framebuffer::~Framebuffer()
 {
 	glDeleteFramebuffers(1, &m_Fbo);
 }
+
+void Framebuffer::InitPickingFramebuffer(GLFWwindow* window)
+{
+	int width, height;
+	glfwGetWindowSize(window, &width, &height);
+	glGenFramebuffers(1, &m_Fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER,m_Fbo);
+
+	glGenTextures(1, &m_Texture);
+	glBindTexture(GL_TEXTURE_2D, m_Texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_Texture, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}

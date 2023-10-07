@@ -45,6 +45,7 @@ void ImguiRender::CreateViewPort(unsigned int textureID, ModelHandler& modelHand
 		viewportSize,
 		ImVec2(0, 1),
 		ImVec2(1, 0));
+
 	for (size_t i = 0; i < modelHandler.models.size(); i++)
 	{
 
