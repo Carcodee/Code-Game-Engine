@@ -52,6 +52,18 @@ void ImguiRender::CreateViewPort(unsigned int textureID, ModelHandler& modelHand
 
 }
 
+void ImguiRender::CreateContentBrowser()
+{
+	ImGui::Begin("Content Browser");
+	ImGui::End();
+}
+
+void ImguiRender::CreateHirearchy()
+{
+	ImGui::Begin("Hirearchy");
+	ImGui::End();
+}
+
 void ImguiRender::CreateGuizmos(ModelHandler& modelHandler)
 {
 	if (modelHandler.models.size() > 0)

@@ -21,6 +21,8 @@ class ImguiRender
 	};
 	ImVec2 viewportWindowSize;
 	void CreateViewPort(unsigned int textureID,ModelHandler& modelHandler);
+	void CreateContentBrowser();
+	void CreateHirearchy();
 	void CreateGuizmos(ModelHandler& modelHandler);
 	void SetGizmoOperation(GLFWwindow* window);
 	private:
