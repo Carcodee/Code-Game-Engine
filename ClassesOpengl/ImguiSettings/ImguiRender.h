@@ -22,6 +22,9 @@ class ImguiRender
 	ImVec2 viewportWindowSize;
 	void CreateViewPort(unsigned int textureID,ModelHandler& modelHandler);
 	void CreateGuizmos(ModelHandler& modelHandler);
+	void SetGizmoOperation(GLFWwindow* window);
 	private:
+		ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+		ImGuizmo::MODE mCurrentGizmoMode = ImGuizmo::WORLD;
 };
 

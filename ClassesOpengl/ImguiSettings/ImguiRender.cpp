@@ -70,12 +70,24 @@ void ImguiRender::CreateGuizmos(ModelHandler& modelHandler)
 		float* model = (float*)glm::value_ptr(modelHandler.GetCurrentModelMatrix(modelHandler.GetModelPicked()));
 
 		ImGuizmo::Manipulate(glm::value_ptr(modelHandler.GetViewMatrix()), glm::value_ptr(modelHandler.GetProjectionMatrix()),
-			ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::MODE::LOCAL, model,
+			mCurrentGizmoOperation, ImGuizmo::MODE::LOCAL, model,
 			NULL, NULL, NULL, NULL);
 		modelHandler.SetModelMatrix(model, modelHandler.GetModelPicked());
 		ImGuizmo::ViewManipulate((float*)glm::value_ptr(modelHandler.GetViewMatrix()), 8.0f, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);
 
 	}
+}
+
+void ImguiRender::SetGizmoOperation(GLFWwindow* window)
+{
+
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+		mCurrentGizmoOperation = ImGuizmo::ROTATE;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+		mCurrentGizmoOperation = ImGuizmo::SCALE;
+
 }
 
 

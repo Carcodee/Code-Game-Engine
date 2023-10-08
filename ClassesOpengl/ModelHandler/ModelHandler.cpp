@@ -58,7 +58,7 @@ void ModelHandler::DrawModel(ShaderClass& shader, int modelID,glm::mat4 projecti
 		//models[modelID].modelMatrix = glm::rotate(models[modelID].modelMatrix, glm::radians(models[modelID].rotationZ), glm::vec3(0.0f, 0.0f, 1.0f));
 		//models[modelID].modelMatrix = glm::scale(models[modelID].modelMatrix, glm::vec3(models[modelID].scale));
 
-		this->currentModel = models[modelID].modelMatrix;
+		this->currentModel = models[modelID].modelMatrix ;
 		shader.setMat4("model", currentModel);
 		shader.setMat4("view", this->view);
 		shader.setMat4("projection", this->projection);

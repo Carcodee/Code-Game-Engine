@@ -299,57 +299,13 @@ auto model_configs = [](ModelHandler& myModelHandler) {
 					{
 						
 							ImGui::Text("Position");
-							static float f1=0.0f,f2=0.0f,f3 = 0.0f;
-							ImGui::SliderFloat("PX", &f1, -10.0f, 10.0f, "%.4f");
-							ImGui::SliderFloat("PY", &f2, -10.0f, 10.0f, "%.4f");
-							ImGui::SliderFloat("PZ", &f3, -10.0f, 10.0f, "%.4f");
-							myModelHandler.SetModelPosition(i, glm::vec3(f1, f2, f3));
-
-
+							float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+							ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(myModelHandler.models[i].modelMatrix), matrixTranslation, matrixRotation, matrixScale);
+							ImGui::InputFloat3("Translate", matrixTranslation);
+							ImGui::InputFloat3("Rotate", matrixRotation);
+							ImGui::InputFloat3("Scale", matrixScale);
+							ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, glm::value_ptr(myModelHandler.models[i].modelMatrix));
 							
-					
-							ImGui::Text("Rotation");
-							static float f4=0.0f, f5=0.0f, f6 = 0.0f;
-							ImGui::SliderFloat("RX", &f4, -200.0f, 200.0f, "%.4f");
-							ImGui::SliderFloat("RY", &f5, -200.0f, 200.0f, "%.4f");
-							ImGui::SliderFloat("RZ", &f6, -200.0f, 200.0f, "%.4f");
-
-
-							myModelHandler.SetModelRotationX(i, f4);
-							myModelHandler.SetModelRotationY(i, f5);
-							myModelHandler.SetModelRotationZ(i, f6);
-
-					
-
-							ImGui::Text("Scale");
-							static float S1=1.0f, S2=1.0f, S3= 1.0f;
-							ImGui::SliderFloat("SX", &S1, -10.0f, 10.0f, "%.4f");
-							ImGui::SliderFloat("SY", &S2, -10.0f, 10.0f, "%.4f");
-							ImGui::SliderFloat("SZ", &S3, -10.0f, 10.0f, "%.4f");
-
-							myModelHandler.SetModelScale(i, glm::vec3(S1, S2, S3));
-
-
-							ImGuiIO& io = ImGui::GetIO();
-							float viewManipulateRight = io.DisplaySize.x;
-							float viewManipulateTop = 0;
-							static ImGuiWindowFlags gizmoWindowFlags = 0;
-
-							ImGui::SetNextWindowSize(ImVec2(800, 400), ImGuiCond_Appearing);
-							ImGui::SetNextWindowPos(ImVec2(400, 20), ImGuiCond_Appearing);
-							ImGui::Begin("Gizmo", 0, gizmoWindowFlags);
-							ImGuizmo::SetDrawlist();
-							float windowWidth = (float)ImGui::GetWindowWidth();
-							float windowHeight = (float)ImGui::GetWindowHeight();
-							ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
-							viewManipulateRight = ImGui::GetWindowPos().x + windowWidth;
-							viewManipulateTop = ImGui::GetWindowPos().y;
-
-							ImGuizmo::Manipulate(glm::value_ptr(myModelHandler.GetViewMatrix()), glm::value_ptr(myModelHandler.GetProjectionMatrix()), 
-								ImGuizmo::OPERATION::ROTATE, ImGuizmo::MODE::WORLD, (float*)glm::value_ptr(myModelHandler.GetCurrentModelMatrix(i)),
-								NULL, NULL, NULL, NULL);
-							ImGuizmo::ViewManipulate((float*)glm::value_ptr(myModelHandler.GetViewMatrix()),8.0f, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);
-							ImGui::End();
 
 						ImGui::TreePop();
 						ImGui::Spacing();
