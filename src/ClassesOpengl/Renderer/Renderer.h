@@ -6,11 +6,11 @@
 
 #include <iostream>
 #include <vector>
-#include "../ClassesOpengl/VAO.h"
-#include "../ClassesOpengl/VBO.h"
-#include "../ClassesOpengl/EBO.h"
+#include "../src/ClassesOpengl/OpenGLHelpers/VAO.h"
+#include "../src/ClassesOpengl/OpenGLHelpers/VBO.h"
+#include "../src/ClassesOpengl/OpenGLHelpers/EBO.h"
 #include "../Shaders/Classes/ShaderClass.h"
-#include "../Model/Model.h"
+#include "../src/Model/Model.h"
 
 class Renderer
 

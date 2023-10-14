@@ -4,8 +4,8 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 #include <iostream>
-#include "../ClassesOpengl/ModelHandler/ModelHandler.h"
-#include "../Model/Model.h"
+#include "../src/ClassesOpengl/ModelHandler/ModelHandler.h"
+#include "../src/Model/Model.h"
 auto MoveCubes = [](float& speed, float& rotationSpeed) {
 
 

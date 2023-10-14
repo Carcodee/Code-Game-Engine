@@ -7,7 +7,7 @@
 #include <iostream>
 #include <functional>
 #include "imgui/ImGuizmo.h"
-#include "../ClassesOpengl/ModelHandler/ModelHandler.h"
+#include "../src/ClassesOpengl/ModelHandler/ModelHandler.h"
 class ImguiRender
 {
 	public:
@@ -28,5 +28,10 @@ class ImguiRender
 	private:
 		ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
 		ImGuizmo::MODE mCurrentGizmoMode = ImGuizmo::WORLD;
+
+		static void ShowPlaceholderObject(const char* prefix, int uid);
+        
+
+        
 };
 

@@ -10,22 +10,22 @@
 #include <future>
 #include <memory>
 
-#include "../ClassesOpengl/VAO.h"
-#include "../ClassesOpengl/VBO.h"
-#include "../ClassesOpengl/EBO.h"
+#include "../src/ClassesOpengl/OpenGLHelpers/VAO.h"
+#include "../src/ClassesOpengl/OpenGLHelpers/VBO.h"
+#include "../src/ClassesOpengl/OpenGLHelpers/EBO.h"
 #include "../Shaders/Classes/ShaderClass.h"
-#include "../Mesh/Mesh.h"
+#include "../src/Mesh/Mesh.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Noise/PerlinNoise.h"
 #include "OBJLoader/OBJ_Loader.h"
-#include "../Model/Model.h"
-#include "../Mesh/Mesh.h"
-#include "../Camera/CameraHandler.h"
-#include "../ClassesOpengl/Framebuffer.h"
+#include "../src/Model/Model.h"
+#include "../src/Mesh/Mesh.h"
+#include "../src/Camera/CameraHandler.h"
+#include "../src/ClassesOpengl/OpenGLHelpers/Framebuffer.h"
 #include "stb-master/stb_image.h"
-#include "../ClassesOpengl/Mateial/Material.h"
-#include "../ClassesOpengl/ModelHandler/ModelHandler.h"
+#include "../src/ClassesOpengl/Mateial/Material.h"
+#include "../src/ClassesOpengl/ModelHandler/ModelHandler.h"
 
 #define STB_IMAGE_IMPLEMENTATION

@@ -18,13 +18,13 @@
     <ClCompile Include="src\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ClassesOpengl\VAO.cpp">
+    <ClCompile Include="src\ClassesOpengl\OpenGLHelpers\VAO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ClassesOpengl\VBO.cpp">
+    <ClCompile Include="src\ClassesOpengl\OpenGLHelpers\VBO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ClassesOpengl\EBO.cpp">
+    <ClCompile Include="src\ClassesOpengl\OpenGLHelpers\EBO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Shaders\Classes\ShaderClass.cpp">
@@ -51,37 +51,37 @@
     <ClCompile Include="Includes\imgui\imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Camera\CameraHandler.cpp">
+    <ClCompile Include="src\Camera\CameraHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh\Mesh.cpp">
+    <ClCompile Include="src\Mesh\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Includes\Noise\PerlinNoise.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Model\Model.cpp">
+    <ClCompile Include="src\Model\Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ClassesOpengl\GBufferClass.cpp">
+    <ClCompile Include="src\ClassesOpengl\OpenGLHelpers\GBufferClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Functions\Utility.cpp">
+    <ClCompile Include="src\Functions\Utility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ClassesOpengl\Framebuffer.cpp">
+    <ClCompile Include="src\ClassesOpengl\OpenGLHelpers\Framebuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ClassesOpengl\Renderer\Renderer.cpp">
+    <ClCompile Include="src\ClassesOpengl\Renderer\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ClassesOpengl\ImguiSettings\ImguiRender.cpp">
+    <ClCompile Include="src\ClassesOpengl\ImguiSettings\ImguiRender.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ClassesOpengl\Mateial\Material.cpp">
+    <ClCompile Include="src\ClassesOpengl\Mateial\Material.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ClassesOpengl\ModelHandler\ModelHandler.cpp">
+    <ClCompile Include="src\ClassesOpengl\ModelHandler\ModelHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Includes\imgui\GraphEditor.cpp">
@@ -99,15 +99,21 @@
     <ClCompile Include="Includes\imgui\ImSequencer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ClassesOpengl\CodeObject\CodeObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ClassesOpengl\TransformClass\Transform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ClassesOpengl\VAO.h">
+    <ClInclude Include="src\ClassesOpengl\OpenGLHelpers\VAO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ClassesOpengl\VBO.h">
+    <ClInclude Include="src\ClassesOpengl\OpenGLHelpers\VBO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ClassesOpengl\EBO.h">
+    <ClInclude Include="src\ClassesOpengl\OpenGLHelpers\EBO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Shaders\Classes\ShaderClass.h">
@@ -140,10 +146,10 @@
     <ClInclude Include="Includes\imgui\imgui_impl_opengl3_loader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Camera\CameraHandler.h">
+    <ClInclude Include="src\Camera\CameraHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh\Mesh.h">
+    <ClInclude Include="src\Mesh\Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Includes\Noise\PerlinNoise.h">
@@ -152,34 +158,34 @@
     <ClInclude Include="Includes\OBJLoader\OBJ_Loader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Model\Model.h">
+    <ClInclude Include="src\Model\Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ClassesOpengl\GBufferClass.h">
+    <ClInclude Include="src\ClassesOpengl\OpenGLHelpers\GBufferClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Functions\Utility.h">
+    <ClInclude Include="src\Functions\Utility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Includes\headers\headers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ClassesOpengl\Framebuffer.h">
+    <ClInclude Include="src\ClassesOpengl\OpenGLHelpers\Framebuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ClassesOpengl\Renderer\Renderer.h">
+    <ClInclude Include="src\ClassesOpengl\Renderer\Renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ClassesOpengl\ImguiSettings\ImguiRender.h">
+    <ClInclude Include="src\ClassesOpengl\ImguiSettings\ImguiRender.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ClassesOpengl\ImguiSettings\MyImguiSettings.h">
+    <ClInclude Include="src\ClassesOpengl\ImguiSettings\MyImguiSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ClassesOpengl\Mateial\Material.h">
+    <ClInclude Include="src\ClassesOpengl\Mateial\Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ClassesOpengl\ModelHandler\ModelHandler.h">
+    <ClInclude Include="src\ClassesOpengl\ModelHandler\ModelHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Includes\imgui\GraphEditor.h">
@@ -195,6 +201,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Includes\imgui\ImSequencer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ClassesOpengl\CodeObject\CodeObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ClassesOpengl\TransformClass\Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

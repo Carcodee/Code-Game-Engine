@@ -4,6 +4,7 @@ layout (location = 0) out vec4 FragColor;
 in vec2 TexCoords;
 in vec3 Normal;
 in vec3 FragPos;
+in vec3 noTangentMapViewPos;
 in vec3 TangentViewPos;
 in vec3 TangentFragPos;
 in vec3 TangentLightPos;
@@ -74,7 +75,6 @@ vec3 setNormalLight();
 //PBR
 vec3 CalculatePBR();
 vec3 CalculatePBRNoTextures();
-vec3 getNormalFromMapNoTexture();
 vec3 getNormalFromMap();
 float DistributionGGX(vec3 N, vec3 H, float roughness);
 float GeometrySchlickGGX(float NdotV, float roughness);
@@ -141,9 +141,9 @@ vec3 CalculatePBR(){
     for(int i = 0; i < 1; ++i) 
     {
         // calculate per-light radiance
-        vec3 L = normalize(-dirLight.direction - FragPos);
+        vec3 L = normalize(dirLight.direction - FragPos);
         vec3 H = normalize(V + L);
-        float distance = length(-dirLight.direction - FragPos);
+        float distance = length(dirLight.direction - FragPos);
         float attenuation = 1.0 / (distance * distance);
         vec3 radiance = dirLight.diffuse * attenuation;
 
@@ -195,8 +195,8 @@ vec3 CalculatePBRNoTextures(){
    float roughness=roughnessM;
    float ao=aoM;
 
-    vec3 N = getNormalFromMapNoTexture();
-    vec3 V = normalize(TangentViewPos - FragPos);
+    vec3 N = normalize(Normal);
+    vec3 V = normalize(noTangentMapViewPos - FragPos);
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
     // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
@@ -207,9 +207,9 @@ vec3 CalculatePBRNoTextures(){
     vec3 Lo = vec3(0.0);
 
         // calculate per-light radiance
-        vec3 L = normalize(TangentLightPos- FragPos);
+        vec3 L = normalize(dirLight.direction- FragPos);
         vec3 H = normalize(V + L);
-        float distance = length(TangentLightPos - FragPos);
+        float distance = length(dirLight.direction - FragPos);
         float attenuation = 1.0 / (distance * distance);
         vec3 radiance = dirLight.diffuse * attenuation;
 
@@ -374,23 +374,7 @@ vec3 getNormalFromMap()
     return normalize(TBN * tangentNormal);
 }
 
-//-------------------------------------PBR-------------------------------------
-vec3 getNormalFromMapNoTexture()
-{
-    vec3 tangentNormal =vec3(0,1,0) * 2.0 - 1.0;
 
-    vec3 Q1  = dFdx(FragPos);
-    vec3 Q2  = dFdy(FragPos);
-    vec2 st1 = dFdx(TexCoords);
-    vec2 st2 = dFdy(TexCoords);
-
-    vec3 N   = normalize(Normal);
-    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
-    vec3 B  = -normalize(cross(N, T));
-    mat3 TBN = mat3(T, B, N);
-
-    return normalize(TBN * tangentNormal);
-}
 // ----------------------------------------------------------------------------
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {

@@ -5,7 +5,7 @@
 #include "../Shaders/Classes/ShaderClass.h"
 #include <iostream>
 #include <vector>
-#include "../Mesh/Mesh.h"
+#include "../src/Mesh/Mesh.h"
 #include <future>
 #include <mutex>
 #include <memory>

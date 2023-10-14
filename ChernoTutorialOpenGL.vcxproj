@@ -151,11 +151,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Camera\CameraHandler.cpp" />
-    <ClCompile Include="ClassesOpengl\EBO.cpp" />
-    <ClCompile Include="ClassesOpengl\GBufferClass.cpp" />
-    <ClCompile Include="ClassesOpengl\Framebuffer.cpp" />
-    <ClCompile Include="ClassesOpengl\ImguiSettings\ImguiRender.cpp" />
+    <ClCompile Include="src\ClassesOpengl\CodeObject\CodeObject.cpp" />
+    <ClCompile Include="src\Camera\CameraHandler.cpp" />
+    <ClCompile Include="src\ClassesOpengl\OpenGLHelpers\EBO.cpp" />
+    <ClCompile Include="src\ClassesOpengl\OpenGLHelpers\GBufferClass.cpp" />
+    <ClCompile Include="src\ClassesOpengl\OpenGLHelpers\Framebuffer.cpp" />
+    <ClCompile Include="src\ClassesOpengl\ImguiSettings\ImguiRender.cpp" />
     <ClCompile Include="Includes\imgui\GraphEditor.cpp" />
     <ClCompile Include="Includes\imgui\ImCurveEdit.cpp" />
     <ClCompile Include="Includes\imgui\ImGradient.cpp" />
@@ -169,26 +170,28 @@
     <ClCompile Include="Includes\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Includes\imgui\ImSequencer.cpp" />
     <ClCompile Include="Includes\Noise\PerlinNoise.cpp" />
-    <ClCompile Include="ClassesOpengl\Mateial\Material.cpp" />
-    <ClCompile Include="Mesh\Mesh.cpp" />
-    <ClCompile Include="ClassesOpengl\ModelHandler\ModelHandler.cpp" />
-    <ClCompile Include="Model\Model.cpp" />
-    <ClCompile Include="ClassesOpengl\Renderer\Renderer.cpp" />
+    <ClCompile Include="src\ClassesOpengl\Mateial\Material.cpp" />
+    <ClCompile Include="src\Mesh\Mesh.cpp" />
+    <ClCompile Include="src\ClassesOpengl\ModelHandler\ModelHandler.cpp" />
+    <ClCompile Include="src\Model\Model.cpp" />
+    <ClCompile Include="src\ClassesOpengl\Renderer\Renderer.cpp" />
     <ClCompile Include="Shaders\Classes\ShaderClass.cpp" />
     <ClCompile Include="src\Application.cpp" />
-    <ClCompile Include="ClassesOpengl\VAO.cpp" />
-    <ClCompile Include="ClassesOpengl\VBO.cpp" />
-    <ClCompile Include="Functions\Utility.cpp" />
+    <ClCompile Include="src\ClassesOpengl\OpenGLHelpers\VAO.cpp" />
+    <ClCompile Include="src\ClassesOpengl\OpenGLHelpers\VBO.cpp" />
+    <ClCompile Include="src\Functions\Utility.cpp" />
+    <ClCompile Include="src\ClassesOpengl\TransformClass\Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Camera\CameraHandler.h" />
-    <ClInclude Include="ClassesOpengl\EBO.h" />
-    <ClInclude Include="ClassesOpengl\ImguiSettings\MyImguiSettings.h" />
-    <ClInclude Include="ClassesOpengl\VAO.h" />
-    <ClInclude Include="ClassesOpengl\VBO.h" />
-    <ClInclude Include="ClassesOpengl\GBufferClass.h" />
-    <ClInclude Include="ClassesOpengl\Framebuffer.h" />
-    <ClInclude Include="ClassesOpengl\ImguiSettings\ImguiRender.h" />
+    <ClInclude Include="src\ClassesOpengl\CodeObject\CodeObject.h" />
+    <ClInclude Include="src\Camera\CameraHandler.h" />
+    <ClInclude Include="src\ClassesOpengl\OpenGLHelpers\EBO.h" />
+    <ClInclude Include="src\ClassesOpengl\ImguiSettings\MyImguiSettings.h" />
+    <ClInclude Include="src\ClassesOpengl\OpenGLHelpers\VAO.h" />
+    <ClInclude Include="src\ClassesOpengl\OpenGLHelpers\VBO.h" />
+    <ClInclude Include="src\ClassesOpengl\OpenGLHelpers\GBufferClass.h" />
+    <ClInclude Include="src\ClassesOpengl\OpenGLHelpers\Framebuffer.h" />
+    <ClInclude Include="src\ClassesOpengl\ImguiSettings\ImguiRender.h" />
     <ClInclude Include="Includes\headers\headers.h" />
     <ClInclude Include="Includes\imgui\GraphEditor.h" />
     <ClInclude Include="Includes\imgui\imconfig.h" />
@@ -206,13 +209,14 @@
     <ClInclude Include="Includes\imgui\imstb_truetype.h" />
     <ClInclude Include="Includes\Noise\PerlinNoise.h" />
     <ClInclude Include="Includes\OBJLoader\OBJ_Loader.h" />
-    <ClInclude Include="ClassesOpengl\Mateial\Material.h" />
-    <ClInclude Include="Mesh\Mesh.h" />
-    <ClInclude Include="ClassesOpengl\ModelHandler\ModelHandler.h" />
-    <ClInclude Include="Model\Model.h" />
-    <ClInclude Include="ClassesOpengl\Renderer\Renderer.h" />
+    <ClInclude Include="src\ClassesOpengl\Mateial\Material.h" />
+    <ClInclude Include="src\Mesh\Mesh.h" />
+    <ClInclude Include="src\ClassesOpengl\ModelHandler\ModelHandler.h" />
+    <ClInclude Include="src\Model\Model.h" />
+    <ClInclude Include="src\ClassesOpengl\Renderer\Renderer.h" />
     <ClInclude Include="Shaders\Classes\ShaderClass.h" />
-    <ClInclude Include="Functions\Utility.h" />
+    <ClInclude Include="src\Functions\Utility.h" />
+    <ClInclude Include="src\ClassesOpengl\TransformClass\Transform.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Includes\imgui-docking\.editorconfig" />

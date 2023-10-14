@@ -4,10 +4,10 @@
 #include "imgui/imgui_impl_opengl3.h"
 
 
-#include"../ClassesOpengl/ImguiSettings/ImguiRender.h"
-#include "../ClassesOpengl/ImguiSettings/MyImguiSettings.h"
+#include"../src/ClassesOpengl/ImguiSettings/ImguiRender.h"
+#include "../src/ClassesOpengl/ImguiSettings/MyImguiSettings.h"
 #include "headers/headers.h"
-#include "../Functions/Utility.h"
+#include "../src/Functions/Utility.h"
 
 
 
@@ -531,7 +531,6 @@ int main(void)
 			unsigned char data[4];
 
 			glReadPixels(mousePos.xpos, mousePos.ypos, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
-			std::cout<< mousePos.xpos <<" "<< mousePos.ypos <<std::endl;
 			std::cout << "R: " << (int)data[0] << " G: " << (int)data[1] << " B: " << (int)data[2] << std::endl;
 			int pickedID =
 				data[0] +
@@ -541,7 +540,6 @@ int main(void)
 			{
 				modelHandler.SetModelPicked(pickedID);
 			}
-			std::cout << "pickedID: " << pickedID << std::endl;
 		}
 
 		pickingFbo.UnBind();
@@ -738,11 +736,11 @@ int main(void)
 				// don't forget to enable shader before setting uniforms
 				modelShader.use();
 				modelShader.setVec3("viewPos", camera.Position);
-				modelShader.setVec3("lightPos", -lightPos);
+				modelShader.setVec3("lightPos", lightPos);
 				modelShader.setVec3("dirLight.ambient", ambientColor);
 				modelShader.setVec3("dirLight.diffuse", glm::vec3(0.3f,0.8f,0.8f));
 				modelShader.setVec3("dirLight.specular", glm::vec3(.5f));
-				modelShader.setVec3("dirLight.direction", -lightPos);
+				modelShader.setVec3("dirLight.direction", lightPos);
 
 
 			}
@@ -856,6 +854,9 @@ int main(void)
 		myImgui.CreateNode([&]() {light_Settings(dirLightOn, spotLightOn, pointLightOn, HDR, bloom, shadows); });
 		myImgui.CreateNode([&]() {model_LoaderTest(modelHandler, flipUVS, modelsLoadedCounter,path); });
 		myImgui.CreateNode([&]() {model_configs(modelHandler); });
+
+
+		myImgui.CreateHirearchy();
 
 		ImGui::PopFont();
 
