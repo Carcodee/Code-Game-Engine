@@ -63,6 +63,7 @@ public:
 	void SetMaterial(ShaderClass& shader,int& mIndex);
 	void SetMaterialColor(glm::vec3 color);
 	void SetMaterialProperties(float albedoIntensity, float roughness, float metallic, float ao);
+	std::vector <Texture>& GetTextures();
 	bool isPBR;
 
 private:

@@ -24,8 +24,8 @@
 #include "../src/Mesh/Mesh.h"
 #include "../src/Camera/CameraHandler.h"
 #include "../src/ClassesOpengl/OpenGLHelpers/Framebuffer.h"
-#include "stb-master/stb_image.h"
 #include "../src/ClassesOpengl/Mateial/Material.h"
 #include "../src/ClassesOpengl/ModelHandler/ModelHandler.h"
-
+#include "../src/Skybox/Skybox.h"
+#include "stb-master/stb_image.h"
 #define STB_IMAGE_IMPLEMENTATION

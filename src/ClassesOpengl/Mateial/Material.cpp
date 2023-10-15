@@ -57,6 +57,11 @@ void Material::SetMaterialProperties(float albedoIntensity, float roughness, flo
 	pbrMaterial.ao = ao;
 }
 
+std::vector<Texture>& Material::GetTextures()
+{
+    return textures;
+}
+
 
 
 void Material::ConfigurateTextures(ShaderClass& shader, int& mIndex)
@@ -72,7 +77,7 @@ void Material::ConfigurateTextures(ShaderClass& shader, int& mIndex)
 
     for (unsigned int i = 0; i < textures.size(); i++)
     {
-        glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
+        glActiveTexture(GL_TEXTURE1 + i); // activate proper texture unit before binding
         // retrieve texture number (the N in diffuse_textureN)
         std::string number;
         std::string name = textures[i].type;
@@ -92,10 +97,11 @@ void Material::ConfigurateTextures(ShaderClass& shader, int& mIndex)
             number = std::to_string(roguhtnessNr++); // transfer unsigned int to string
 
         // now set the sampler to the correct texture unit
-        glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
+        glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i+1);
         // and finally bind the texture
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
+
     int heightmapping = (heightNr > 1) ? 1 : 0;
     int normalMapping = (normalNr > 1) ? 1 : 0;
     //Albedo or Diffuse
@@ -108,6 +114,7 @@ void Material::ConfigurateTextures(ShaderClass& shader, int& mIndex)
 
     //Non PBR
     int specularMapping = (specularNr > 1) ? 1 : 0;
+    shader.use();
     shader.setInt("texturesOn", 1);
     shader.setInt("meshCount", mIndex);
     shader.setInt("heighmap", heightmapping);
@@ -116,7 +123,6 @@ void Material::ConfigurateTextures(ShaderClass& shader, int& mIndex)
 
     if (isPBR)
     {
-        shader.use();
         shader.setInt("PBRon", 1);
         shader.setInt("roughnessMap", roughtnessmapping);
         shader.setInt("metallicMap", metallicmapping);
@@ -132,7 +138,6 @@ void Material::ConfigurateTextures(ShaderClass& shader, int& mIndex)
 
     }else 
     {
-        shader.use();
         shader.setInt("PBRon", 0);
         shader.setInt("specularMapping", specularMapping);
         shader.setVec3("materials[" + std::to_string(mIndex) + "].diffuse", noPBRMaterial.difuse);

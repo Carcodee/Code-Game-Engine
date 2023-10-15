@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Skybox\Skybox.cpp" />
     <ClCompile Include="src\ClassesOpengl\CodeObject\CodeObject.cpp" />
     <ClCompile Include="src\Camera\CameraHandler.cpp" />
     <ClCompile Include="src\ClassesOpengl\OpenGLHelpers\EBO.cpp" />
@@ -183,6 +184,7 @@
     <ClCompile Include="src\ClassesOpengl\TransformClass\Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Skybox\Skybox.h" />
     <ClInclude Include="src\ClassesOpengl\CodeObject\CodeObject.h" />
     <ClInclude Include="src\Camera\CameraHandler.h" />
     <ClInclude Include="src\ClassesOpengl\OpenGLHelpers\EBO.h" />
@@ -246,6 +248,10 @@
     <None Include="Shaders\Picking.vert" />
     <None Include="Shaders\ShadowMap.frag" />
     <None Include="Shaders\ShadowMap.vert" />
+    <None Include="Shaders\SkyboxShaders\Irradiance.frag" />
+    <None Include="Shaders\SkyboxShaders\Irradiance.vert" />
+    <None Include="Shaders\SkyboxShaders\SkyboxHandler.frag" />
+    <None Include="Shaders\SkyboxShaders\SkyboxHandler.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Includes\imgui-docking\LICENSE.txt" />

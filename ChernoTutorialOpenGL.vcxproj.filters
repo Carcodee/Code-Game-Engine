@@ -105,6 +105,9 @@
     <ClCompile Include="src\ClassesOpengl\TransformClass\Transform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Skybox\Skybox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ClassesOpengl\OpenGLHelpers\VAO.h">
@@ -209,6 +212,9 @@
     <ClInclude Include="src\ClassesOpengl\TransformClass\Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Skybox\Skybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Includes\Imgui\.editorconfig" />
@@ -238,6 +244,10 @@
     <None Include="Shaders\ShadowMap.vert" />
     <None Include="Shaders\Picking.frag" />
     <None Include="Shaders\Picking.vert" />
+    <None Include="Shaders\SkyboxShaders\SkyboxHandler.frag" />
+    <None Include="Shaders\SkyboxShaders\SkyboxHandler.vert" />
+    <None Include="Shaders\SkyboxShaders\Irradiance.frag" />
+    <None Include="Shaders\SkyboxShaders\Irradiance.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Includes\imgui-docking\LICENSE.txt" />

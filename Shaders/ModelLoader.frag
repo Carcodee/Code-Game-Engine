@@ -50,7 +50,7 @@ uniform float aoM;
 uniform Material materials[NR_MATERIAL_SIZE];
 uniform DirLight dirLight;
 
-
+uniform samplerCube irradianceMap;
 uniform sampler2D texture_diffuse1;
 uniform sampler2D texture_specular1;
 uniform sampler2D texture_normal1;
@@ -80,6 +80,7 @@ float DistributionGGX(vec3 N, vec3 H, float roughness);
 float GeometrySchlickGGX(float NdotV, float roughness);
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
 vec3 fresnelSchlick(float cosTheta, vec3 F0);
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness);
 //-------------------------------------
 
 void main()
@@ -205,7 +206,7 @@ vec3 CalculatePBRNoTextures(){
 
     // reflectance equation
     vec3 Lo = vec3(0.0);
-
+    
         // calculate per-light radiance
         vec3 L = normalize(dirLight.direction- FragPos);
         vec3 H = normalize(V + L);
@@ -240,10 +241,14 @@ vec3 CalculatePBRNoTextures(){
         Lo += (kD * albedo / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
  
     
-    // ambient lighting (note that the next IBL tutorial will replace 
-    // this ambient lighting with environment lighting).
-    vec3 ambient = vec3(0.03) * albedo * ao;
-    
+    // ambient lighting (we now use IBL as the ambient term)
+    vec3 mykS = fresnelSchlick(max(dot(N, V), 0.0), F0);
+    vec3 mykD = 1.0 - mykS;
+    kD *= 1.0 - metallic;	  
+    vec3 irradiance = texture(irradianceMap, N).rgb;
+    vec3 diffuse      = vec3(0.03) * albedo;
+    vec3 ambient = (mykD * diffuse) * ao;
+//    vec3 ambient = vec3(0.03) * albedo * ao;
     vec3 color = ambient + Lo;
 
     // HDR tonemapping
@@ -415,4 +420,8 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}  
 // ----------------------------------------------------------------------------

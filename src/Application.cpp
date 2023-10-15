@@ -111,6 +111,8 @@ int main(void)
 	ShaderClass gBufferLightPassShader("Shaders/LightPass.vert", "Shaders/LightPass.frag");
 	ShaderClass shadowShaderDepth("Shaders/ShadowMap.vert", "Shaders/ShadowMap.frag");
 	ShaderClass pickingShader("Shaders/Picking.vert", "Shaders/Picking.frag");
+	ShaderClass SkyboxHandlerShader("Shaders/SkyboxShaders/SkyboxHandler.vert", "Shaders/SkyboxShaders/SkyboxHandler.frag");
+
 
 	std::vector <GLfloat> cubeLightVertices = util::returnVertices(util::cube3Layout);
 	std::vector <GLfloat> vertices = util::returnVertices(util::cube4Layout);
@@ -401,6 +403,15 @@ int main(void)
 		Framebuffer pickingFbo;
 		pickingFbo.generateTexture(window);
 
+		Skybox myHDRISkybox("C:/Users/carlo/OneDrive/Documents/GitHub/OpenglCarlos/ImagesProgramming/HDRSkyboxes/CloudSkybox.hdr");
+		myHDRISkybox.GenerateFramebuffers();
+		myHDRISkybox.GenerateCubemap(SkyboxHandlerShader,SCR_HEIGHT, SCR_WIDTH);
+		myHDRISkybox.GenerateFramebuffersIrradiance();
+		myHDRISkybox.GenerateIradianceMap(SkyboxHandlerShader, SCR_HEIGHT, SCR_WIDTH);
+		
+		modelShader.use();
+		modelShader.setInt("irradianceMap", 0);
+
 
 	//Color
 	glm::vec3 Color(1);
@@ -463,6 +474,7 @@ int main(void)
 		// make sure we clear the framebuffer's content
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 
 #pragma region configurations
 
@@ -531,7 +543,6 @@ int main(void)
 			unsigned char data[4];
 
 			glReadPixels(mousePos.xpos, mousePos.ypos, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
-			std::cout << "R: " << (int)data[0] << " G: " << (int)data[1] << " B: " << (int)data[2] << std::endl;
 			int pickedID =
 				data[0] +
 				data[1] * 256 +
@@ -715,13 +726,10 @@ int main(void)
 
 		cubemapShader.setMat4("view", view);
 		cubemapShader.setMat4("projection", projection);
-		skyboxVAO.Bind();
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, textureCubeMap);
-
-		glBindTexture(GL_TEXTURE_CUBE_MAP, textureCubeMap);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glBindVertexArray(0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, myHDRISkybox.envCubemap);
+		util::renderCube();
+		
 		glDepthFunc(GL_LESS);
 
 #pragma endregion
@@ -735,12 +743,19 @@ int main(void)
 			{
 				// don't forget to enable shader before setting uniforms
 				modelShader.use();
+
+				glActiveTexture(GL_TEXTURE0);
+
+				modelShader.setInt("irradianceMap", 0);
+				glBindTexture(GL_TEXTURE_CUBE_MAP, myHDRISkybox.irradianceMap);
+
 				modelShader.setVec3("viewPos", camera.Position);
 				modelShader.setVec3("lightPos", lightPos);
 				modelShader.setVec3("dirLight.ambient", ambientColor);
 				modelShader.setVec3("dirLight.diffuse", glm::vec3(0.3f,0.8f,0.8f));
 				modelShader.setVec3("dirLight.specular", glm::vec3(.5f));
 				modelShader.setVec3("dirLight.direction", lightPos);
+
 
 
 			}
@@ -753,7 +768,6 @@ int main(void)
 			else
 			{
 				modelHandler.DrawModel(modelShader, i, projectionM, viewM);
-
 			}
 		}
 		
