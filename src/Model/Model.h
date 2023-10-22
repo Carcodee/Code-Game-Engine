@@ -9,6 +9,7 @@
 #include <future>
 #include <mutex>
 #include <memory>
+#include "../ClassesOpengl/CodeObject/ComponentBase/ComponentBase.h"
 
 struct ModelConfigs
 {
@@ -23,7 +24,7 @@ struct ModelConfigs
     int id;
 };
 
-class Model
+class Model: public ComponentBase
 {
 
 public:
@@ -55,7 +56,7 @@ public:
     //TODO: add move constructor
     
 
-    void StartModel(std::string const& path ,bool& isPBR, std::shared_ptr<Material> material, bool gamma = false) {
+    void StartModel(std::string const& path ,const bool& isPBR, std::shared_ptr<Material> material, bool gamma = false) {
        myFuture = loadSceneAsync(path,directory,isLoaded,modelMutex);
        this->isPBR=isPBR;
        this->path = path;

@@ -108,6 +108,12 @@
     <ClCompile Include="src\Skybox\Skybox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ClassesOpengl\CodeObject\ComponentBase\ComponentBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineSandbox\FirstCodeObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ClassesOpengl\OpenGLHelpers\VAO.h">
@@ -213,6 +219,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Skybox\Skybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ClassesOpengl\CodeObject\ComponentBase\ComponentBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineSandbox\FirstCodeObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

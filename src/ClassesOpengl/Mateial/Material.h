@@ -4,6 +4,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include "../Shaders/Classes/ShaderClass.h"
+#include "../CodeObject/ComponentBase/ComponentBase.h"
 
 struct Texture {
 	unsigned int id;
@@ -26,8 +27,8 @@ struct NoPRBMaterial {
 	float shininess;
 
 };
-
-class Material
+//changeable, into a proper class
+class Material: public ComponentBase
 {
 
 public:

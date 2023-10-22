@@ -403,7 +403,6 @@ auto model_LoaderTest = [](ModelHandler& models, bool& flipUVS, int& modelCounte
 			std::shared_ptr<Material> material = std::make_shared<Material>();
 			ModelItem model = { Model(),modelCounter, glm::mat4(1.0f),"Cube ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base", material};
 			models.AddModel(model);
-			//the problem is that the material that i give to the item is not being used, instead i am creating one in the model class
 
 			models.startLoadModel(strPath, PBRon, material, modelCounter);
 			modelCounter++;

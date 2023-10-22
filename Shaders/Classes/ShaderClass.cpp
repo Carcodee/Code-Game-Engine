@@ -2,7 +2,6 @@
 
 ShaderClass::ShaderClass(const char* vertexPath, const char* fragmentPath)
 {
-
 	//Loading shaders from file
 
 	//Vertex Shaders

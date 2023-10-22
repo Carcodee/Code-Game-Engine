@@ -37,6 +37,7 @@ void Model::Draw(ShaderClass& shader)
 
             meshes[i].Draw(shader, i, material);
         }
+
     }
 
 }

@@ -151,6 +151,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="EngineSandbox\FirstCodeObject.cpp" />
+    <ClCompile Include="src\ClassesOpengl\CodeObject\ComponentBase\ComponentBase.cpp" />
     <ClCompile Include="src\Skybox\Skybox.cpp" />
     <ClCompile Include="src\ClassesOpengl\CodeObject\CodeObject.cpp" />
     <ClCompile Include="src\Camera\CameraHandler.cpp" />
@@ -184,6 +186,8 @@
     <ClCompile Include="src\ClassesOpengl\TransformClass\Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="EngineSandbox\FirstCodeObject.h" />
+    <ClInclude Include="src\ClassesOpengl\CodeObject\ComponentBase\ComponentBase.h" />
     <ClInclude Include="src\Skybox\Skybox.h" />
     <ClInclude Include="src\ClassesOpengl\CodeObject\CodeObject.h" />
     <ClInclude Include="src\Camera\CameraHandler.h" />

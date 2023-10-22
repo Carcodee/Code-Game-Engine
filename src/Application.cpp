@@ -112,6 +112,25 @@ int main(void)
 	ShaderClass shadowShaderDepth("Shaders/ShadowMap.vert", "Shaders/ShadowMap.frag");
 	ShaderClass pickingShader("Shaders/Picking.vert", "Shaders/Picking.frag");
 	ShaderClass SkyboxHandlerShader("Shaders/SkyboxShaders/SkyboxHandler.vert", "Shaders/SkyboxShaders/SkyboxHandler.frag");
+	ShaderClass IrradianceShader("Shaders/SkyboxShaders/Irradiance.vert", "Shaders/SkyboxShaders/Irradiance.frag");
+
+	//To do When a object is creeated in the code, it should be added to the model handler
+	//and the model handler should be the one that handles the drawing of the objects
+	//Also in the inspector you should be able to add components to the objects
+	FirstCodeObject myFirstCodeObject("FirstCodeObject", 0, &modelShader);
+	FirstCodeObject myFirstCodeObjectSon1("FirstCodeObject2", 1, &modelShader);
+	FirstCodeObject myFirstCodeObjectSon2("FirstCodeObject2", 2, &modelShader);
+
+	myFirstCodeObject.parents.push_back(&myFirstCodeObjectSon1);
+	myFirstCodeObject.parents.push_back(&myFirstCodeObjectSon2);
+	
+	FirstCodeObject myFirstCodeObject4("FirstCodeObject2", 3, &modelShader);
+
+
+
+	modelHandler.codeObjects.push_back(myFirstCodeObject);
+	modelHandler.codeObjects.push_back(myFirstCodeObject4);
+	myFirstCodeObject.StartCodeEngine();
 
 
 	std::vector <GLfloat> cubeLightVertices = util::returnVertices(util::cube3Layout);
@@ -407,10 +426,9 @@ int main(void)
 		myHDRISkybox.GenerateFramebuffers();
 		myHDRISkybox.GenerateCubemap(SkyboxHandlerShader,SCR_HEIGHT, SCR_WIDTH);
 		myHDRISkybox.GenerateFramebuffersIrradiance();
-		myHDRISkybox.GenerateIradianceMap(SkyboxHandlerShader, SCR_HEIGHT, SCR_WIDTH);
+		myHDRISkybox.GenerateIradianceMap(IrradianceShader, SCR_HEIGHT, SCR_WIDTH);
 		
-		modelShader.use();
-		modelShader.setInt("irradianceMap", 0);
+
 
 
 	//Color
@@ -762,15 +780,21 @@ int main(void)
 			if (flipUVS)
 			{
 				stbi_set_flip_vertically_on_load(true);
+
 				modelHandler.DrawModel(modelShader, i,projectionM,viewM);
+
 				stbi_set_flip_vertically_on_load(false);
 			}
 			else
 			{
+
 				modelHandler.DrawModel(modelShader, i, projectionM, viewM);
+				myFirstCodeObject.UpdateCodeEngine();
+
 			}
 		}
-		
+
+
 
 
 #pragma endregion
@@ -869,8 +893,7 @@ int main(void)
 		myImgui.CreateNode([&]() {model_LoaderTest(modelHandler, flipUVS, modelsLoadedCounter,path); });
 		myImgui.CreateNode([&]() {model_configs(modelHandler); });
 
-
-		myImgui.CreateHirearchy();
+		myImgui.CreateHirearchy(modelHandler.codeObjects);
 
 		ImGui::PopFont();
 

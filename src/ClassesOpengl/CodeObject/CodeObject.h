@@ -5,20 +5,56 @@
 #include "../src/ClassesOpengl/Mateial/Material.h"
 #include "../src/Model/Model.h"
 #include "../src/ClassesOpengl/TransformClass/Transform.h"
+#include "ComponentBase/ComponentBase.h"
+#include "../Shaders/Classes/ShaderClass.h"
+
+
 class CodeObject
 {
 public:
-	CodeObject();
+	CodeObject(std::string name,int id,ShaderClass* shader);
 	~CodeObject();
 
-	void StartCodeEngine();
-	void UpdateCodeEngine();
+	virtual void StartCodeEngine();
+	virtual void UpdateCodeEngine();
+	//material
+	template<typename T>
+	void AddComponent();
+
+	template<typename T>
+	T* GetComponent();
 	
-	
+
 	std::string name;
-	std::vector<Material> materials;
-	Transform transform;
-	Model model;
-	std::vector<CodeObject>* parents;
+	int id;
+	std::vector<ComponentBase*> components;
+	std::vector<CodeObject*> parents;
+	ShaderClass *shader;
+
+private: 
+	void SetShaderProperties();
 };
 
+template<typename T>
+T* CodeObject::GetComponent()
+{
+    for (int i = 0; i < components.size(); i++)
+	{
+		T* derivedComponent = dynamic_cast<T*>(components[i]);
+
+		if (derivedComponent != nullptr)
+		{
+			std::cout << "Component found" << std::endl;
+			return derivedComponent;
+		}
+	}
+	std::cout << "Component Not found" << std::endl;
+
+	return nullptr;
+}
+template<typename T>
+void CodeObject::AddComponent()
+{
+	T* component = new T();
+	components.push_back(component);
+}

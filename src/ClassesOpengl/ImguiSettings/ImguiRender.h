@@ -22,14 +22,14 @@ class ImguiRender
 	ImVec2 viewportWindowSize;
 	void CreateViewPort(unsigned int textureID,ModelHandler& modelHandler);
 	void CreateContentBrowser();
-	void CreateHirearchy();
+	void CreateHirearchy(std::vector<CodeObject> objects);
 	void CreateGuizmos(ModelHandler& modelHandler);
 	void SetGizmoOperation(GLFWwindow* window);
 	private:
 		ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
 		ImGuizmo::MODE mCurrentGizmoMode = ImGuizmo::WORLD;
 
-		static void ShowPlaceholderObject(const char* prefix, int uid);
+	    void ShowPlaceholderObject(const char* prefix,CodeObject object);
         
 
         

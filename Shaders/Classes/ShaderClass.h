@@ -11,8 +11,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "../src/ClassesOpengl/CodeObject/ComponentBase/ComponentBase.h"
 
-class ShaderClass
+class ShaderClass: public ComponentBase
 {
 public:
     // the program ID

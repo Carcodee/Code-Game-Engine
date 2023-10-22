@@ -7,7 +7,7 @@
 #include "../src/Model/Model.h"
 #include "../Mateial/Material.h"
 #include "../Shaders/Classes/ShaderClass.h"
-
+#include "../CodeObject/CodeObject.h"
 
 struct ModelItem
 {
@@ -20,45 +20,6 @@ struct ModelItem
 	float rotationX, rotationY, rotationZ;
 	std::string materialName;
 	std::shared_ptr <Material> material;
-
-	////generate a default constructor for this struct with parameters
-	//ModelItem(int modelID, std::string name, glm::vec3 position, glm::vec3 scale, float rotationX, float rotationY, float rotationZ, std::string materialName, Material& mat) {
-	//	this->modelID = modelID;
-	//	this->name = name;
-	//	this->position = position;
-	//	this->scale = scale;
-	//	this->rotationX = rotationX;
-	//	this->rotationY = rotationY;
-	//	this->rotationZ = rotationZ;
-	//	this->materialName = materialName;
-	//	this->material = mat;
-	//};
-
-	//ModelItem(const ModelItem& other) {
-	//	this->modelID = other.modelID;
-	//	this->name = other.name;
-	//	this->position = other.position;
-	//	this->scale = other.scale;
-	//	this->rotationX = other.rotationX;
-	//	this->rotationY = other.rotationY;
-	//	this->rotationZ = other.rotationZ;
-	//	this->materialName = other.materialName;
-	//	this->material = other.material;
-	//}
-
-	//ModelItem& operator=(const ModelItem& other) {
-	//	this->modelID = other.modelID;
-	//	this->name = other.name;
-	//	this->position = other.position;
-	//	this->scale = other.scale;
-	//	this->rotationX = other.rotationX;
-	//	this->rotationY = other.rotationY;
-	//	this->rotationZ = other.rotationZ;
-	//	this->materialName = other.materialName;
-	//	this->material = other.material;
-	//	return *this;
-	//}
-
 };
 
 class ModelHandler
@@ -76,6 +37,7 @@ class ModelHandler
 		void SetModelScale(int modelID, glm::vec3 scale);
 		void DrawModel(ShaderClass& shader, int modelID, glm::mat4 projection, glm::mat4 view);
 		void ExtractModelMaterial(int modelID, const char* path);
+
 		glm::mat4 GetViewMatrix();
 		glm::mat4 GetProjectionMatrix();
 		glm::mat4 GetCurrentModelMatrix(int count);
@@ -84,12 +46,14 @@ class ModelHandler
 		void SetModelPicked(int modelID);
 		int GetModelPicked();
 
+		//codeobject
+		std::vector<CodeObject> codeObjects;
 
 private:
 	int modelPicked;
-glm::mat4 view;
-glm::mat4 projection;
-glm::mat4 currentModel;
-int counter;
+	glm::mat4 view;
+	glm::mat4 projection;
+	glm::mat4 currentModel;
+	int counter;
 };
 

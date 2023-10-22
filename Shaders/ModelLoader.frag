@@ -242,7 +242,7 @@ vec3 CalculatePBRNoTextures(){
  
     
     // ambient lighting (we now use IBL as the ambient term)
-    vec3 mykS = fresnelSchlick(max(dot(N, V), 0.0), F0);
+    vec3 mykS = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0,roughness);
     vec3 mykD = 1.0 - mykS;
     kD *= 1.0 - metallic;	  
     vec3 irradiance = texture(irradianceMap, N).rgb;

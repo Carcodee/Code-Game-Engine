@@ -58,7 +58,7 @@ void ImguiRender::CreateContentBrowser()
 	ImGui::End();
 }
 
-void ImguiRender::CreateHirearchy()
+void ImguiRender::CreateHirearchy(std::vector<CodeObject> objects)
 {
 	ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
 	if (!ImGui::Begin("Example: Property editor"))
@@ -72,9 +72,9 @@ void ImguiRender::CreateHirearchy()
 	if (ImGui::BeginTable("split", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
 	{
 		// Iterate placeholder objects (all the same data)
-		for (int obj_i = 0; obj_i < 4; obj_i++)
+		for (int obj_i = 0; obj_i < objects.size(); obj_i++)
 		{
-			ShowPlaceholderObject("Object", obj_i);
+			ShowPlaceholderObject("Object", objects[obj_i]);
 			//ImGui::Separator();
 		}
 		ImGui::EndTable();
@@ -121,29 +121,29 @@ void ImguiRender::SetGizmoOperation(GLFWwindow* window)
 
 }
 
-void ImguiRender::ShowPlaceholderObject(const char* prefix, int uid)
+void ImguiRender::ShowPlaceholderObject(const char* prefix, CodeObject object)
 {
 
 		// Use object uid as identifier. Most commonly you could also use the object pointer as a base ID.
-		ImGui::PushID(uid);
+		ImGui::PushID(object.id);
 
 		// Text and Tree nodes are less high than framed widgets, using AlignTextToFramePadding() we add vertical spacing to make the tree lines equal high.
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		ImGui::AlignTextToFramePadding();
-		bool node_open = ImGui::TreeNode("Object", "%s_%u", prefix, uid);
+		bool node_open = ImGui::TreeNode(object.name.c_str(), "%s_%u", prefix, object.id);
 		ImGui::TableSetColumnIndex(1);
 		ImGui::Text("my sailor is rich");
 
 		if (node_open)
 		{
 			static float placeholder_members[8] = { 0.0f, 0.0f, 1.0f, 3.1416f, 100.0f, 999.0f };
-			for (int i = 0; i < 8; i++)
+			for (int i = 0; i < object.parents.size(); i++)
 			{
 				ImGui::PushID(i); // Use field index as identifier.
 				if (i < 2)
 				{
-					ShowPlaceholderObject("Child", 424242);
+					ShowPlaceholderObject("Child", *object.parents[i]);
 				}
 				else
 				{
