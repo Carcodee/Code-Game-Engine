@@ -7,7 +7,6 @@
 #include "../src/Model/Model.h"
 #include "../Mateial/Material.h"
 #include "../Shaders/Classes/ShaderClass.h"
-#include "../CodeObject/CodeObject.h"
 
 struct ModelItem
 {
@@ -21,6 +20,7 @@ struct ModelItem
 	std::string materialName;
 	std::shared_ptr <Material> material;
 };
+class CodeObject;
 
 class ModelHandler
 {
@@ -45,10 +45,10 @@ class ModelHandler
 		std::vector <ModelItem> models;
 		void SetModelPicked(int modelID);
 		int GetModelPicked();
+		std::vector <CodeObject*> codeObjects;
 
 		//codeobject
-		std::vector<CodeObject> codeObjects;
-
+		void CreateCodeObject(CodeObject* codeObject);
 private:
 	int modelPicked;
 	glm::mat4 view;

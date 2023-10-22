@@ -1,4 +1,5 @@
 #include "ModelHandler.h"
+#include "../CodeObject/CodeObject.h"
 
 ModelHandler::ModelHandler()
 {
@@ -105,6 +106,12 @@ void ModelHandler::SetModelPicked(int modelID)
 int ModelHandler::GetModelPicked()
 {
 	return this->modelPicked;
+}
+
+void ModelHandler::CreateCodeObject(CodeObject* codeObject)
+{
+	codeObject->id= this->codeObjects.size();
+	this->codeObjects.push_back(codeObject);
 }
 
 

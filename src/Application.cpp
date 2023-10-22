@@ -117,19 +117,8 @@ int main(void)
 	//To do When a object is creeated in the code, it should be added to the model handler
 	//and the model handler should be the one that handles the drawing of the objects
 	//Also in the inspector you should be able to add components to the objects
-	FirstCodeObject myFirstCodeObject("FirstCodeObject", 0, &modelShader);
-	FirstCodeObject myFirstCodeObjectSon1("FirstCodeObject2", 1, &modelShader);
-	FirstCodeObject myFirstCodeObjectSon2("FirstCodeObject2", 2, &modelShader);
+	FirstCodeObject myFirstCodeObject(&modelShader,&modelHandler);
 
-	myFirstCodeObject.parents.push_back(&myFirstCodeObjectSon1);
-	myFirstCodeObject.parents.push_back(&myFirstCodeObjectSon2);
-	
-	FirstCodeObject myFirstCodeObject4("FirstCodeObject2", 3, &modelShader);
-
-
-
-	modelHandler.codeObjects.push_back(myFirstCodeObject);
-	modelHandler.codeObjects.push_back(myFirstCodeObject4);
 	myFirstCodeObject.StartCodeEngine();
 
 

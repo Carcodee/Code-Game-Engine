@@ -8,6 +8,7 @@
 #include <functional>
 #include "imgui/ImGuizmo.h"
 #include "../src/ClassesOpengl/ModelHandler/ModelHandler.h"
+
 class ImguiRender
 {
 	public:
@@ -22,14 +23,14 @@ class ImguiRender
 	ImVec2 viewportWindowSize;
 	void CreateViewPort(unsigned int textureID,ModelHandler& modelHandler);
 	void CreateContentBrowser();
-	void CreateHirearchy(std::vector<CodeObject> objects);
+	void CreateHirearchy(std::vector<CodeObject*> objects);
 	void CreateGuizmos(ModelHandler& modelHandler);
 	void SetGizmoOperation(GLFWwindow* window);
 	private:
 		ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
 		ImGuizmo::MODE mCurrentGizmoMode = ImGuizmo::WORLD;
 
-	    void ShowPlaceholderObject(const char* prefix,CodeObject object);
+	    void ShowPlaceholderObject(const char* prefix,CodeObject* object);
         
 
         

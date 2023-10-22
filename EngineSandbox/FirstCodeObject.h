@@ -5,7 +5,7 @@
 class FirstCodeObject: public CodeObject
 {
 	public:
-		FirstCodeObject(std::string name, int id,ShaderClass* modelShader) :CodeObject(name, id, modelShader) {};
+		FirstCodeObject(ShaderClass* modelShader,ModelHandler* model) :CodeObject(modelShader, model) {};
 		~FirstCodeObject();
     void StartCodeEngine() override;
 	void UpdateCodeEngine() override;

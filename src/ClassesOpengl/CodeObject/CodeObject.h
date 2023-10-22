@@ -7,12 +7,13 @@
 #include "../src/ClassesOpengl/TransformClass/Transform.h"
 #include "ComponentBase/ComponentBase.h"
 #include "../Shaders/Classes/ShaderClass.h"
-
+//#include "../src/ClassesOpengl/ModelHandler/ModelHandler.h"
+class ModelHandler;
 
 class CodeObject
 {
 public:
-	CodeObject(std::string name,int id,ShaderClass* shader);
+	CodeObject(ShaderClass* shader, ModelHandler* model);
 	~CodeObject();
 
 	virtual void StartCodeEngine();
@@ -24,13 +25,13 @@ public:
 	template<typename T>
 	T* GetComponent();
 	
-
+	
 	std::string name;
 	int id;
 	std::vector<ComponentBase*> components;
 	std::vector<CodeObject*> parents;
 	ShaderClass *shader;
-
+	ModelHandler* modelHandlerController;
 private: 
 	void SetShaderProperties();
 };

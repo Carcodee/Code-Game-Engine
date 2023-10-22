@@ -1,12 +1,14 @@
 #include "CodeObject.h"
+#include "../src/ClassesOpengl/ModelHandler/ModelHandler.h"
 
-CodeObject::CodeObject(std::string name, int id, ShaderClass* shader)
+CodeObject::CodeObject(ShaderClass* shader, ModelHandler* model)
 {
-	this->name = name;
-	this->id = id;
 	this->shader =shader;
+	this->modelHandlerController = model;
+	modelHandlerController->CreateCodeObject(this);
+	this->name = "Code Object " + id;
+
 	AddComponent<Transform>();
-	
 	shader = GetComponent<ShaderClass>();
 
 	StartCodeEngine();
