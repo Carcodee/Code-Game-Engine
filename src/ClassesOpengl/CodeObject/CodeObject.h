@@ -59,7 +59,24 @@ template<typename T>
 T* CodeObject::AddComponent()
 {
 	T* component = new T();
-	components.push_back(component);
 
+	for (size_t i = 0; i < components.size(); i++)
+	{
+		T* derivedComponent = dynamic_cast<T*>(components[i]);
+		if (derivedComponent!=nullptr)
+		{
+			std::cout << "Component already added" << std::endl;
+
+			if (typeid(component) == typeid(derivedComponent))
+			{
+				std::cout << "Component already added" << std::endl;
+				return nullptr;
+			}
+		}
+
+	}
+	std::cout << "Component added" << std::endl;
+
+	components.push_back(component);
 	return component;
 }
