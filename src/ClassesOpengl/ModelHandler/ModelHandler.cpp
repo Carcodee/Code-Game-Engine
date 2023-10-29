@@ -19,34 +19,7 @@ void ModelHandler::startLoadModel(std::string const& path, bool isPBR, std::shar
 	models[count].newModel.StartModel(path, isPBR, material);
 }
 
-void ModelHandler::SetModelPosition(int modelID, glm::vec3 position)
-{
-	models[modelID].position = position;
-}
-
-void ModelHandler::SetModelRotationX(int modelID, float rotation)
-{
-
-	models[modelID].rotationX = rotation;
-}
-
-void ModelHandler::SetModelRotationY(int modelID, float rotation)
-{
-
-	models[modelID].rotationY = rotation;
-}
-void ModelHandler::SetModelRotationZ(int modelID, float rotation)
-{
-
-	models[modelID].rotationZ = rotation;
-}
-
-void ModelHandler::SetModelScale(int modelID, glm::vec3 scale)
-{
-	models[modelID].scale = scale;
-}
-
-void ModelHandler::DrawModel(ShaderClass& shader, int modelID,glm::mat4 projection, glm::mat4 view)
+void ModelHandler::DrawModel(ShaderClass& shader, int objectID,glm::mat4 projection, glm::mat4 view)
 {
 
 		this->projection = projection;
@@ -58,14 +31,13 @@ void ModelHandler::DrawModel(ShaderClass& shader, int modelID,glm::mat4 projecti
 		//models[modelID].modelMatrix = glm::rotate(models[modelID].modelMatrix, glm::radians(models[modelID].rotationY), glm::vec3(0.0f, 1.0f, 0.0f));
 		//models[modelID].modelMatrix = glm::rotate(models[modelID].modelMatrix, glm::radians(models[modelID].rotationZ), glm::vec3(0.0f, 0.0f, 1.0f));
 		//models[modelID].modelMatrix = glm::scale(models[modelID].modelMatrix, glm::vec3(models[modelID].scale));
-
-		this->currentModel = models[modelID].modelMatrix ;
+		this->currentModel = codeObjects[objectID]->transform->GetLocalModelMatrix();
 		shader.setMat4("model", currentModel);
 		shader.setMat4("view", this->view);
 		shader.setMat4("projection", this->projection);
 
 
-		models[modelID].newModel.Draw(shader);
+		codeObjects[objectID]->GetComponent<Model>()->Draw(shader);
 
 		
 
@@ -73,7 +45,7 @@ void ModelHandler::DrawModel(ShaderClass& shader, int modelID,glm::mat4 projecti
 
 void ModelHandler::ExtractModelMaterial(int modelID,const char* path)
 {
-	models[modelID].newModel.ExtractMaterials(path);
+	codeObjects[modelID]->GetComponent<Model>()->ExtractMaterials(path);
 }
 
 glm::mat4 ModelHandler::GetViewMatrix()
@@ -88,33 +60,36 @@ glm::mat4 ModelHandler::GetProjectionMatrix()
 
 glm::mat4 ModelHandler::GetCurrentModelMatrix(int count)
 {
-	return this->models[count].modelMatrix;
+	return this->codeObjects[count]->transform->GetLocalModelMatrix();
 }
 
 
 
 void ModelHandler::SetModelMatrix(float* matrix, int count)
 {
-	this->models[count].modelMatrix = glm::make_mat4(matrix);
+	this->codeObjects[count]->transform->SetLocalModelMatrix(glm::make_mat4(matrix));
 }
 
-void ModelHandler::SetModelPicked(int modelID)
-{
-	this->modelPicked = modelID;
-}
 
-int ModelHandler::GetModelPicked()
-{
-	return this->modelPicked;
+void ModelHandler::NewCodeObject(ShaderClass* shader) {
+	CodeObject* codeObject = new CodeObject(shader, this);
 }
 
 void ModelHandler::CreateCodeObject(CodeObject* codeObject)
 {
-	codeObject->id= this->codeObjects.size();
 	this->codeObjects.push_back(codeObject);
+
+	codeObject->id= this->codeObjects.size()-1;
 }
 
 
+void ModelHandler::UpdateCodeObjects()
+{
+	for (int i = 0; i < this->codeObjects.size(); i++)
+	{
+		this->codeObjects[i]->UpdateCodeEngine();
+	}
+}
 
 
 

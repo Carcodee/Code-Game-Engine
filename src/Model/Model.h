@@ -62,7 +62,6 @@ public:
        this->path = path;
        this->gammaCorrection = gamma;
        this->material = material;
-        //loadModel(path);
 
     }
     void Draw(ShaderClass& shader);

@@ -6,6 +6,8 @@
 #include <iostream>
 #include "../src/ClassesOpengl/ModelHandler/ModelHandler.h"
 #include "../src/Model/Model.h"
+#include "../src/ClassesOpengl/CodeObject/CodeObject.h"
+
 auto MoveCubes = [](float& speed, float& rotationSpeed) {
 
 
@@ -249,28 +251,59 @@ auto light_Settings = [](bool& dirLightOn, bool& spotLightOn, bool& pointLightOn
 
 	};
 
-auto model_configs = [](ModelHandler& myModelHandler) {
+auto model_configs = [](ModelHandler& myModelHandler,int selectedItem) {
 
 	if (ImGui::TreeNode("MODELS DATA"))
 	{
 		const float spacing1 = 4;
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing1, spacing1));
 
-		for (size_t i = 0; i < myModelHandler.models.size(); i++)
-		{
-			if (myModelHandler.models[i].newModel.isLoaded)
+		ImGui::Text("TRANSFORM");
+		float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+		glm::mat4 modelMatrix = myModelHandler.codeObjects[selectedItem]->transform->GetLocalModelMatrix();
+		ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(modelMatrix), matrixTranslation, matrixRotation, matrixScale);
+		ImGui::InputFloat3("Translate", matrixTranslation);
+		ImGui::InputFloat3("Rotate", matrixRotation);
+		ImGui::InputFloat3("Scale", matrixScale);
+		ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, glm::value_ptr(modelMatrix));
+
+
+			//if (ImGui::TreeNode("TRANSFORM"))
+			//{
+
+
+			//	ImGui::TreePop();
+			//	ImGui::Spacing();
+			//}
+			if (ImGui::Button("Add Model Component")) {
+				//"Models/BackpackModel/backpack.obj"
+				//Models/pizzaCar/myPizzaMovil.obj
+				//Models/pig/pig.obj
+				std::string strPath = "Models/Cube/Cube.obj";
+				myModelHandler.codeObjects[selectedItem]->AddComponent<Material>();
+				myModelHandler.codeObjects[selectedItem]->material = std::make_shared<Material>();
+
+				myModelHandler.codeObjects[selectedItem]->AddComponent<Model>();
+				myModelHandler.codeObjects[selectedItem]->GetComponent<Model>()->StartModel(strPath, true, myModelHandler.codeObjects[selectedItem]->material);
+			}
+
+			Model* ptr=nullptr;
+			try {
+				ptr = myModelHandler.codeObjects[selectedItem]->GetComponent<Model>();
+			}
+			catch (const std::exception& e) {
+				std::cout << e.what() << std::endl;
+			}
+
+			if (ptr != nullptr && ptr->isLoaded)
 			{
-				std::string name = myModelHandler.models[i].name +" " + std::to_string(myModelHandler.models[i].modelID);
-				if (ImGui::TreeNode(name.c_str()))
+				std::string name = myModelHandler.codeObjects[selectedItem]->name;
+				if (ImGui::TreeNode("MaterialConfigs: "))
 				{
-			
-					if (ImGui::TreeNode("MaterialConfigs: "))
-					{
-				
 						static float col1[3] = { 1.0f, 1.0f, 1.0f };
 
 						ImGui::ColorPicker3("Material Color", col1);
-						myModelHandler.models[i].material->SetMaterialColor(glm::vec3(col1[0], col1[1], col1[2]));
+						myModelHandler.codeObjects[selectedItem]->material->SetMaterialColor(glm::vec3(col1[0], col1[1], col1[2]));
 
 						
 						static float f4 = 1.0f;
@@ -285,31 +318,13 @@ auto model_configs = [](ModelHandler& myModelHandler) {
 						static float f3 = 1.0f;
 						ImGui::SliderFloat("Ao intensity", &f3, 0.0f, 5.0f, "%.4f");
 						
-						
-						myModelHandler.models[i].material->SetMaterialProperties(f4,f1, f2, f3);
+						myModelHandler.codeObjects[selectedItem]->material->SetMaterialProperties(f4,f1, f2, f3);
 
-
-
-						ImGui::TreePop();
 						ImGui::Spacing();
 
 
-					}
-					if (ImGui::TreeNode("TRANSFORM"))
-					{
-						
-							ImGui::Text("Position");
-							float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-							ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(myModelHandler.models[i].modelMatrix), matrixTranslation, matrixRotation, matrixScale);
-							ImGui::InputFloat3("Translate", matrixTranslation);
-							ImGui::InputFloat3("Rotate", matrixRotation);
-							ImGui::InputFloat3("Scale", matrixScale);
-							ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, glm::value_ptr(myModelHandler.models[i].modelMatrix));
-							
+				
 
-						ImGui::TreePop();
-						ImGui::Spacing();
-					}
 					struct TextFilters
 					{
 						// Modify character input by altering 'data->Eventchar' (ImGuiInputTextFlags_CallbackCharFilter callback)
@@ -329,13 +344,13 @@ auto model_configs = [](ModelHandler& myModelHandler) {
 						}
 					};
 
-					static char buf1[400] = ""; ImGui::InputText("Model path here:", buf1, 400);
+					static char buf1[400] = ""; ImGui::InputText("Texture path here:", buf1, 400);
 
 					if (ImGui::Button("Extract material")) {
 						//"Models/BackpackModel/backpack.obj"
 						//Models/pizzaCar/myPizzaMovil.obj
 						//Models/pig/pig.obj
-						myModelHandler.ExtractModelMaterial(i, buf1);
+						myModelHandler.ExtractModelMaterial(selectedItem, buf1);
 					}
 					ImGui::TreePop();
 					ImGui::Spacing();
@@ -344,16 +359,16 @@ auto model_configs = [](ModelHandler& myModelHandler) {
 
 			
 			}
-		}
+		
 		ImGui::PopStyleVar();
 		ImGui::TreePop();
 		ImGui::Spacing();
 	}
 
 };
-auto model_LoaderTest = [](ModelHandler& models, bool& flipUVS, int& modelCounter, std::string& path) {
+auto model_LoaderTest = [](ModelHandler* models, bool& flipUVS, int& modelCounter, ShaderClass* shader,std::string& path) {
 
-	if (ImGui::TreeNode("Model Loader"))
+	if (ImGui::TreeNode("CodeObject Creator"))
 	{
 		struct TextFilters
 		{
@@ -382,30 +397,20 @@ auto model_LoaderTest = [](ModelHandler& models, bool& flipUVS, int& modelCounte
 		ImGui::CheckboxFlags("Flip UVS", &flipUvs, ImGuiComboFlags_PopupAlignLeft);
 		ImGui::CheckboxFlags("PBR", &PBRon, ImGuiComboFlags_PopupAlignLeft);
 
-		if (ImGui::Button("Load Model")) {
+		if (ImGui::Button("Create CodeObject")) {
 			//"Models/BackpackModel/backpack.obj"
 			//Models/pizzaCar/myPizzaMovil.obj
 			//Models/pig/pig.obj
-			std::string strPath = path;
+			
+			models->NewCodeObject(shader);
+			
+	/*		std::string strPath = path;
 			flipUVS = flipUvs;
 			std::shared_ptr<Material> material = std::make_shared<Material>();
 			ModelItem model = { Model(),modelCounter, glm::mat4(1.0f),"Cube ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base", material};
 			models.AddModel(model);
 			models.startLoadModel(strPath, PBRon, material,modelCounter);
-			modelCounter++;
-		}
-		if (ImGui::Button("Load Cube")) {
-			//"Models/BackpackModel/backpack.obj"
-			//Models/pizzaCar/myPizzaMovil.obj
-			//Models/pig/pig.obj
-			std::string strPath = "Models/Cube/Cube.obj";
-			flipUVS = flipUvs;
-			std::shared_ptr<Material> material = std::make_shared<Material>();
-			ModelItem model = { Model(),modelCounter, glm::mat4(1.0f),"Cube ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base", material};
-			models.AddModel(model);
-
-			models.startLoadModel(strPath, PBRon, material, modelCounter);
-			modelCounter++;
+			modelCounter++;*/
 		}
 
 		ImGui::SameLine();

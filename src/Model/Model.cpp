@@ -178,7 +178,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         LoadPBRTextures("texture_metallic", textures);
         //5. ao maps
         LoadPBRTextures("texture_ao", textures);
-        material->setConfigurations(true, true);
+        material->setConfigurations(true, false);
         material->SetTexture(textures);
     }
     
@@ -301,8 +301,9 @@ void Model::ExtractMaterials(const char* path)
         //5. ao maps
     ExtractTextures("texture_ao", textures, path);
 
-        material->setConfigurations(true, true);
-        material->SetTexture(textures);
+    material->setConfigurations(true, true);
+
+    material->SetTexture(textures);
     
 }
 

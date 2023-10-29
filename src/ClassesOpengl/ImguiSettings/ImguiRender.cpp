@@ -16,6 +16,7 @@ ImguiRender::ImguiRender(GLFWwindow* window)
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;    // Enable Gamepad Controlbs
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // Enable Docking
+	selected = 0;
 }
 
 void ImguiRender::NewFrame()
@@ -75,6 +76,7 @@ void ImguiRender::CreateHirearchy(std::vector<CodeObject*> objects)
 		// Iterate placeholder objects (all the same data)
 		for (int obj_i = 0; obj_i < objects.size(); obj_i++)
 		{
+			if (objects[obj_i]->showed)continue;
 			ShowPlaceholderObject("Object", objects[obj_i]);
 			//ImGui::Separator();
 		}
@@ -86,7 +88,7 @@ void ImguiRender::CreateHirearchy(std::vector<CodeObject*> objects)
 
 void ImguiRender::CreateGuizmos(ModelHandler& modelHandler)
 {
-	if (modelHandler.models.size() > 0)
+	if (modelHandler.codeObjects.size() > 0)
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		float viewManipulateRight = io.DisplaySize.x;
@@ -99,12 +101,12 @@ void ImguiRender::CreateGuizmos(ModelHandler& modelHandler)
 		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
 		viewManipulateRight = ImGui::GetWindowPos().x + windowWidth;
 		viewManipulateTop = ImGui::GetWindowPos().y;
-		float* model = (float*)glm::value_ptr(modelHandler.GetCurrentModelMatrix(modelHandler.GetModelPicked()));
+		float* model = (float*)glm::value_ptr(modelHandler.GetCurrentModelMatrix(selected));
 
 		ImGuizmo::Manipulate(glm::value_ptr(modelHandler.GetViewMatrix()), glm::value_ptr(modelHandler.GetProjectionMatrix()),
 			mCurrentGizmoOperation, ImGuizmo::MODE::LOCAL, model,
 			NULL, NULL, NULL, NULL);
-		modelHandler.SetModelMatrix(model, modelHandler.GetModelPicked());
+		modelHandler.SetModelMatrix(model, selected);
 		ImGuizmo::ViewManipulate((float*)glm::value_ptr(modelHandler.GetViewMatrix()), 8.0f, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);
 
 	}
@@ -124,7 +126,6 @@ void ImguiRender::SetGizmoOperation(GLFWwindow* window)
 
 void ImguiRender::ShowPlaceholderObject(const char* prefix, CodeObject* object)
 {
-
 		// Use object uid as identifier. Most commonly you could also use the object pointer as a base ID.
 		ImGui::PushID(object->id);
 
@@ -133,12 +134,18 @@ void ImguiRender::ShowPlaceholderObject(const char* prefix, CodeObject* object)
 		ImGui::TableSetColumnIndex(0);
 		ImGui::AlignTextToFramePadding();
 		bool node_open = ImGui::TreeNode(object->name.c_str(), "%s_%u", prefix, object->id);
+		for (int i = 0; i < object->parents.size(); i++)
+		{
+			object->parents[i]->showed = true;
+		}
 		ImGui::TableSetColumnIndex(1);
 		ImGui::Text("my sailor is rich");
 
 		if (node_open)
 		{
 			static float placeholder_members[8] = { 0.0f, 0.0f, 1.0f, 3.1416f, 100.0f, 999.0f };
+			selected = object->id;
+
 			for (int i = 0; i < object->parents.size(); i++)
 			{
 				ImGui::PushID(i); // Use field index as identifier.

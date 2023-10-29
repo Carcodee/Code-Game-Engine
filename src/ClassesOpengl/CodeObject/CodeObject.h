@@ -10,28 +10,30 @@
 //#include "../src/ClassesOpengl/ModelHandler/ModelHandler.h"
 class ModelHandler;
 
-class CodeObject
+class CodeObject: public ComponentBase
 {
 public:
 	CodeObject(ShaderClass* shader, ModelHandler* model);
 	~CodeObject();
-
+    void Implementation() override;
 	virtual void StartCodeEngine();
 	virtual void UpdateCodeEngine();
+	void AddParent(CodeObject* parent);	
 	//material
 	template<typename T>
-	void AddComponent();
+	T* AddComponent();
 
 	template<typename T>
 	T* GetComponent();
-	
-	
-	std::string name;
 	int id;
+	std::string name;
+	bool showed;
+	Transform* transform;
 	std::vector<ComponentBase*> components;
 	std::vector<CodeObject*> parents;
-	ShaderClass *shader;
+	ShaderClass* shader;
 	ModelHandler* modelHandlerController;
+	std::shared_ptr<Material> material;
 private: 
 	void SetShaderProperties();
 };
@@ -45,17 +47,19 @@ T* CodeObject::GetComponent()
 
 		if (derivedComponent != nullptr)
 		{
-			std::cout << "Component found" << std::endl;
+			//std::cout << "Component found" << std::endl;
 			return derivedComponent;
 		}
 	}
-	std::cout << "Component Not found" << std::endl;
+	//std::cout << "Component Not found" << std::endl;
 
 	return nullptr;
 }
 template<typename T>
-void CodeObject::AddComponent()
+T* CodeObject::AddComponent()
 {
 	T* component = new T();
 	components.push_back(component);
+
+	return component;
 }

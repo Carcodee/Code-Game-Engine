@@ -14,6 +14,9 @@ class Transform: public ComponentBase
 	void SetPosition(glm::vec3 position);
 	void SetRotation(glm::vec3 rotation);
 	void SetScale(glm::vec3 scale);
+	glm::mat4 GetLocalModelMatrix();
+	void SetLocalModelMatrix(glm::mat4 matrix);
+
 	glm::vec3* position;
 	glm::vec3* rotation;
 	glm::vec3* scale;

@@ -42,4 +42,14 @@ void Transform::SetScale(glm::vec3 newScale)
 	*scale = newScale;
 }
 
+glm::mat4 Transform::GetLocalModelMatrix()
+{
+	return localModelMatrix;
+}
+
+void Transform::SetLocalModelMatrix(glm::mat4 matrix)
+{
+	localModelMatrix = matrix;
+}
+
 

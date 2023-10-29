@@ -26,6 +26,7 @@ class ImguiRender
 	void CreateHirearchy(std::vector<CodeObject*> objects);
 	void CreateGuizmos(ModelHandler& modelHandler);
 	void SetGizmoOperation(GLFWwindow* window);
+	int selected;
 	private:
 		ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
 		ImGuizmo::MODE mCurrentGizmoMode = ImGuizmo::WORLD;

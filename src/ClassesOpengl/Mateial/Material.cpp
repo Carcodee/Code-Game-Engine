@@ -115,7 +115,7 @@ void Material::ConfigurateTextures(ShaderClass& shader, int& mIndex)
     //Non PBR
     int specularMapping = (specularNr > 1) ? 1 : 0;
     shader.use();
-    shader.setInt("texturesOn", 1);
+    shader.setInt("texturesOn", UseTexture);
     shader.setInt("meshCount", mIndex);
     shader.setInt("heighmap", heightmapping);
     shader.setInt("normalMapping", normalMapping);

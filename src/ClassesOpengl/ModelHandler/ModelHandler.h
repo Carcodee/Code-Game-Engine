@@ -29,26 +29,25 @@ class ModelHandler
 
 		void AddModel(ModelItem& model);
 		void startLoadModel(std::string const& path, bool isPBR, std::shared_ptr<Material> material, int count);
-		void SetModelPosition(int modelID, glm::vec3 position);
-		void SetModelRotationX(int modelID, float rotation);
-		void SetModelRotationY(int modelID, float rotation);
-		void SetModelRotationZ(int modelID, float rotation);
 
-		void SetModelScale(int modelID, glm::vec3 scale);
-		void DrawModel(ShaderClass& shader, int modelID, glm::mat4 projection, glm::mat4 view);
+		void DrawModel(ShaderClass& shader, int objectID, glm::mat4 projection, glm::mat4 view);
+
 		void ExtractModelMaterial(int modelID, const char* path);
 
 		glm::mat4 GetViewMatrix();
 		glm::mat4 GetProjectionMatrix();
 		glm::mat4 GetCurrentModelMatrix(int count);
+
+
 		void SetModelMatrix(float* matrix, int count);
 		std::vector <ModelItem> models;
-		void SetModelPicked(int modelID);
-		int GetModelPicked();
-		std::vector <CodeObject*> codeObjects;
 
+
+		std::vector <CodeObject*> codeObjects;
 		//codeobject
 		void CreateCodeObject(CodeObject* codeObject);
+		void NewCodeObject(ShaderClass* shader);
+		void UpdateCodeObjects();
 private:
 	int modelPicked;
 	glm::mat4 view;

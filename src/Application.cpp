@@ -42,6 +42,8 @@ void processInput(GLFWwindow* window);
 
 
 ModelHandler modelHandler;
+ShaderClass* modelShaderPointer;
+
 std::string path;
 
 
@@ -98,12 +100,13 @@ int main(void)
 // -----------------------------
 	glEnable(GL_DEPTH_TEST);
 
+	ShaderClass modelShader("Shaders/ModelLoader.vert", "Shaders/ModelLoader.frag");
+	modelShaderPointer=&modelShader;
 
 	ShaderClass myShader("Shaders/Base.vert", "Shaders/Base.frag");
 	ShaderClass lightShader("Shaders/Light.vert","Shaders/Light.frag");
 	ShaderClass cubemapShader("Shaders/Cubemap.vert", "Shaders/Cubemap.frag");
 	ShaderClass fbShader("Shaders/framebuffer.vert", "Shaders/Framebuffer.frag");
-	ShaderClass modelShader("Shaders/ModelLoader.vert", "Shaders/ModelLoader.frag");
 
 	ShaderClass fbBlurShader("Shaders/Blur.vert", "Shaders/Blur.frag");
 	ShaderClass finalBloomShader("Shaders/FinalBloom.vert", "Shaders/FinalBloom.frag");
@@ -117,10 +120,9 @@ int main(void)
 	//To do When a object is creeated in the code, it should be added to the model handler
 	//and the model handler should be the one that handles the drawing of the objects
 	//Also in the inspector you should be able to add components to the objects
+
 	FirstCodeObject myFirstCodeObject(&modelShader,&modelHandler);
-
 	myFirstCodeObject.StartCodeEngine();
-
 
 	std::vector <GLfloat> cubeLightVertices = util::returnVertices(util::cube3Layout);
 	std::vector <GLfloat> vertices = util::returnVertices(util::cube4Layout);
@@ -556,7 +558,7 @@ int main(void)
 				data[2] * 256 * 256;
 			if (pickedID<=modelHandler.models.size())
 			{
-				modelHandler.SetModelPicked(pickedID);
+				/*modelHandler.SetModelPicked(pickedID);*/
 			}
 		}
 
@@ -744,42 +746,41 @@ int main(void)
 
 #pragma region ModelRegion
 
-		for (size_t i = 0; i < modelHandler.models.size(); i++)
+		for (size_t i = 0; i < modelHandler.codeObjects.size(); i++)
 		{
-			if (modelHandler.models[i].newModel.isLoaded)
+		if (modelHandler.codeObjects[i]->GetComponent<Model>() != nullptr)
 			{
-				// don't forget to enable shader before setting uniforms
-				modelShader.use();
+				if (modelHandler.codeObjects[i]->GetComponent<Model>()->isLoaded)
+				{
+					modelShader.use();
 
-				glActiveTexture(GL_TEXTURE0);
+					glActiveTexture(GL_TEXTURE0);
 
-				modelShader.setInt("irradianceMap", 0);
-				glBindTexture(GL_TEXTURE_CUBE_MAP, myHDRISkybox.irradianceMap);
+					modelShader.setInt("irradianceMap", 0);
+					glBindTexture(GL_TEXTURE_CUBE_MAP, myHDRISkybox.irradianceMap);
 
-				modelShader.setVec3("viewPos", camera.Position);
-				modelShader.setVec3("lightPos", lightPos);
-				modelShader.setVec3("dirLight.ambient", ambientColor);
-				modelShader.setVec3("dirLight.diffuse", glm::vec3(0.3f,0.8f,0.8f));
-				modelShader.setVec3("dirLight.specular", glm::vec3(.5f));
-				modelShader.setVec3("dirLight.direction", lightPos);
+					modelShader.setVec3("viewPos", camera.Position);
+					modelShader.setVec3("lightPos", lightPos);
+					modelShader.setVec3("dirLight.ambient", ambientColor);
+					modelShader.setVec3("dirLight.diffuse", glm::vec3(0.3f, 0.8f, 0.8f));
+					modelShader.setVec3("dirLight.specular", glm::vec3(.5f));
+					modelShader.setVec3("dirLight.direction", lightPos);
+				}
+				if (flipUVS)
+				{
+					stbi_set_flip_vertically_on_load(true);
 
+					modelHandler.DrawModel(modelShader, i, projectionM, viewM);
 
+					stbi_set_flip_vertically_on_load(false);
+				}
+				else
+				{
 
-			}
-			if (flipUVS)
-			{
-				stbi_set_flip_vertically_on_load(true);
+					modelHandler.DrawModel(modelShader, i, projectionM, viewM);
+					myFirstCodeObject.UpdateCodeEngine();
 
-				modelHandler.DrawModel(modelShader, i,projectionM,viewM);
-
-				stbi_set_flip_vertically_on_load(false);
-			}
-			else
-			{
-
-				modelHandler.DrawModel(modelShader, i, projectionM, viewM);
-				myFirstCodeObject.UpdateCodeEngine();
-
+				}
 			}
 		}
 
@@ -879,8 +880,8 @@ int main(void)
 		myImgui.CreateNode([&]() {light_Movement(lightX, lightY, lightZ); });
 		myImgui.CreateNode([&]() {height_Mapping(heightScaleFactor); });
 		myImgui.CreateNode([&]() {light_Settings(dirLightOn, spotLightOn, pointLightOn, HDR, bloom, shadows); });
-		myImgui.CreateNode([&]() {model_LoaderTest(modelHandler, flipUVS, modelsLoadedCounter,path); });
-		myImgui.CreateNode([&]() {model_configs(modelHandler); });
+		myImgui.CreateNode([&]() {model_LoaderTest(&modelHandler, flipUVS, modelsLoadedCounter,&modelShader,path); });
+		myImgui.CreateNode([&]() {model_configs(modelHandler, myImgui.selected); });
 
 		myImgui.CreateHirearchy(modelHandler.codeObjects);
 
@@ -1010,10 +1011,18 @@ void DropCallback(GLFWwindow* window, int count, const char** paths)
 		path= paths[i];
 	}
 	std::shared_ptr<Material> material = std::make_shared<Material>();
-	ModelItem model = { Model(),modelsLoadedCounter ,glm::mat4(1.0f), "Entity ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base", material };
-	modelHandler.models.push_back(model);
-	modelHandler.models[modelsLoadedCounter].newModel.StartModel(path, PBR, material);
-	modelsLoadedCounter++;
+	//ModelItem model = { Model(),modelsLoadedCounter ,glm::mat4(1.0f), "Entity ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base", material };
+	//modelHandler.models.push_back(model);
+	//modelHandler.models[modelsLoadedCounter].newModel.StartModel(path, PBR, material);
+	//modelsLoadedCounter++;
+	modelHandler.NewCodeObject(modelShaderPointer);
+	int selectedItem = modelHandler.codeObjects.size() - 1;
+
+	modelHandler.codeObjects[selectedItem]->AddComponent<Material>();
+	modelHandler.codeObjects[selectedItem]->material = std::make_shared<Material>();
+
+	modelHandler.codeObjects[selectedItem]->AddComponent<Model>();
+	modelHandler.codeObjects[selectedItem]->GetComponent<Model>()->StartModel(path, true, modelHandler.codeObjects[selectedItem]->material);
 
 }
 #pragma endregion
