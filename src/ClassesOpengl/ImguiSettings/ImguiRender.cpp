@@ -1,6 +1,5 @@
 #include "ImguiRender.h"
 #include "../CodeObject/CodeObject.h"
-
 ImguiRender::ImguiRender(GLFWwindow* window)
 {
 	//IMGUI
@@ -17,6 +16,11 @@ ImguiRender::ImguiRender(GLFWwindow* window)
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;    // Enable Gamepad Controlbs
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // Enable Docking
 	selected = 0;
+	currentDirectory= "Assets";
+	relativeAssetsPath = "Assets";
+	contentBrowserFilePath = util::LoadTexture("Resources/ContentBrowser/FileIcon.png");
+	contentBrowserIconPath = util::LoadTexture("Resources/ContentBrowser/FolderIcon.png");
+
 }
 
 void ImguiRender::NewFrame()
@@ -36,7 +40,7 @@ void ImguiRender::Render()
 void ImguiRender::CreateViewPort(unsigned int textureID, ModelHandler& modelHandler)
 {
 
-	ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoMove);
+	ImGui::Begin("Scene", nullptr);
 	viewportWindowSize = ImGui::GetWindowSize();
 	glViewport(0, 0, viewportWindowSize.x, viewportWindowSize.y);
 	//ImGui::SetNextWindowSize(ImVec2(SCR_WIDTH, SCR_HEIGHT));
@@ -48,7 +52,7 @@ void ImguiRender::CreateViewPort(unsigned int textureID, ModelHandler& modelHand
 		ImVec2(0, 1),
 		ImVec2(1, 0));
 	CreateGuizmos(modelHandler);
-
+	
 	
 
 
@@ -56,15 +60,67 @@ void ImguiRender::CreateViewPort(unsigned int textureID, ModelHandler& modelHand
 
 void ImguiRender::CreateContentBrowser()
 {
-	ImGui::Begin("Content Browser");
+
+	
+	ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
+	if (!ImGui::Begin("Content Browser"))
+	{
+		ImGui::End();
+		return;
+	}
+
+	std::filesystem::path pathToShow = currentDirectory;
+	if (currentDirectory != std::filesystem::path(relativeAssetsPath))
+	{
+		if (ImGui::Button("<-"))
+		{
+			currentDirectory = pathToShow.parent_path();
+		}
+	}
+	static  float padding = 16.0f;
+	static  float thumbNailSize= 128.0f;
+	float cellSize = thumbNailSize + padding;
+	float panelWidth = ImGui::GetContentRegionAvail().x;
+	int columnCount = (int)(panelWidth / cellSize);
+	if (columnCount < 1)
+	{
+		columnCount = 1;
+	}
+	//TODO
+
+	ImGui::Columns(columnCount,0,false);
+	for (const auto& entry : std::filesystem::directory_iterator(pathToShow))
+	{
+		std::string pathString = entry.path().string();	
+		auto relativePath = std::filesystem::relative(pathString, relativeAssetsPath);
+		std::string filename= relativePath.filename().string();
+		contentBrowserTextureID = (entry.is_directory())? contentBrowserIconPath : contentBrowserFilePath;
+		(ImGui::ImageButton((ImTextureID)contentBrowserTextureID, { thumbNailSize,thumbNailSize },{1,0},{0,1}));
+		if (ImGui::IsItemHovered()&&ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+		{
+			if (entry.is_directory())
+			{
+				currentDirectory /= entry.path().filename();
+			}
+		}
+		ImGui::Text(filename.c_str());
+
+		ImGui::NextColumn();
+
+	}
+
+	ImGui::Columns(1);
+	ImGui::SliderFloat("ThumbnailSize",&thumbNailSize, 16,512);
+	ImGui::SliderFloat("Padding", &padding, 0, 32);
+
 	ImGui::End();
 }
 
 void ImguiRender::CreateHirearchy(std::vector<CodeObject*> objects)
 {
 	ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-	if (!ImGui::Begin("Example: Property editor"))
-	{
+	if (!ImGui::Begin("Example: Property editor"))	{
+
 		ImGui::End();
 		return;
 	}

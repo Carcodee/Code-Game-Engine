@@ -8,7 +8,7 @@
 #include "../src/ClassesOpengl/ImguiSettings/MyImguiSettings.h"
 #include "headers/headers.h"
 #include "../src/Functions/Utility.h"
-
+#include <windows.h>
 
 
 using namespace glm;
@@ -88,11 +88,11 @@ int main(void)
 	// tell GLFW to capture our mouse
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	ImguiRender myImgui(window);
 
 	if (glewInit() != GLEW_OK)
 		std::cout << "Error!" << std::endl;
 	std::cout << glGetString(GL_VERSION) << std::endl;
+	ImguiRender myImgui(window);
 
 
 	glfwSetDropCallback(window, DropCallback);
@@ -116,11 +116,6 @@ int main(void)
 	ShaderClass pickingShader("Shaders/Picking.vert", "Shaders/Picking.frag");
 	ShaderClass SkyboxHandlerShader("Shaders/SkyboxShaders/SkyboxHandler.vert", "Shaders/SkyboxShaders/SkyboxHandler.frag");
 	ShaderClass IrradianceShader("Shaders/SkyboxShaders/Irradiance.vert", "Shaders/SkyboxShaders/Irradiance.frag");
-
-	//To do When a object is creeated in the code, it should be added to the model handler
-	//and the model handler should be the one that handles the drawing of the objects
-	//Also in the inspector you should be able to add components to the objects
-
 	FirstCodeObject myFirstCodeObject(&modelShader,&modelHandler);
 	myFirstCodeObject.StartCodeEngine();
 
@@ -474,13 +469,8 @@ int main(void)
 
 		ImGui::PushFont(font1);
 
-		/* Render here */
-		// render
-		// ------
 
 		glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
-		//glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-		// make sure we clear the framebuffer's content
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -793,22 +783,21 @@ int main(void)
 
 		if (!bloom)
 		{	
-			// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		glDisable(GL_DEPTH_TEST | GL_DEPTH_BUFFER_BIT); // disable depth test so screen-space quad isn't discarded due to depth test.
-		// clear all relevant buffers
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
-		glClear(GL_COLOR_BUFFER_BIT);
-		finalFbo.Bind();
+			glDisable(GL_DEPTH_TEST | GL_DEPTH_BUFFER_BIT); // disable depth test so screen-space quad isn't discarded due to depth test.
+			// clear all relevant buffers
+			glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
+			glClear(GL_COLOR_BUFFER_BIT);
+			finalFbo.Bind();
 
-		fbShader.use();
-		fbShader.setBool("HDR", HDR);
+			fbShader.use();
+			fbShader.setBool("HDR", HDR);
 
-		glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
-		util::renderQuad();
-		finalFbo.UnBind();
-
+			glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
+			util::renderQuad();
+			finalFbo.UnBind();
 
 		}
 
@@ -883,15 +872,15 @@ int main(void)
 		myImgui.CreateNode([&]() {model_LoaderTest(&modelHandler, flipUVS, modelsLoadedCounter,&modelShader,path); });
 		myImgui.CreateNode([&]() {model_configs(modelHandler, myImgui.selected); });
 
-		myImgui.CreateHirearchy(modelHandler.codeObjects);
 
 		ImGui::PopFont();
 
 
 		ImGui::ShowDemoWindow();
-		
-		myImgui.CreateViewPort(finalFbo.m_Texture, modelHandler);
+		myImgui.CreateContentBrowser();
+		myImgui.CreateHirearchy(modelHandler.codeObjects);
 		myImgui.SetGizmoOperation(window);
+		myImgui.CreateViewPort(finalFbo.m_Texture, modelHandler);
 
 		myImgui.Render();
 #pragma endregion

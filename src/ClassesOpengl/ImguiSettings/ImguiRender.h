@@ -6,9 +6,10 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <functional>
+#include <filesystem>
 #include "imgui/ImGuizmo.h"
 #include "../src/ClassesOpengl/ModelHandler/ModelHandler.h"
-
+#include "../src/Functions/Utility.h"
 class ImguiRender
 {
 	public:
@@ -32,8 +33,13 @@ class ImguiRender
 		ImGuizmo::MODE mCurrentGizmoMode = ImGuizmo::WORLD;
 
 	    void ShowPlaceholderObject(const char* prefix,CodeObject* object);
-        
 
+		//browser
+		std::filesystem::path currentDirectory;
+		std::filesystem::path relativeAssetsPath;
+		unsigned int contentBrowserIconPath;
+		unsigned int contentBrowserFilePath;
+		unsigned int contentBrowserTextureID;
         
 };
 

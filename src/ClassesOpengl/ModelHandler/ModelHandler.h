@@ -2,7 +2,6 @@
 #include<iostream>
 #include <string>
 #include <vector>
-
 #include <glm/glm.hpp>
 #include "../src/Model/Model.h"
 #include "../Mateial/Material.h"
