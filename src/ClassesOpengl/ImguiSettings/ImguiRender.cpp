@@ -39,8 +39,9 @@ void ImguiRender::Render()
 
 void ImguiRender::CreateViewPort(unsigned int textureID, ModelHandler& modelHandler)
 {
+	//lock viewport to the size of the window
 
-	ImGui::Begin("Scene", nullptr);
+	ImGui::Begin("Scene", nullptr,ImGuiWindowFlags_::ImGuiWindowFlags_NoMove);
 	viewportWindowSize = ImGui::GetWindowSize();
 	glViewport(0, 0, viewportWindowSize.x, viewportWindowSize.y);
 	//ImGui::SetNextWindowSize(ImVec2(SCR_WIDTH, SCR_HEIGHT));
