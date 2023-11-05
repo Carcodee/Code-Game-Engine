@@ -1,0 +1,13 @@
+(?)
+[ Copy "Hello, world!" to clipboard ]
+### Window options ###
+### Widgets ###
+### Layout & Scrolling ###
+### Popups & Modal windows ###
+### Tables & Columns ###
+### Inputs & Focus ###
+3YIZDYPYLPTK1565217358854.jpg Nueva carpeta Nueva carpeta (2) Nueva carpeta (3) Nuevo documento de texto.txt test1 test1 - copia test1 - copia (2)
+test1 - copia (3)
+{ 128.000 } ThumbnailSize
+{ 16.000 } Padding Scene Debug Example: Property editor Dear ImGui Demo
+Content Browser

@@ -25,14 +25,11 @@ class ModelHandler
 {
 	public:
 		ModelHandler();
-
+		void SetShader(ShaderClass* shader);
 		void AddModel(ModelItem& model);
 		void startLoadModel(std::string const& path, bool isPBR, std::shared_ptr<Material> material, int count);
-
 		void DrawModel(ShaderClass& shader, int objectID, glm::mat4 projection, glm::mat4 view);
-
 		void ExtractModelMaterial(int modelID, const char* path);
-
 		glm::mat4 GetViewMatrix();
 		glm::mat4 GetProjectionMatrix();
 		glm::mat4 GetCurrentModelMatrix(int count);
@@ -47,11 +44,14 @@ class ModelHandler
 		void CreateCodeObject(CodeObject* codeObject);
 		void NewCodeObject(ShaderClass* shader);
 		void UpdateCodeObjects();
+		void DragDropCodeObject(const char* path);
+
 private:
 	int modelPicked;
 	glm::mat4 view;
 	glm::mat4 projection;
 	glm::mat4 currentModel;
 	int counter;
+	ShaderClass* shader;
 };
 

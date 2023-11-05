@@ -10,6 +10,15 @@
 #include "imgui/ImGuizmo.h"
 #include "../src/ClassesOpengl/ModelHandler/ModelHandler.h"
 #include "../src/Functions/Utility.h"
+#include "../src/ClassesOpengl/OpenGLHelpers/Framebuffer.h"
+enum DragDropFileType
+{
+	fbx,
+	png,
+	jpg,
+	folder
+};
+
 class ImguiRender
 {
 	public:
@@ -21,12 +30,16 @@ class ImguiRender
 	void CreateNode(Lambda myLambda) {
 		myLambda();
 	};
+	void SetModelHandler(ModelHandler& modelHandler);
 	ImVec2 viewportWindowSize;
-	void CreateViewPort(unsigned int textureID,ModelHandler& modelHandler);
+	void CreateViewPort(unsigned textID,ModelHandler& modelHandler);
 	void CreateContentBrowser();
 	void CreateHirearchy(std::vector<CodeObject*> objects);
-	void CreateGuizmos(ModelHandler& modelHandler);
+	void inline CreateGuizmos(ModelHandler& modelHandler);
 	void SetGizmoOperation(GLFWwindow* window);
+	void SetFrameBuffer(Framebuffer& frameBuffer);
+
+	void OnDragDropCallBack(DragDropFileType filetype);
 	int selected;
 	private:
 		ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
@@ -37,9 +50,13 @@ class ImguiRender
 		//browser
 		std::filesystem::path currentDirectory;
 		std::filesystem::path relativeAssetsPath;
+		bool dragDropSucced=false;
+		std::string dragDropPath;
 		unsigned int contentBrowserIconPath;
 		unsigned int contentBrowserFilePath;
 		unsigned int contentBrowserTextureID;
-        
+        ImVec2 myViewportSize;
+		Framebuffer myFrameBuffer;
+		ModelHandler myModelHandler;
 };
 

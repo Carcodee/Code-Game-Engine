@@ -14,6 +14,8 @@ CodeObject::CodeObject(ShaderClass* shader, ModelHandler* model)
 	AddComponent<Transform>();
 	shader = GetComponent<ShaderClass>();
 	transform = GetComponent<Transform>();
+	GetComponent<Transform>()->GetLocalModelMatrix();
+
 }
 
 CodeObject::~CodeObject()

@@ -1,11 +1,19 @@
 #include "ModelHandler.h"
 #include "../CodeObject/CodeObject.h"
 
+
+
 ModelHandler::ModelHandler()
 {
-
 	this->view = glm::mat4(1.0f);
 	this->projection = glm::mat4(1.0f);
+	this->shader = nullptr;
+
+}
+
+void ModelHandler::SetShader(ShaderClass* shader)
+{
+	this->shader = shader;
 }
 
 void ModelHandler::AddModel(ModelItem& modelItem)
@@ -89,6 +97,17 @@ void ModelHandler::UpdateCodeObjects()
 	{
 		this->codeObjects[i]->UpdateCodeEngine();
 	}
+}
+
+void ModelHandler::DragDropCodeObject(const char* path)
+{
+	NewCodeObject(this->shader);
+	int selectedItem = codeObjects.size() - 1;
+	codeObjects[selectedItem]->AddComponent<Material>();
+	codeObjects[selectedItem]->material = std::make_shared<Material>();
+
+	codeObjects[selectedItem]->AddComponent<Model>();
+	codeObjects[selectedItem]->GetComponent<Model>()->StartModel(path, true, codeObjects[selectedItem]->material);
 }
 
 

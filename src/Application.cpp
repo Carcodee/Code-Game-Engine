@@ -92,7 +92,7 @@ int main(void)
 		std::cout << "Error!" << std::endl;
 	std::cout << glGetString(GL_VERSION) << std::endl;
 	ImguiRender myImgui(window);
-
+	myImgui.SetModelHandler(modelHandler);
 
 	glfwSetDropCallback(window, DropCallback);
 	// configure global opengl state
@@ -115,6 +115,7 @@ int main(void)
 	ShaderClass pickingShader("Shaders/Picking.vert", "Shaders/Picking.frag");
 	ShaderClass SkyboxHandlerShader("Shaders/SkyboxShaders/SkyboxHandler.vert", "Shaders/SkyboxShaders/SkyboxHandler.frag");
 	ShaderClass IrradianceShader("Shaders/SkyboxShaders/Irradiance.vert", "Shaders/SkyboxShaders/Irradiance.frag");
+	modelHandler.SetShader(&modelShader);
 	FirstCodeObject myFirstCodeObject(&modelShader,&modelHandler);
 	myFirstCodeObject.StartCodeEngine();
 
@@ -299,35 +300,6 @@ int main(void)
 #pragma endregion
 
 
-#pragma region basic Fbo
-
-		unsigned int fbo;
-		glGenFramebuffers(1, &fbo);
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-		unsigned int textureColorbuffer;
-		glGenTextures(1, &textureColorbuffer);
-		glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
-
-		//render buffer obj
-		unsigned int rbo;
-		glGenRenderbuffers(1, &rbo);
-		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
-		// now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-			std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		fbShader.setInt("screenTexture", 0);
-	
-	
-#pragma endregion
 
 
 #pragma region Bloom
@@ -401,13 +373,42 @@ int main(void)
 #pragma endregion
 	
 		Framebuffer finalFbo;
-		finalFbo.generateTexture(window);
+		finalFbo.generateTexture();
 		fbShader.setInt("screenTexture", 0);
+		myImgui.SetFrameBuffer(finalFbo);
+
+#pragma region basic Fbo
+
+		unsigned int fbo;
+		glGenFramebuffers(1, &fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+		unsigned int textureColorbuffer;
+		glGenTextures(1, &textureColorbuffer);
+		glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, finalFbo.m_Width, finalFbo.m_Height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+
+		//render buffer obj
+		unsigned int rbo;
+		glGenRenderbuffers(1, &rbo);
+		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, finalFbo.m_Width, finalFbo.m_Height); // use a single renderbuffer object for both a depth AND stencil buffer.
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
+		// now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+#pragma endregion
 
 		Framebuffer pickingFbo;
-		pickingFbo.generateTexture(window);
+		pickingFbo.generateTexture();
 
-		Skybox myHDRISkybox("C:/Users/carlo/OneDrive/Documents/GitHub/OpenglCarlos/ImagesProgramming/HDRSkyboxes/CloudSkybox.hdr");
+		Skybox myHDRISkybox("ImagesProgramming/HDRSkyboxes/CloudSkybox.hdr");
 		myHDRISkybox.GenerateFramebuffers();
 		myHDRISkybox.GenerateCubemap(SkyboxHandlerShader,SCR_HEIGHT, SCR_WIDTH);
 		myHDRISkybox.GenerateFramebuffersIrradiance();
@@ -486,7 +487,7 @@ int main(void)
 		glm::mat4 projection = glm::mat4(1.0f);;
 		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
-		glm::mat4 projectionM = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 projectionM = glm::perspective(glm::radians(camera.Zoom), (float)finalFbo.m_Width / (float)finalFbo.m_Height, 0.1f, 100.0f);
 		glm::mat4 viewM = camera.GetViewMatrix();
 		glm::vec3 lightPos(lightX, lightY, lightZ);
 
@@ -513,7 +514,7 @@ int main(void)
 
 #pragma region Picking ObjectRegion
 
-		glViewport(0, 0, myImgui.viewportWindowSize.x, myImgui.viewportWindowSize.y);
+		//glViewport(0, 0, myImgui.viewportWindowSize.x, myImgui.viewportWindowSize.y);
 		pickingFbo.Bind();
 		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 		glClearDepth(1.0);
@@ -608,11 +609,10 @@ int main(void)
 
 
 
-		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
-		(bloom) ? glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO) : glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		//glViewport(0, 0, finalFbo.m_Height, finalFbo.m_Height);
+		(bloom) ? glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO) : finalFbo.Bind();
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 #pragma region light
 
 
@@ -789,14 +789,11 @@ int main(void)
 			// clear all relevant buffers
 			glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
 			glClear(GL_COLOR_BUFFER_BIT);
-			finalFbo.Bind();
+
 
 			fbShader.use();
 			fbShader.setBool("HDR", HDR);
 
-			glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
-			util::renderQuad();
-			finalFbo.UnBind();
 
 		}
 
@@ -830,8 +827,6 @@ int main(void)
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-			finalFbo.Bind();
-
 			glDisable(GL_DEPTH_TEST);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			finalBloomShader.use();
@@ -844,19 +839,17 @@ int main(void)
 			finalBloomShader.setBool("hdr", HDR);
 			util::renderQuad();
 
-			finalFbo.UnBind();
 
 			//std::cout << "bloom: " << (bloom ? "on" : "off") << "| exposure: " << exposure << std::endl;
 			//clear all relevant buffers
 
-
 		}
-
+		myImgui.OnDragDropCallBack(DragDropFileType::fbx);
 
 
 #pragma endregion
 
-
+		finalFbo.UnBind();
 		glEnd();
 
 
@@ -879,7 +872,7 @@ int main(void)
 		myImgui.CreateContentBrowser();
 		myImgui.CreateHirearchy(modelHandler.codeObjects);
 		myImgui.SetGizmoOperation(window);
-		myImgui.CreateViewPort(finalFbo.m_Texture, modelHandler);
+		myImgui.CreateViewPort(textureColorbuffer,modelHandler);
 
 		myImgui.Render();
 #pragma endregion
@@ -998,19 +991,9 @@ void DropCallback(GLFWwindow* window, int count, const char** paths)
 		std::cout << paths[i] << std::endl;
 		path= paths[i];
 	}
-	std::shared_ptr<Material> material = std::make_shared<Material>();
-	//ModelItem model = { Model(),modelsLoadedCounter ,glm::mat4(1.0f), "Entity ", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f, "Base", material };
-	//modelHandler.models.push_back(model);
-	//modelHandler.models[modelsLoadedCounter].newModel.StartModel(path, PBR, material);
-	//modelsLoadedCounter++;
-	modelHandler.NewCodeObject(modelShaderPointer);
-	int selectedItem = modelHandler.codeObjects.size() - 1;
-
-	modelHandler.codeObjects[selectedItem]->AddComponent<Material>();
-	modelHandler.codeObjects[selectedItem]->material = std::make_shared<Material>();
-
-	modelHandler.codeObjects[selectedItem]->AddComponent<Model>();
-	modelHandler.codeObjects[selectedItem]->GetComponent<Model>()->StartModel(path, true, modelHandler.codeObjects[selectedItem]->material);
+	//TODO: only working with full paths
+	modelHandler.DragDropCodeObject(path.c_str());
+	std::cout << path << std::endl;
 
 }
 #pragma endregion
