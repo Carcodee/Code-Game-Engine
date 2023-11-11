@@ -137,12 +137,12 @@ void ImguiRender::CreateContentBrowser()
 		columnCount = 1;
 	}
 
-
+	int i = 0;
 	ImGui::Columns(columnCount,0,false);
 
 	for (const auto& entry : std::filesystem::directory_iterator(pathToShow))
 	{
-
+		ImGui::PushID(i++);
 		std::string pathString = entry.path().string();	
 		auto relativePath = std::filesystem::relative(pathString, relativeAssetsPath);
 		std::string filename= relativePath.filename().string();
@@ -167,6 +167,7 @@ void ImguiRender::CreateContentBrowser()
 		ImGui::Text(filename.c_str());
 
 		ImGui::NextColumn();
+		ImGui::PopID();
 
 	}
 
