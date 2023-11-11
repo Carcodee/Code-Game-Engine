@@ -33,7 +33,6 @@ float metallicM = 1.0f;
 float aoM = 1.0f;
 float albedoM = 1.0f;
 
-
 void DropCallback(GLFWwindow* window, int count, const char** paths);
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -122,6 +121,8 @@ int main(void)
 	std::vector <GLfloat> cubeLightVertices = util::returnVertices(util::cube3Layout);
 	std::vector <GLfloat> vertices = util::returnVertices(util::cube4Layout);
 	 //index data
+
+	
 	std::vector <GLuint> indices = {
 		// front and back
 		0, 3, 2,
@@ -220,12 +221,12 @@ int main(void)
 
 	std::vector<std::string> textFaces
 	{
-			"C:/Users/carlo/OneDrive/Documents/GitHub/OpenglCarlos/ImagesProgramming/skybox/right.jpg",
-			"C:/Users/carlo/OneDrive/Documents/GitHub/OpenglCarlos/ImagesProgramming/skybox/left.jpg",
-			"C:/Users/carlo/OneDrive/Documents/GitHub/OpenglCarlos/ImagesProgramming/skybox/top.jpg",
-			"C:/Users/carlo/OneDrive/Documents/GitHub/OpenglCarlos/ImagesProgramming/skybox/bottom.jpg",
-			"C:/Users/carlo/OneDrive/Documents/GitHub/OpenglCarlos/ImagesProgramming/skybox/front.jpg",
-			"C:/Users/carlo/OneDrive/Documents/GitHub/OpenglCarlos/ImagesProgramming/skybox/back.jpg"
+			"ImagesProgramming/skybox/right.jpg",
+			"ImagesProgramming/skybox/left.jpg",
+			"ImagesProgramming/skybox/top.jpg",
+			"ImagesProgramming/skybox/bottom.jpg",
+			"ImagesProgramming/skybox/front.jpg",
+			"ImagesProgramming/skybox/back.jpg"
 	};
 
 	unsigned int textureCubeMap=util::LoadCubemap(textFaces);
