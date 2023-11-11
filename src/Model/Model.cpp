@@ -265,8 +265,6 @@ void Model::LoadPBRTextures(std::string typeName,std::vector<Texture>& textures)
 
 std::future<const aiScene*> Model::loadSceneAsync(std::string path, std::string& directory, bool& isLoaded, std::mutex& mutex)
 {
-
-
     auto sceneLoader = ([path, &directory, &isLoaded, &mutex, this]()->const aiScene* {
         std::lock_guard<std::mutex> lock(mutex);
         const aiScene * scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
@@ -276,6 +274,8 @@ std::future<const aiScene*> Model::loadSceneAsync(std::string path, std::string&
             return nullptr;
         }
         directory = path.substr(0, path.find_last_of('/'));
+        std::cout << "Model Finded: " + directory << "\n";
+
         return scene;
         });
 

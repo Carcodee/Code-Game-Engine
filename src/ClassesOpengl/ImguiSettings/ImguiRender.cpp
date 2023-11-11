@@ -40,12 +40,12 @@ void ImguiRender::Render()
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void ImguiRender::SetModelHandler(ModelHandler& modelHandler)
+void ImguiRender::SetModelHandler(ModelHandler* modelHandler)
 {
 	this->myModelHandler = modelHandler;
 }
 
-void ImguiRender::CreateViewPort(unsigned textID, ModelHandler& modelHandler)
+void ImguiRender::CreateViewPort(unsigned textID, ModelHandler* modelHandler)
 {
 	//lock viewport to the size of the window
 
@@ -70,10 +70,9 @@ void ImguiRender::CreateViewPort(unsigned textID, ModelHandler& modelHandler)
 		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM")) {
 			const wchar_t* path = (const wchar_t*)payload->Data;
 			dragDropPath=(relativeAssetsPath/std::filesystem::path(path)).string();
-			std::cout<<dragDropPath<<std::endl;
+			OnDragDropCallBack(DragDropFileType::fbx);
 			ImGui::EndDragDropTarget();
 			dragDropSucced = true;
-
 		}
 	}
 	CreateGuizmos(modelHandler);
@@ -86,9 +85,9 @@ void ImguiRender::CreateViewPort(unsigned textID, ModelHandler& modelHandler)
 
 }
 
-void ImguiRender::CreateGuizmos(ModelHandler& modelHandler)
+void ImguiRender::CreateGuizmos(ModelHandler* modelHandler)
 {
-	if (modelHandler.codeObjects.size() > 0)
+	if (modelHandler->codeObjects.size() > 0)
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		float viewManipulateRight = io.DisplaySize.x;
@@ -101,13 +100,13 @@ void ImguiRender::CreateGuizmos(ModelHandler& modelHandler)
 		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
 		viewManipulateRight = ImGui::GetWindowPos().x + windowWidth;
 		viewManipulateTop = ImGui::GetWindowPos().y;
-		float* model = (float*)glm::value_ptr(modelHandler.GetCurrentModelMatrix(selected));
+		float* model = (float*)glm::value_ptr(modelHandler->GetCurrentModelMatrix(selected));
 
-		ImGuizmo::Manipulate(glm::value_ptr(modelHandler.GetViewMatrix()), glm::value_ptr(modelHandler.GetProjectionMatrix()),
+		ImGuizmo::Manipulate(glm::value_ptr(modelHandler->GetViewMatrix()), glm::value_ptr(modelHandler->GetProjectionMatrix()),
 			mCurrentGizmoOperation, ImGuizmo::MODE::LOCAL, model,
 			NULL, NULL, NULL, NULL);
-		modelHandler.SetModelMatrix(model, selected);
-		ImGuizmo::ViewManipulate((float*)glm::value_ptr(modelHandler.GetViewMatrix()), 8.0f, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);
+		modelHandler->SetModelMatrix(model, selected);
+		ImGuizmo::ViewManipulate((float*)glm::value_ptr(modelHandler->GetViewMatrix()), 8.0f, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);
 
 	}
 }
@@ -129,7 +128,7 @@ void ImguiRender::CreateContentBrowser()
 		}
 	}
 	static  float padding = 16.0f;
-	static  float thumbNailSize= 128.0f;
+	static  float thumbNailSize= 88.0f;
 	float cellSize = thumbNailSize + padding;
 	float panelWidth = ImGui::GetContentRegionAvail().x;
 	int columnCount = (int)(panelWidth / cellSize);
@@ -140,8 +139,10 @@ void ImguiRender::CreateContentBrowser()
 
 
 	ImGui::Columns(columnCount,0,false);
+
 	for (const auto& entry : std::filesystem::directory_iterator(pathToShow))
 	{
+
 		std::string pathString = entry.path().string();	
 		auto relativePath = std::filesystem::relative(pathString, relativeAssetsPath);
 		std::string filename= relativePath.filename().string();
@@ -222,12 +223,17 @@ void ImguiRender::SetFrameBuffer(Framebuffer& frameBuffer)
 
 void ImguiRender::OnDragDropCallBack(DragDropFileType filetype)
 {
+	std::string path = std::filesystem::absolute(dragDropPath).string();
+
 	if (dragDropSucced)
 	{
 		switch (filetype)
 		{
 		case fbx:
-			myModelHandler.DragDropCodeObject(dragDropPath.c_str());
+			myModelHandler->DragDropCodeObject(path.c_str());
+			dragDropPath = "";
+			dragDropSucced = false;
+
 			break;
 		case png:
 			break;
@@ -238,7 +244,6 @@ void ImguiRender::OnDragDropCallBack(DragDropFileType filetype)
 		default:
 			break;
 		}
-		dragDropSucced = false;
 	}
 	
 }
@@ -247,7 +252,6 @@ void ImguiRender::ShowPlaceholderObject(const char* prefix, CodeObject* object)
 {
 		// Use object uid as identifier. Most commonly you could also use the object pointer as a base ID.
 		ImGui::PushID(object->id);
-
 		// Text and Tree nodes are less high than framed widgets, using AlignTextToFramePadding() we add vertical spacing to make the tree lines equal high.
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);

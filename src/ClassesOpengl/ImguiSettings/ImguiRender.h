@@ -11,6 +11,7 @@
 #include "../src/ClassesOpengl/ModelHandler/ModelHandler.h"
 #include "../src/Functions/Utility.h"
 #include "../src/ClassesOpengl/OpenGLHelpers/Framebuffer.h"
+
 enum DragDropFileType
 {
 	fbx,
@@ -30,12 +31,12 @@ class ImguiRender
 	void CreateNode(Lambda myLambda) {
 		myLambda();
 	};
-	void SetModelHandler(ModelHandler& modelHandler);
+	void SetModelHandler(ModelHandler* modelHandler);
 	ImVec2 viewportWindowSize;
-	void CreateViewPort(unsigned textID,ModelHandler& modelHandler);
+	void CreateViewPort(unsigned textID,ModelHandler* modelHandler);
 	void CreateContentBrowser();
 	void CreateHirearchy(std::vector<CodeObject*> objects);
-	void inline CreateGuizmos(ModelHandler& modelHandler);
+	void inline CreateGuizmos(ModelHandler* modelHandler);
 	void SetGizmoOperation(GLFWwindow* window);
 	void SetFrameBuffer(Framebuffer& frameBuffer);
 
@@ -52,11 +53,15 @@ class ImguiRender
 		std::filesystem::path relativeAssetsPath;
 		bool dragDropSucced=false;
 		std::string dragDropPath;
+
 		unsigned int contentBrowserIconPath;
 		unsigned int contentBrowserFilePath;
 		unsigned int contentBrowserTextureID;
         ImVec2 myViewportSize;
 		Framebuffer myFrameBuffer;
-		ModelHandler myModelHandler;
+		ModelHandler* myModelHandler;
+
+
+
 };
 

@@ -92,7 +92,7 @@ int main(void)
 		std::cout << "Error!" << std::endl;
 	std::cout << glGetString(GL_VERSION) << std::endl;
 	ImguiRender myImgui(window);
-	myImgui.SetModelHandler(modelHandler);
+	myImgui.SetModelHandler(&modelHandler);
 
 	glfwSetDropCallback(window, DropCallback);
 	// configure global opengl state
@@ -553,8 +553,6 @@ int main(void)
 		}
 
 		pickingFbo.UnBind();
-
-
 #pragma endregion
 
 #pragma region ShadowsRegion
@@ -735,6 +733,7 @@ int main(void)
 
 #pragma region ModelRegion
 
+		myImgui.OnDragDropCallBack(DragDropFileType::fbx);
 		for (size_t i = 0; i < modelHandler.codeObjects.size(); i++)
 		{
 		if (modelHandler.codeObjects[i]->GetComponent<Model>() != nullptr)
@@ -844,7 +843,7 @@ int main(void)
 			//clear all relevant buffers
 
 		}
-		myImgui.OnDragDropCallBack(DragDropFileType::fbx);
+		
 
 
 #pragma endregion
@@ -872,7 +871,7 @@ int main(void)
 		myImgui.CreateContentBrowser();
 		myImgui.CreateHirearchy(modelHandler.codeObjects);
 		myImgui.SetGizmoOperation(window);
-		myImgui.CreateViewPort(textureColorbuffer,modelHandler);
+		myImgui.CreateViewPort(textureColorbuffer,&modelHandler);
 
 		myImgui.Render();
 #pragma endregion
