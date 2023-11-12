@@ -9,12 +9,12 @@ FirstCodeObject::~FirstCodeObject()
 
 void FirstCodeObject::StartCodeEngine()
 {
-	
-
-	//model= AddComponent<Model>();
-	//std::shared_ptr<Material> material = std::make_shared<Material>();
-	//model->StartModel("Models/Cube/Cube.obj",true, material);
 	//is being callled on the parent class so the is being added also in the hirearchy of the parent class level
+
+
+	model= AddComponent<Model>();
+	std::shared_ptr<Material> material = std::make_shared<Material>();
+	model->StartModel("Assets/Models/box/Cube.obj",true, material);
 	FirstCodeObject* newObject=new FirstCodeObject(shader,modelHandlerController);
 	this->AddParent(newObject);
 

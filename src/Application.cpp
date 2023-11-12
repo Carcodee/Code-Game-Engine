@@ -17,8 +17,8 @@ using namespace glm;
 
 GLFWwindow* window;
 
-const unsigned int SCR_WIDTH = 1200;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1600;
+const unsigned int SCR_HEIGHT = 900;
 
 bool bloomKeyPressed = true;
 float exposure = 1.0f;
@@ -72,7 +72,7 @@ int main(void)
 
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "CUBEUI", NULL, NULL);
+	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "CODEENGINE", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -875,7 +875,6 @@ int main(void)
 		ImGui::PopFont();
 
 
-		ImGui::ShowDemoWindow();
 		myImgui.CreateContentBrowser();
 		myImgui.CreateHirearchy(modelHandler.codeObjects);
 		myImgui.SetGizmoOperation(window);

@@ -109,9 +109,7 @@ void ImguiRender::CreateGuizmos(ModelHandler* modelHandler)
 		ImGuizmo::ViewManipulate((float*)glm::value_ptr(modelHandler->GetViewMatrix()), 8.0f, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);
 		if (manipulating && !wasManipulatingLastFrame)
 		{
-			std::cout << "Event" << "\n";
 			OnEventSucced(selected);
-
 		}
 		wasManipulatingLastFrame = manipulating;
 

@@ -279,7 +279,7 @@ auto model_configs = [](ModelHandler& myModelHandler,int selectedItem) {
 				//"Models/BackpackModel/backpack.obj"
 				//Models/pizzaCar/myPizzaMovil.obj
 				//Models/pig/pig.obj
-				std::string strPath = "Models/Cube/Cube.obj";
+				std::string strPath = "Models/box/Cube.obj";
 				myModelHandler.codeObjects[selectedItem]->AddComponent<Material>();
 				myModelHandler.codeObjects[selectedItem]->material = std::make_shared<Material>();
 
