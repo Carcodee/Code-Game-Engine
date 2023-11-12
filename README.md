@@ -26,6 +26,9 @@ void FirstCodeObject::StartCodeEngine()
 	this->AddParent(newObject);
 }
 ```
+
+
+
 You can also simply add the model from the content browser. After that you will see your model properties in the inspector.
 
 Another Example to add an object with a model from a certain class:
@@ -40,6 +43,9 @@ void FirstCodeObject::StartCodeEngine()
 }
 
 ```
+
+
+
 In this engine you can access to the components calling 
  ```
 void FirstCodeObject::StartCodeEngine()
@@ -48,7 +54,7 @@ void FirstCodeObject::StartCodeEngine()
 }
 ```
 
-![PBR](https://github.com/Carcodee/Code-Game-Engine/assets/74780908/a70d0330-c1f3-4309-87a8-4ba9975496bf)
+
 
 
 Preview
@@ -62,6 +68,7 @@ Set textures pasting the explorer filepath in the "Extract textures" of the mode
 https://github.com/Carcodee/Code-Game-Engine/assets/74780908/ea3ecb3f-ef05-4571-a0a3-5a4b18159eb5
 
 https://github.com/Carcodee/Code-Game-Engine/assets/74780908/306cddde-9b70-46fd-acb2-a0463540d003
+![PBR](https://github.com/Carcodee/Code-Game-Engine/assets/74780908/a70d0330-c1f3-4309-87a8-4ba9975496bf)
 
 Issues:
 
