@@ -8,7 +8,6 @@
 #include "../src/ClassesOpengl/ImguiSettings/MyImguiSettings.h"
 #include "headers/headers.h"
 #include "../src/Functions/Utility.h"
-#include <windows.h>
 
 
 using namespace glm;
@@ -42,7 +41,7 @@ void processInput(GLFWwindow* window);
 
 ModelHandler modelHandler;
 ShaderClass* modelShaderPointer;
-
+EventSystem myEventSystem;
 std::string path;
 
 
@@ -52,6 +51,7 @@ MousePos mousePos;
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
+std::stack<IUndoable*> undoStack;
 
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
@@ -90,9 +90,16 @@ int main(void)
 	if (glewInit() != GLEW_OK)
 		std::cout << "Error!" << std::endl;
 	std::cout << glGetString(GL_VERSION) << std::endl;
-	ImguiRender myImgui(window);
-	myImgui.SetModelHandler(&modelHandler);
 
+
+
+
+	ImguiRender myImgui(window);
+	myEventSystem.SetUndoStack(undoStack);
+
+	myImgui.SetModelHandler(&modelHandler);
+	myImgui.SetEventSystem(&myEventSystem);
+	myImgui.SetUndoStack(undoStack);
 	glfwSetDropCallback(window, DropCallback);
 	// configure global opengl state
 // -----------------------------
@@ -954,6 +961,7 @@ void processInput(GLFWwindow* window)
 			camera.MovementSpeed = 5.0f;
 		}
 
+
 	}
 	else
 	{
@@ -961,18 +969,27 @@ void processInput(GLFWwindow* window)
 		camera.SetMouseSpeed(false);
 
 	}
+	if ((glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) && (!(glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)&&myEventSystem.isUnduKeyPressed))
+	{
+		myEventSystem.UndoAction();
+	}
+	myEventSystem.isUnduKeyPressed = (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS);
 
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 	{
 		
 		glfwGetCursorPos(window, &mousePos.xpos, &mousePos.ypos);
 		mousePos.isPressed=true;
-
+		myEventSystem.OnEvent();
 	}
 	else
 	{
 
 		mousePos.isPressed = false;
+	}
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
+	{
+		myEventSystem.OnEventFinished();
 	}
 
 }

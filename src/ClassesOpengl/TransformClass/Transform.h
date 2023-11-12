@@ -2,9 +2,19 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "../CodeObject/ComponentBase/ComponentBase.h"
+#include "../src/GameEngineActions/IUndoable.h"
+#include <iostream>
+#include <stack>
 
-class Transform: public ComponentBase
+struct UndoRedoPos
 {
+	glm::vec3 undoPos;
+	glm::vec3 redoPos;
+};
+class Transform: public ComponentBase, public IUndoable
+{
+
+
 	public:
 	Transform();
 	
@@ -17,11 +27,24 @@ class Transform: public ComponentBase
 	glm::mat4 GetLocalModelMatrix();
 	void SetLocalModelMatrix(glm::mat4 matrix);
 
-	glm::vec3* position;
-	glm::vec3* rotation;
-	glm::vec3* scale;
+	void SetValueUndoRedoPos();
+
+	glm::vec3 position;
+	glm::vec3 rotation;
+	glm::vec3 scale;
+
+	void Undo() override;
+	void Redo() override;
+
+	glm::vec3 positionBeforeMove;
+	glm::vec3 rotationBeforeMove;
+	glm::vec3 scaleBeforeMove;
+
+	glm::vec3 positionAfterMove;
+	glm::vec3 rotationAfterMove;
+	glm::vec3 scaleAfterMove;
 	private:
 	glm::mat4 localModelMatrix;
-
+	std::stack<UndoRedoPos*> undoPositionStack;
 };
 

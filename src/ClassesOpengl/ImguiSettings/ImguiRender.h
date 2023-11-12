@@ -7,10 +7,16 @@
 #include <iostream>
 #include <functional>
 #include <filesystem>
+#include <stack>
+
 #include "imgui/ImGuizmo.h"
 #include "../src/ClassesOpengl/ModelHandler/ModelHandler.h"
 #include "../src/Functions/Utility.h"
 #include "../src/ClassesOpengl/OpenGLHelpers/Framebuffer.h"
+#include "../src/GameEngineActions/IUndoable.h"
+#include "../src/GameEngineActions/EventSystem/EventSystem.h"
+
+
 
 enum DragDropFileType
 {
@@ -23,26 +29,32 @@ enum DragDropFileType
 class ImguiRender
 {
 	public:
-	ImguiRender(GLFWwindow* window);
-	~ImguiRender();
-	void NewFrame();
-	void Render();
-	template <typename Lambda>
-	void CreateNode(Lambda myLambda) {
-		myLambda();
-	};
-	void SetModelHandler(ModelHandler* modelHandler);
-	ImVec2 viewportWindowSize;
-	void CreateViewPort(unsigned textID,ModelHandler* modelHandler);
-	void CreateContentBrowser();
-	void CreateHirearchy(std::vector<CodeObject*> objects);
-	void inline CreateGuizmos(ModelHandler* modelHandler);
-	void SetGizmoOperation(GLFWwindow* window);
-	void SetFrameBuffer(Framebuffer& frameBuffer);
+		ImguiRender(GLFWwindow* window);
+		~ImguiRender();
+		void NewFrame();
+		void Render();
+		template <typename Lambda>
+		void CreateNode(Lambda myLambda) {
+			myLambda();
+		};
+		void SetModelHandler(ModelHandler* modelHandler);
+		ImVec2 viewportWindowSize;
+		void CreateViewPort(unsigned textID,ModelHandler* modelHandler);
+		void CreateContentBrowser();
+		void CreateHirearchy(std::vector<CodeObject*> objects);
+		void OnEventSucced(int objID);
+		void OnDragDropCallBack(DragDropFileType filetype);
+		void inline CreateGuizmos(ModelHandler* modelHandler);
 
-	void OnDragDropCallBack(DragDropFileType filetype);
-	int selected;
+
+
+		void SetGizmoOperation(GLFWwindow* window);
+		void SetFrameBuffer(Framebuffer& frameBuffer);
+		void SetUndoStack(std::stack<IUndoable*>& undoStack);
+		void SetEventSystem(EventSystem* eventSystem);
+		int selected;
 	private:
+
 		ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
 		ImGuizmo::MODE mCurrentGizmoMode = ImGuizmo::WORLD;
 
@@ -52,7 +64,11 @@ class ImguiRender
 		std::filesystem::path currentDirectory;
 		std::filesystem::path relativeAssetsPath;
 		bool dragDropSucced=false;
+		
+		std::stack<IUndoable*> undoStack;
+		EventSystem* eventSystem;
 		std::string dragDropPath;
+	    bool wasManipulatingLastFrame = false;
 
 		unsigned int contentBrowserIconPath;
 		unsigned int contentBrowserFilePath;

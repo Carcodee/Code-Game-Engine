@@ -114,6 +114,12 @@
     <ClCompile Include="EngineSandbox\FirstCodeObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\GameEngineActions\IUndoable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameEngineActions\EventSystem\EventSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ClassesOpengl\OpenGLHelpers\VAO.h">
@@ -225,6 +231,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EngineSandbox\FirstCodeObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameEngineActions\IUndoable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameEngineActions\EventSystem\EventSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

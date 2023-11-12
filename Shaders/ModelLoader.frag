@@ -247,7 +247,7 @@ vec3 CalculatePBRNoTextures(){
     kD *= 1.0 - metallic;	  
     vec3 irradiance = texture(irradianceMap, N).rgb;
     vec3 diffuse      = irradiance * albedo;
-    vec3 ambient = (mykD * diffuse) * ao;
+    vec3 ambient = (mykD * vec3(0.3)) * ao;
 //    vec3 ambient = vec3(0.03) * albedo * ao;
     vec3 color = ambient + Lo;
 

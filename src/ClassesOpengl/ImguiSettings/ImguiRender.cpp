@@ -59,8 +59,6 @@ void ImguiRender::CreateViewPort(unsigned textID, ModelHandler* modelHandler)
 		glViewport(0, 0, viewportSize.x, viewportSize.y);
 		myFrameBuffer.Resize((int)viewportSize.x, (int)viewportSize.y);
 		myViewportSize = { viewportSize.x,viewportSize.y };
-		std::cout << myFrameBuffer.m_Width << std::endl;
-		std::cout << myFrameBuffer.m_Height << std::endl;
 
 	}
 
@@ -102,11 +100,20 @@ void ImguiRender::CreateGuizmos(ModelHandler* modelHandler)
 		viewManipulateTop = ImGui::GetWindowPos().y;
 		float* model = (float*)glm::value_ptr(modelHandler->GetCurrentModelMatrix(selected));
 
-		ImGuizmo::Manipulate(glm::value_ptr(modelHandler->GetViewMatrix()), glm::value_ptr(modelHandler->GetProjectionMatrix()),
-			mCurrentGizmoOperation, ImGuizmo::MODE::LOCAL, model,
-			NULL, NULL, NULL, NULL);
+		bool manipulating = ImGuizmo::Manipulate(glm::value_ptr(modelHandler->GetViewMatrix()), glm::value_ptr(modelHandler->GetProjectionMatrix()),
+		mCurrentGizmoOperation, ImGuizmo::MODE::LOCAL, model,
+		NULL, NULL, NULL, NULL);
+
 		modelHandler->SetModelMatrix(model, selected);
+
 		ImGuizmo::ViewManipulate((float*)glm::value_ptr(modelHandler->GetViewMatrix()), 8.0f, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);
+		if (manipulating && !wasManipulatingLastFrame)
+		{
+			std::cout << "Event" << "\n";
+			OnEventSucced(selected);
+
+		}
+		wasManipulatingLastFrame = manipulating;
 
 	}
 }
@@ -220,6 +227,24 @@ void ImguiRender::SetGizmoOperation(GLFWwindow* window)
 void ImguiRender::SetFrameBuffer(Framebuffer& frameBuffer)
 {
 	this->myFrameBuffer = frameBuffer;
+}
+
+void ImguiRender::SetUndoStack(std::stack<IUndoable*>& undoStack)
+{
+	this->undoStack = undoStack;
+}
+
+void ImguiRender::SetEventSystem(EventSystem* eventSystem)
+{
+	this->eventSystem = eventSystem;
+}
+
+void ImguiRender::OnEventSucced(int objID)
+{
+	eventSystem->undoStack.push(myModelHandler->codeObjects[objID]->transform);
+	myModelHandler->codeObjects[objID]->transform->SetValueUndoRedoPos();
+
+
 }
 
 void ImguiRender::OnDragDropCallBack(DragDropFileType filetype)

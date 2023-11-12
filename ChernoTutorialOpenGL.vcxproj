@@ -154,6 +154,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="EngineSandbox\FirstCodeObject.cpp" />
+    <ClCompile Include="src\GameEngineActions\EventSystem\EventSystem.cpp" />
+    <ClCompile Include="src\GameEngineActions\IUndoable.cpp" />
     <ClCompile Include="src\ClassesOpengl\CodeObject\ComponentBase\ComponentBase.cpp" />
     <ClCompile Include="src\Skybox\Skybox.cpp" />
     <ClCompile Include="src\ClassesOpengl\CodeObject\CodeObject.cpp" />
@@ -189,6 +191,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EngineSandbox\FirstCodeObject.h" />
+    <ClInclude Include="src\GameEngineActions\EventSystem\EventSystem.h" />
+    <ClInclude Include="src\GameEngineActions\IUndoable.h" />
     <ClInclude Include="src\ClassesOpengl\CodeObject\ComponentBase\ComponentBase.h" />
     <ClInclude Include="src\Skybox\Skybox.h" />
     <ClInclude Include="src\ClassesOpengl\CodeObject\CodeObject.h" />

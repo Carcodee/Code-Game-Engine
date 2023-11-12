@@ -29,5 +29,7 @@
 #include "../src/Skybox/Skybox.h"
 #include "stb-master/stb_image.h"
 #define STB_IMAGE_IMPLEMENTATION
+#include "../src/GameEngineActions/EventSystem/EventSystem.h"
+#include"../src/GameEngineActions/IUndoable.h"
 
 #include "../EngineSandbox/FirstCodeObject.h"
