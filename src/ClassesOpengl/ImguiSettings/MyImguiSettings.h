@@ -418,3 +418,4 @@ auto model_LoaderTest = [](ModelHandler* models, bool& flipUVS, int& modelCounte
 		ImGui::Spacing();
 	};
 	};
+void Create();
