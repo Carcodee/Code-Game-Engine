@@ -72,7 +72,7 @@ https://github.com/Carcodee/Code-Game-Engine/assets/74780908/306cddde-9b70-46fd-
 
 Issues:
 
--Only supported for visual studio, there is not premake or cmake implemented.
+-Only supported for visual studio
 
 
 PD: I would love to implement a lot more features but this is it for now. Any advice for this project is valuable :D
