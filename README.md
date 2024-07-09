@@ -1,6 +1,6 @@
 # Code Game Engine
  
-Simple 3d game engine from carlos
+Simple 3d game
 The main features are:
 
 
